@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -88,13 +89,14 @@ function Header({
 	secondaryTotalTooltip?: ReactNode;
 	testId?: string;
 }) {
+	const { t } = useLocaleCtx();
 	const hasTotal = total !== undefined && total !== null;
 	const hasSecondaryTotal = secondaryTotal !== undefined && secondaryTotal !== null;
 	const hasActionRow = hasTotal || controls;
 	return (
 		<div className="shrink-0 space-y-2">
 			<div className="pr-1 pl-2">
-				<span className="text-primary text-sm font-medium">{title}</span>
+				<span className="text-primary text-sm font-medium">{t(title)}</span>
 			</div>
 			{hasActionRow && (
 				<div
@@ -103,11 +105,11 @@ function Header({
 				>
 					{hasTotal ? (
 						<div className="flex min-w-0 items-center gap-5">
-							<TotalChip total={total} totalLabel={totalLabel} totalTooltip={totalTooltip} testId={testId} />
+							<TotalChip total={total} totalLabel={totalLabel ? t(totalLabel) : undefined} totalTooltip={totalTooltip} testId={testId} />
 							{hasSecondaryTotal && (
 								<TotalChip
 									total={secondaryTotal}
-									totalLabel={secondaryTotalLabel}
+									totalLabel={secondaryTotalLabel ? t(secondaryTotalLabel) : undefined}
 									totalTooltip={secondaryTotalTooltip}
 									testId={testId ? `${testId}-secondary` : undefined}
 								/>

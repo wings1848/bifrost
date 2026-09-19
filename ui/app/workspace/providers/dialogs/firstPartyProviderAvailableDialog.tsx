@@ -9,6 +9,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alertDialog";
 import { ProviderIconType, RenderProviderIcon } from "@/lib/constants/icons";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { ProviderLabels } from "@/lib/constants/logs";
 import { KnownProvider } from "@/lib/types/config";
 
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function FirstPartyProviderAvailableDialog({ show, customProviderName, knownProvider, onDismiss, onProceed }: Props) {
+	const { t } = useLocaleCtx();
 	const label = ProviderLabels[knownProvider];
 
 	return (
@@ -34,12 +36,12 @@ export default function FirstPartyProviderAvailableDialog({ show, customProvider
 					<AlertDialogDescription>
 						We noticed you have a custom provider named <span className="text-foreground font-medium">{customProviderName}</span>.
 						Bifrost now supports {label} natively. You can delete the custom provider and add the official {label} integration from{" "}
-						<span className="text-foreground font-medium">Add Provider</span>, or keep using your custom provider as is.
+						<span className="text-foreground font-medium">{t("Add Provider")}</span>, or keep using your custom provider as is.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={onDismiss}>Keep custom provider</AlertDialogCancel>
-					<AlertDialogAction onClick={onProceed}>Take me there</AlertDialogAction>
+					<AlertDialogCancel onClick={onDismiss}>{t("Keep custom provider")}</AlertDialogCancel>
+					<AlertDialogAction onClick={onProceed}>{t("Take me there")}</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

@@ -3,6 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider } from "@/lib/types/config";
 import { debuggingFormSchema, type DebuggingFormSchema } from "@/lib/types/schemas";
@@ -19,6 +20,7 @@ interface DebuggingFormFragmentProps {
 }
 
 export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -58,11 +60,11 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 		updateProvider(updatedProvider)
 			.unwrap()
 			.then(() => {
-				toast.success("Debugging configuration updated successfully");
+				toast.success(t("Debugging configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update debugging configuration", {
+				toast.error(t("Failed to update debugging configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -81,7 +83,7 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 								<div className="flex items-center justify-between space-x-2">
 									<div className="space-y-0.5">
 										<div className="flex items-center gap-1.5">
-											<FormLabel>Send Back Raw Request</FormLabel>
+											<FormLabel>{t("Send Back Raw Request")}</FormLabel>
 											<TooltipProvider>
 												<Tooltip>
 													<TooltipTrigger asChild data-testid="provider-debugging-send-back-raw-request-tooltip-trigger">
@@ -123,7 +125,7 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 								<div className="flex items-center justify-between space-x-2">
 									<div className="space-y-0.5">
 										<div className="flex items-center gap-1.5">
-											<FormLabel>Send Back Raw Response</FormLabel>
+											<FormLabel>{t("Send Back Raw Response")}</FormLabel>
 											<TooltipProvider>
 												<Tooltip>
 													<TooltipTrigger asChild data-testid="provider-debugging-send-back-raw-response-tooltip-trigger">
@@ -178,7 +180,7 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 												</Tooltip>
 											</TooltipProvider>
 										</div>
-										<p className="text-muted-foreground text-xs">Persist raw request and response payloads in log records.</p>
+										<p className="text-muted-foreground text-xs">{t("Persist raw request and response payloads in log records.")}</p>
 									</div>
 									<FormControl>
 										<Switch

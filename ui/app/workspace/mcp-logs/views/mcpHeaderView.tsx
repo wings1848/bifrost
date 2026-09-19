@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DateTimePickerWithRange } from "@/components/ui/datePickerWithRange";
 import { Input } from "@/components/ui/input";
 import { useTimezonePreference } from "@/lib/hooks/useTimezonePreference";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import type { MCPToolLogFilters } from "@/lib/types/logs";
 import { getRangeForPeriod, TIME_PERIODS } from "@/lib/utils/timeRange";
 import { Radio, RefreshCw, Search } from "lucide-react";
@@ -38,6 +39,7 @@ export function McpHeaderView({
 	onToggleColumnVisibility,
 	onResetColumns,
 }: McpHeaderViewProps) {
+	const { t } = useLocaleCtx();
 	const [localSearch, setLocalSearch] = useState(filters.content_search || "");
 	const [timezone, setTimezone] = useTimezonePreference();
 	const [startTime, setStartTime] = useState<Date | undefined>(filters.start_time ? new Date(filters.start_time) : undefined);
@@ -100,7 +102,7 @@ export function McpHeaderView({
 				<Input
 					type="text"
 					className="!h-7 rounded-tl-none rounded-tr-sm rounded-br-sm rounded-bl-none border-none bg-slate-50 shadow-none outline-none focus-visible:ring-0 dark:bg-zinc-900"
-					placeholder="Search MCP logs"
+					placeholder={t("Search MCP logs")}
 					value={localSearch}
 					onChange={(e) => handleSearchChange(e.target.value)}
 				/>

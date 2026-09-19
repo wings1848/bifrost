@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { BaseProvider, ModelProvider } from "@/lib/types/config";
 import { formCustomProviderConfigSchema } from "@/lib/types/schemas";
@@ -27,6 +28,7 @@ interface Props {
 
 // Standalone component for provider configuration tabs
 export function ApiStructureFormFragment({ provider }: Props) {
+	const { t } = useLocaleCtx();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const dispatch = useAppDispatch();
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -87,11 +89,11 @@ export function ApiStructureFormFragment({ provider }: Props) {
 		)
 			.unwrap()
 			.then(() => {
-				toast.success("Provider configuration updated successfully");
+				toast.success(t("Provider configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update provider configuration", {
+				toast.error(t("Failed to update provider configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -129,11 +131,11 @@ export function ApiStructureFormFragment({ provider }: Props) {
 						name="base_provider_type"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Base Provider Type</FormLabel>
+								<FormLabel>{t("Base Provider Type")}</FormLabel>
 								<Select onValueChange={field.onChange} value={field.value}>
 									<FormControl>
 										<SelectTrigger disabled={true}>
-											<SelectValue placeholder="Select base provider" />
+											<SelectValue placeholder={t("Select base provider")} />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
@@ -145,7 +147,7 @@ export function ApiStructureFormFragment({ provider }: Props) {
 										<SelectItem value="replicate">Replicate</SelectItem>
 									</SelectContent>
 								</Select>
-								<FormDescription>The underlying provider this custom provider will use</FormDescription>
+								<FormDescription>{t("The underlying provider this custom provider will use")}</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -161,7 +163,7 @@ export function ApiStructureFormFragment({ provider }: Props) {
 											<label htmlFor="drop-excess-requests" className="text-sm font-medium">
 												Is Keyless?
 											</label>
-											<p className="text-muted-foreground text-sm">Whether the custom provider requires a key</p>
+											<p className="text-muted-foreground text-sm">{t("Whether the custom provider requires a key")}</p>
 										</div>
 										<Switch
 											id="drop-excess-requests"

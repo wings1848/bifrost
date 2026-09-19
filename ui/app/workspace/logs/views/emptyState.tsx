@@ -4,6 +4,7 @@ import { CodeEditor } from "@/components/ui/codeEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { getExampleBaseUrl } from "@/lib/utils/port";
 import { AlertTriangle, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -74,6 +75,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ error }: EmptyStateProps) {
+	const { t } = useLocaleCtx();
 	const [language, setLanguage] = useState<Language>("python");
 
 	// Generate examples dynamically using the port utility
@@ -253,19 +255,19 @@ const result = await chain.invoke({ input: "What is LangChain?" });`,
 			<div className="w-full space-y-6 p-4">
 				<div className="flex flex-row items-center gap-2">
 					<div>
-						<h3 className="text-lg font-semibold">Integrate under 60 seconds</h3>
-						<p className="text-muted-foreground text-sm">Send your first request to get started</p>
+						<h3 className="text-lg font-semibold">{t("Integrate under 60 seconds")}</h3>
+						<p className="text-muted-foreground text-sm">{t("Send your first request to get started")}</p>
 					</div>
 				</div>
 
 				<Tabs defaultValue="curl" className="w-full rounded-lg border">
 					<TabsList className="flex h-10 w-full justify-start rounded-t-lg rounded-b-none">
 						<TabsTrigger value="curl">cURL</TabsTrigger>
-						<TabsTrigger value="openai">OpenAI SDK</TabsTrigger>
-						<TabsTrigger value="anthropic">Anthropic SDK</TabsTrigger>
-						<TabsTrigger value="genai">Google GenAI SDK</TabsTrigger>
-						<TabsTrigger value="litellm">LiteLLM SDK</TabsTrigger>
-						<TabsTrigger value="langchain">LangChain SDK</TabsTrigger>
+						<TabsTrigger value="openai">{t("OpenAI SDK")}</TabsTrigger>
+						<TabsTrigger value="anthropic">{t("Anthropic SDK")}</TabsTrigger>
+						<TabsTrigger value="genai">{t("Google GenAI SDK")}</TabsTrigger>
+						<TabsTrigger value="litellm">{t("LiteLLM SDK")}</TabsTrigger>
+						<TabsTrigger value="langchain">{t("LangChain SDK")}</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="curl" className="px-4">

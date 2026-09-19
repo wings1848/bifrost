@@ -28,6 +28,7 @@ import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { formatDistanceToNow } from "date-fns";
 import { Users } from "lucide-react";
 import { useVirtualKeyUsage } from "../hooks/useVirtualKeyUsage";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 function usageBarClass(pct: number, exhausted: boolean) {
 	if (exhausted) return "[&>div]:bg-red-500/70";
@@ -73,6 +74,7 @@ export default function VirtualKeyDetailSheet({
 	hasPrev = false,
 	hasNext = false,
 }: VirtualKeyDetailSheetProps) {
+	const { t } = useLocaleCtx();
 	const { assignedUsers, isManagedByProfile, managingProfile, displayBudgets, displayRateLimit } = useVirtualKeyUsage(virtualKey);
 	const canUpdateVirtualKeys = useRbac(RbacResource.VirtualKeys, RbacOperation.Update);
 	const [setBudgetOverride] = useSetVirtualKeyBudgetOverrideMutation();
@@ -140,7 +142,7 @@ export default function VirtualKeyDetailSheet({
 					<div className="flex min-w-0 flex-col items-start">
 						<div className="flex min-w-0 items-center gap-1">
 							<SheetTitle className="truncate">{virtualKey.name}</SheetTitle>
-							<CopyableId id={virtualKey.id} entityLabel="Virtual key" />
+							<CopyableId id={virtualKey.id} entityLabel={t("Virtual key")} />
 						</div>
 						<SheetDescription>{virtualKey.description || "Virtual key details and usage information"}</SheetDescription>
 					</div>
@@ -159,7 +161,7 @@ export default function VirtualKeyDetailSheet({
 
 					{assignedUsers.length > 0 ? (
 						<div className="space-y-1">
-							<Label className="text-sm font-medium">Assigned Users</Label>
+							<Label className="text-sm font-medium">{t("Assigned Users")}</Label>
 							<div className="flex items-center gap-2">
 								<Users className="text-muted-foreground h-4 w-4" />
 								<span className="text-sm">{assignedUsers.map((u) => u.name || u.email).join(", ")}</span>
@@ -169,11 +171,11 @@ export default function VirtualKeyDetailSheet({
 
 					{/* Basic Information */}
 					<div className="space-y-4">
-						<h3 className="font-semibold">Basic Information</h3>
+						<h3 className="font-semibold">{t("Basic Information")}</h3>
 
 						<div className="grid gap-4">
 							<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-								<span className="text-muted-foreground text-sm">Status</span>
+								<span className="text-muted-foreground text-sm">{t("Status")}</span>
 								<div className="col-span-2">
 									{(() => {
 										const isExpired = !!virtualKey.expires_at && Date.now() >= new Date(virtualKey.expires_at).getTime();
@@ -186,7 +188,7 @@ export default function VirtualKeyDetailSheet({
 
 							{virtualKey.expires_at && (
 								<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-									<span className="text-muted-foreground text-sm">Expires</span>
+									<span className="text-muted-foreground text-sm">{t("Expires")}</span>
 									<div className="col-span-2 text-sm">
 										{formatDistanceToNow(new Date(virtualKey.expires_at), {
 											addSuffix: true,
@@ -197,7 +199,7 @@ export default function VirtualKeyDetailSheet({
 							)}
 
 							<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-								<span className="text-muted-foreground text-sm">Created</span>
+								<span className="text-muted-foreground text-sm">{t("Created")}</span>
 								<div className="col-span-2 text-sm">
 									{formatDistanceToNow(new Date(virtualKey.created_at), {
 										addSuffix: true,
@@ -206,7 +208,7 @@ export default function VirtualKeyDetailSheet({
 							</div>
 
 							<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-								<span className="text-muted-foreground text-sm">Last Updated</span>
+								<span className="text-muted-foreground text-sm">{t("Last Updated")}</span>
 								<div className="col-span-2 text-sm">
 									{formatDistanceToNow(new Date(virtualKey.updated_at), {
 										addSuffix: true,
@@ -216,7 +218,7 @@ export default function VirtualKeyDetailSheet({
 
 							{entityInfo.type !== "None" && (
 								<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-									<span className="text-muted-foreground text-sm">Assigned To</span>
+									<span className="text-muted-foreground text-sm">{t("Assigned To")}</span>
 									<div className="col-span-2 flex items-center gap-2">
 										<Badge variant={entityInfo.type === "None" ? "outline" : "secondary"}>{entityInfo.type}</Badge>
 										<span className="text-sm">{entityInfo.name}</span>
@@ -235,7 +237,7 @@ export default function VirtualKeyDetailSheet({
 
 							{/* Provider Configurations */}
 							<div className="space-y-4">
-								<h3 className="font-semibold">Provider Configurations</h3>
+								<h3 className="font-semibold">{t("Provider Configurations")}</h3>
 
 								<div className="space-y-3">
 									{!virtualKey.provider_configs || virtualKey.provider_configs.length === 0 ? (
@@ -253,7 +255,7 @@ export default function VirtualKeyDetailSheet({
 														<div className="flex items-center gap-2">
 															<Badge variant="outline" className="font-mono text-xs">
 																Weight:{" "}
-																{config.weight != null ? config.weight : <span className="text-muted-foreground italic">Not Set</span>}
+																{config.weight != null ? config.weight : <span className="text-muted-foreground italic">{t("Not Set")}</span>}
 															</Badge>
 															{!isManagedByProfile ? (
 																<BudgetOverrideManagerDialog
@@ -270,21 +272,21 @@ export default function VirtualKeyDetailSheet({
 													{/* Basic Config */}
 													<div className="space-y-3">
 														<div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
-															<span className="text-muted-foreground pt-0.5 text-sm font-medium">Allowed Models</span>
+															<span className="text-muted-foreground pt-0.5 text-sm font-medium">{t("Allowed Models")}</span>
 															<div className="col-span-2">
 																<ModelAccessBadges value={config.allowed_models} mode="allow" />
 															</div>
 														</div>
 
 														<div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
-															<span className="text-muted-foreground pt-0.5 text-sm font-medium">Blocked Models</span>
+															<span className="text-muted-foreground pt-0.5 text-sm font-medium">{t("Blocked Models")}</span>
 															<div className="col-span-2">
 																<ModelAccessBadges value={config.blacklisted_models} mode="block" />
 															</div>
 														</div>
 
 														<div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3">
-															<span className="text-muted-foreground pt-0.5 text-sm font-medium">Allowed Keys</span>
+															<span className="text-muted-foreground pt-0.5 text-sm font-medium">{t("Allowed Keys")}</span>
 															<div className="col-span-2">
 																{config.allow_all_keys ? (
 																	<Badge variant="success" className="text-xs">
@@ -311,7 +313,7 @@ export default function VirtualKeyDetailSheet({
 															<>
 																<DottedSeparator />
 																<div className="space-y-2">
-																	<h4 className="text-sm font-medium">Provider Budgets</h4>
+																	<h4 className="text-sm font-medium">{t("Provider Budgets")}</h4>
 																	{config.budgets.map((b, bIdx) => (
 																		<div key={bIdx} className="space-y-2">
 																			<UsageLine current={b.current_usage} max={getEffectiveBudgetLimit(b)} format={formatCurrency} />
@@ -346,12 +348,12 @@ export default function VirtualKeyDetailSheet({
 															<>
 																<DottedSeparator />
 																<div className="space-y-3">
-																	<h4 className="text-sm font-medium">Provider Rate Limits</h4>
+																	<h4 className="text-sm font-medium">{t("Provider Rate Limits")}</h4>
 
 																	{/* Token Limits */}
 																	{config.rate_limit.token_max_limit != null ? (
 																		<div className="space-y-2">
-																			<span className="text-muted-foreground text-xs font-medium">TOKEN LIMITS</span>
+																			<span className="text-muted-foreground text-xs font-medium">{t("TOKEN LIMITS")}</span>
 																			<UsageLine
 																				current={config.rate_limit.token_current_usage}
 																				max={config.rate_limit.token_max_limit}
@@ -377,7 +379,7 @@ export default function VirtualKeyDetailSheet({
 																	{/* Request Limits */}
 																	{config.rate_limit.request_max_limit != null ? (
 																		<div className="space-y-2">
-																			<span className="text-muted-foreground text-xs font-medium">REQUEST LIMITS</span>
+																			<span className="text-muted-foreground text-xs font-medium">{t("REQUEST LIMITS")}</span>
 																			<UsageLine
 																				current={config.rate_limit.request_current_usage}
 																				max={config.rate_limit.request_max_limit}
@@ -401,7 +403,7 @@ export default function VirtualKeyDetailSheet({
 																	) : null}
 
 																	{config.rate_limit.token_max_limit == null && config.rate_limit.request_max_limit == null && (
-																		<p className="text-muted-foreground text-sm">No rate limits configured for this provider</p>
+																		<p className="text-muted-foreground text-sm">{t("No rate limits configured for this provider")}</p>
 																	)}
 																</div>
 															</>
@@ -412,7 +414,7 @@ export default function VirtualKeyDetailSheet({
 															<>
 																<DottedSeparator />
 																<div className="space-y-3">
-																	<h4 className="text-sm font-medium">Model Budgets</h4>
+																	<h4 className="text-sm font-medium">{t("Model Budgets")}</h4>
 																	{config.model_budgets.map((mb, mbIdx) => (
 																		<div key={`${mb.model_name}-${mbIdx}`} className="space-y-3 rounded-md border p-3">
 																			<span className="text-sm font-medium">{mb.model_name}</span>
@@ -450,7 +452,7 @@ export default function VirtualKeyDetailSheet({
 																			{/* Token Limits */}
 																			{mb.rate_limit?.token_max_limit != null ? (
 																				<div className="space-y-2">
-																					<span className="text-muted-foreground text-xs font-medium">TOKEN LIMITS</span>
+																					<span className="text-muted-foreground text-xs font-medium">{t("TOKEN LIMITS")}</span>
 																					<UsageLine
 																						current={mb.rate_limit.token_current_usage}
 																						max={mb.rate_limit.token_max_limit}
@@ -468,7 +470,7 @@ export default function VirtualKeyDetailSheet({
 																			{/* Request Limits */}
 																			{mb.rate_limit?.request_max_limit != null ? (
 																				<div className="space-y-2">
-																					<span className="text-muted-foreground text-xs font-medium">REQUEST LIMITS</span>
+																					<span className="text-muted-foreground text-xs font-medium">{t("REQUEST LIMITS")}</span>
 																					<UsageLine
 																						current={mb.rate_limit.request_current_usage}
 																						max={mb.rate_limit.request_max_limit}
@@ -497,18 +499,18 @@ export default function VirtualKeyDetailSheet({
 
 							{/* MCP Server Configurations */}
 							<div className="space-y-4">
-								<h3 className="font-semibold">MCP Server Configurations</h3>
+								<h3 className="font-semibold">{t("MCP Server Configurations")}</h3>
 
 								<div className="space-y-3">
 									{!virtualKey.mcp_configs || virtualKey.mcp_configs.length === 0 ? (
-										<span className="text-muted-foreground text-sm">No MCP servers configured</span>
+										<span className="text-muted-foreground text-sm">{t("No MCP servers configured")}</span>
 									) : (
 										<div className="rounded-md border">
 											<Table>
 												<TableHeader>
 													<TableRow>
-														<TableHead>MCP Server</TableHead>
-														<TableHead>Allowed Tools</TableHead>
+														<TableHead>{t("MCP Server")}</TableHead>
+														<TableHead>{t("Allowed Tools")}</TableHead>
 													</TableRow>
 												</TableHeader>
 												<TableBody>
@@ -518,7 +520,7 @@ export default function VirtualKeyDetailSheet({
 															<TableCell>
 																{config.tools_to_execute?.includes("*") ? (
 																	<Badge variant="success" className="text-xs">
-																		All Tools
+																		{t("All Tools")}
 																	</Badge>
 																) : config.tools_to_execute && config.tools_to_execute.length > 0 ? (
 																	<div className="flex flex-wrap gap-1">
@@ -547,7 +549,7 @@ export default function VirtualKeyDetailSheet({
 
 							{/* Budget Information */}
 							<div className="space-y-4">
-								<h3 className="font-semibold">Budget Information</h3>
+								<h3 className="font-semibold">{t("Budget Information")}</h3>
 
 								{displayBudgets && displayBudgets.length > 0 ? (
 									<div className="space-y-4">
@@ -590,20 +592,20 @@ export default function VirtualKeyDetailSheet({
 										))}
 									</div>
 								) : (
-									<p className="text-muted-foreground text-sm">No budget limits configured</p>
+									<p className="text-muted-foreground text-sm">{t("No budget limits configured")}</p>
 								)}
 							</div>
 
 							{/* Rate Limits */}
 							<div className="space-y-4">
-								<h3 className="font-semibold">Rate Limits</h3>
+								<h3 className="font-semibold">{t("Rate Limits")}</h3>
 
 								{displayRateLimit ? (
 									<div className="space-y-4">
 										{/* Token Limits */}
 										{displayRateLimit.token_max_limit != null ? (
 											<div className="space-y-3 rounded-lg border p-4">
-												<span className="text-sm font-medium">Token Limits</span>
+												<span className="text-sm font-medium">{t("Token Limits")}</span>
 												<UsageLine
 													current={displayRateLimit.token_current_usage}
 													max={displayRateLimit.token_max_limit}
@@ -631,7 +633,7 @@ export default function VirtualKeyDetailSheet({
 										{/* Request Limits */}
 										{displayRateLimit.request_max_limit != null ? (
 											<div className="space-y-3 rounded-lg border p-4">
-												<span className="text-sm font-medium">Request Limits</span>
+												<span className="text-sm font-medium">{t("Request Limits")}</span>
 												<UsageLine
 													current={displayRateLimit.request_current_usage}
 													max={displayRateLimit.request_max_limit}
@@ -657,11 +659,11 @@ export default function VirtualKeyDetailSheet({
 										) : null}
 
 										{displayRateLimit.token_max_limit == null && displayRateLimit.request_max_limit == null && (
-											<p className="text-muted-foreground text-sm">No rate limits configured</p>
+											<p className="text-muted-foreground text-sm">{t("No rate limits configured")}</p>
 										)}
 									</div>
 								) : (
-									<p className="text-muted-foreground text-sm">No rate limits configured</p>
+									<p className="text-muted-foreground text-sm">{t("No rate limits configured")}</p>
 								)}
 							</div>
 						</>

@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DefaultNetworkConfig } from "@/lib/constants/config";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider, isKnownProvider } from "@/lib/types/config";
 import { networkOnlyFormSchema, type SecretVar, type NetworkOnlyFormSchema } from "@/lib/types/schemas";
@@ -63,6 +64,7 @@ const secondsToHumanReadable = (seconds: number) => {
 };
 
 export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -106,7 +108,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 			if ((provider.network_config?.base_url ?? "").trim() !== "") {
 				toast.error("You can't remove network configuration for this provider.");
 			} else {
-				toast.error("Base URL is required for this provider.");
+				toast.error(t("Base URL is required for this provider."));
 			}
 			return;
 		}
@@ -137,11 +139,11 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 		updateProvider(updatedProvider)
 			.unwrap()
 			.then(() => {
-				toast.success("Provider configuration updated successfully");
+				toast.success(t("Provider configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update provider configuration", {
+				toast.error(t("Failed to update provider configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -277,7 +279,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 								name="network_config.max_retries"
 								render={({ field }) => (
 									<FormItem className="flex-1">
-										<FormLabel>Max Retries</FormLabel>
+										<FormLabel>{t("Max Retries")}</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="0"
@@ -312,7 +314,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 										<FormLabel>Initial Backoff (ms)</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="e.g 500"
+												placeholder={t("e.g 500")}
 												{...field}
 												value={field.value === undefined || Number.isNaN(field.value) ? "" : field.value}
 												disabled={!hasUpdateProviderAccess}
@@ -342,7 +344,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 										<FormLabel>Max Backoff (ms)</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="e.g 10000"
+												placeholder={t("e.g 10000")}
 												{...field}
 												value={field.value === undefined || Number.isNaN(field.value) ? "" : field.value}
 												disabled={!hasUpdateProviderAccess}
@@ -371,7 +373,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 								name="network_config.max_conns_per_host"
 								render={({ field }) => (
 									<FormItem className="flex-1">
-										<FormLabel>Max Connections Per Host</FormLabel>
+										<FormLabel>{t("Max Connections Per Host")}</FormLabel>
 										<FormControl>
 											<Input
 												data-testid="network-config-max-conns-per-host-input"
@@ -501,7 +503,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between">
 									<div className="space-y-0.5">
-										<FormLabel>Allow Private Network</FormLabel>
+										<FormLabel>{t("Allow Private Network")}</FormLabel>
 										<FormDescription>
 											Allow connections to private IPs (e.g. <code>10.x</code>, <code>192.168.x</code>). Required for providers on a LAN,
 											k8s pod network, or private VPC. Cloud metadata addresses (169.254.x.x) are always blocked.
@@ -549,7 +551,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 										render={({ field }) => (
 											<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 												<div className="space-y-0.5">
-													<FormLabel>Skip TLS verification</FormLabel>
+													<FormLabel>{t("Skip TLS verification")}</FormLabel>
 													<FormDescription>
 														Disable TLS certificate verification for provider connections. This bypasses server certificate validation and
 														should be used only as a last resort when a trusted CA chain cannot be configured. Prefer ca_cert_pem for

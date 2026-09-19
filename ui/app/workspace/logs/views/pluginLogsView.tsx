@@ -2,6 +2,7 @@ import { PluginLogEntry } from "@/lib/types/logs";
 import { cn } from "@/lib/utils";
 import { LOG_LEVEL_BADGE_CLASSES, meetsMinLogLevel, type LogLevel } from "@/lib/utils/logLevel";
 import { format } from "date-fns";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import LogLevelTabs from "./logLevelTabs";
@@ -20,6 +21,7 @@ function formatPluginName(name: string): string {
 }
 
 export default function PluginLogsView({ pluginLogs }: PluginLogsViewProps) {
+	const { t } = useLocaleCtx();
 	const [minLevel, setMinLevel] = useState<LogLevel>("debug");
 	const parsed = useMemo(() => parsePluginLogs(pluginLogs), [pluginLogs]);
 
@@ -28,7 +30,7 @@ export default function PluginLogsView({ pluginLogs }: PluginLogsViewProps) {
 	return (
 		<div>
 			<div className="flex items-center justify-between gap-3 py-3">
-				<div className="text-sm font-semibold">Plugin Logs</div>
+				<div className="text-sm font-semibold">{t("Plugin Logs")}</div>
 				<LogLevelTabs value={minLevel} onChange={setMinLevel} testId="plugin-logs-level-filter" />
 			</div>
 			<div className="flex flex-col gap-2 pb-3">

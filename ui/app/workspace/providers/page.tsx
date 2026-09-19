@@ -19,6 +19,7 @@ import {
 	useLazyGetProviderQuery,
 } from "@/lib/store";
 import { KnownProvider, ModelProvider, ModelProviderName, ProviderStatus } from "@/lib/types/config";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { DATABRICKS_PROVIDER, isCustomDatabricksProvider } from "@/lib/utils/databricksMigration";
 import { findCustomProviderCollisions, normalizeProviderName } from "@/lib/utils/providerCollision";
@@ -37,6 +38,7 @@ import { AddProviderDropdown } from "./views/addProviderDropdown";
 import { ProvidersEmptyState } from "./views/providersEmptyState";
 
 export default function Providers() {
+	const { t } = useLocaleCtx();
 	const isMobile = useIsMobile();
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
@@ -134,7 +136,7 @@ export default function Providers() {
 					);
 					return;
 				}
-				toast.error("Something went wrong", {
+				toast.error(t("Something went wrong"), {
 					description: `We encountered an error while getting provider config: ${getErrorMessage(err)}`,
 				});
 			});
@@ -180,7 +182,7 @@ export default function Providers() {
 				setProvider(name);
 				return;
 			}
-			toast.error("Failed to add provider", {
+			toast.error(t("Failed to add provider"), {
 				description: getErrorMessage(err),
 			});
 		}
@@ -288,7 +290,7 @@ export default function Providers() {
 				<TooltipProvider>
 					<div className="flex min-h-0 flex-1 flex-col rounded-md bg-zinc-50/50 md:p-4 md:pb-0 dark:bg-zinc-800/20">
 						{/* Pinned lane title */}
-						<div className="text-muted-foreground mb-2 shrink-0 text-xs font-medium">Configured Providers</div>
+						<div className="text-muted-foreground mb-2 shrink-0 text-xs font-medium">{t("Configured Providers")}</div>
 
 						{/* Configured providers (standard with keys + custom): the only scrolling region */}
 						<div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
@@ -340,7 +342,7 @@ export default function Providers() {
 									className="flex flex-col items-center justify-center gap-2 px-4 py-8 text-center"
 								>
 									<Server className="text-muted-foreground h-8 w-8" strokeWidth={1} />
-									<div className="text-muted-foreground text-xs">No providers configured yet</div>
+									<div className="text-muted-foreground text-xs">{t("No providers configured yet")}</div>
 								</div>
 							)}
 
@@ -363,7 +365,7 @@ export default function Providers() {
 			<div className={cn("min-w-0 w-full", mobileDetailOpen ? "block" : "hidden md:block")}>
 				<Button variant="ghost" size="sm" className="mb-3 -ml-2 md:hidden" onClick={() => setMobileDetailOpen(false)}>
 					<ArrowLeft className="size-4" />
-					Providers
+					{t("Providers")}
 				</Button>
 				{isLoadingProvider && (
 					<div className="bg-muted/10 flex w-full items-center justify-center rounded-md md:max-h-[calc(var(--app-content-viewport)_-_300px)]">
@@ -372,7 +374,7 @@ export default function Providers() {
 				)}
 				{!selectedProvider && (
 					<div className="bg-muted/10 flex w-full items-center justify-center rounded-md md:max-h-[calc(var(--app-content-viewport)_-_300px)]">
-						<div className="text-muted-foreground text-sm">Select a provider</div>
+						<div className="text-muted-foreground text-sm">{t("Select a provider")}</div>
 					</div>
 				)}
 				{!isLoadingProvider && selectedProvider && (

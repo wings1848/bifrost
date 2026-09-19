@@ -15,6 +15,7 @@ import {
 	useUpdateProviderGovernanceMutation,
 } from "@/lib/store";
 import { ModelProvider } from "@/lib/types/config";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { CreateBudgetRequest, ProviderGovernance } from "@/lib/types/governance";
 import { budgetSignature } from "@/lib/utils/governance";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -73,6 +74,7 @@ function governanceToFormValues(provGov: ProviderGovernance | undefined): FormDa
 }
 
 export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	// Defers the save until the operator says whether to clear accumulated spend.
 	const resetPrompt = useBudgetUsageResetPrompt<FormData>();
@@ -185,10 +187,10 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 				},
 			}).unwrap();
 
-			toast.success("Governance configuration saved successfully");
+			toast.success(t("Governance configuration saved successfully"));
 			form.reset(data);
 		} catch (error) {
-			toast.error("Failed to update provider governance", {
+			toast.error(t("Failed to update provider governance"), {
 				description: getErrorMessage(error),
 			});
 		}
@@ -240,7 +242,7 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 
 				{/* Rate Limiting Configuration */}
 				<div className="space-y-4">
-					<Label className="text-sm font-medium">Rate Limiting Configuration</Label>
+					<Label className="text-sm font-medium">{t("Rate Limiting Configuration")}</Label>
 					<NumberAndSelect
 						id="providerTokenMaxLimit"
 						labelClassName="font-normal"
@@ -266,7 +268,7 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 					<>
 						<DottedSeparator />
 						<div className="space-y-4">
-							<Label className="text-sm font-medium">Current Usage</Label>
+							<Label className="text-sm font-medium">{t("Current Usage")}</Label>
 							<div className="bg-muted/50 grid grid-cols-1 gap-4 rounded-lg p-4 md:grid-cols-2">
 								{providerGovernance?.budgets?.map((b) => (
 									<div key={b.id} className="space-y-1">
@@ -278,7 +280,7 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 								))}
 								{providerGovernance?.rate_limit?.token_max_limit && (
 									<div className="space-y-1">
-										<p className="text-muted-foreground text-xs">Token Usage</p>
+										<p className="text-muted-foreground text-xs">{t("Token Usage")}</p>
 										<p className="text-sm font-medium">
 											{providerGovernance.rate_limit.token_current_usage.toLocaleString()} /{" "}
 											{providerGovernance.rate_limit.token_max_limit.toLocaleString()}
@@ -287,7 +289,7 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 								)}
 								{providerGovernance?.rate_limit?.request_max_limit && (
 									<div className="space-y-1">
-										<p className="text-muted-foreground text-xs">Request Usage</p>
+										<p className="text-muted-foreground text-xs">{t("Request Usage")}</p>
 										<p className="text-sm font-medium">
 											{providerGovernance.rate_limit.request_current_usage.toLocaleString()} /{" "}
 											{providerGovernance.rate_limit.request_max_limit.toLocaleString()}

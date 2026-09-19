@@ -2,6 +2,7 @@ import Provider from "@/components/provider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ModelProvider } from "@/lib/types/config";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -74,6 +75,7 @@ const availableTabs = (hasCustomProviderConfig: boolean, hasGovernanceAccess: bo
 };
 
 export default function ProviderConfigSheet({ show, onCancel, provider }: Props) {
+	const { t } = useLocaleCtx();
 	const [selectedTab, setSelectedTab] = useState<string | undefined>(undefined);
 	const hasGovernanceAccess = useRbac(RbacResource.Governance, RbacOperation.View);
 	const hasCustomProviderConfig = !!provider.custom_provider_config;
@@ -126,7 +128,7 @@ export default function ProviderConfigSheet({ show, onCancel, provider }: Props)
 											data-testid={`provider-tab-${tab.id}`}
 											className="flex-none px-3 whitespace-nowrap"
 										>
-											{tab.label}
+											{t(tab.label)}
 										</TabsTrigger>
 									))}
 								</TabsList>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ComboboxSelect, type ComboboxSelectOption } from "@/components/ui/combobox";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { DEFAULT_PAGE_SIZE_OPTIONS, useTablePageSizePreference } from "@/lib/hooks/useTablePageSizePreference";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import type { DisplayLogEntry, LogEntry, Pagination } from "@/lib/types/logs";
 import { cn } from "@/lib/utils";
 import type { ColumnOrderState, ColumnPinningState, TableMeta, VisibilityState } from "@tanstack/react-table";
@@ -59,6 +60,7 @@ export function LogsDataTable({
 	onReorderColumns,
 	tableMeta,
 }: DataTableProps) {
+	const { t } = useLocaleCtx();
 	const [sorting, setSorting] = useState<SortingState>([{ id: pagination.sort_by, desc: pagination.order === "desc" }]);
 	const [pageSizePref, setPageSizePref, pageSizeHydrated] = useTablePageSizePreference("bifrost.logs.pageSize");
 
@@ -281,7 +283,7 @@ export function LogsDataTable({
 
 				<div className="flex items-center gap-3">
 					<div className="flex items-center gap-1.5">
-						<span className="text-muted-foreground">Rows per page</span>
+						<span className="text-muted-foreground">{t("Rows per page")}</span>
 						<ComboboxSelect
 							options={pageSizeOptions}
 							value={String(pageSizePref)}
@@ -300,13 +302,13 @@ export function LogsDataTable({
 							onClick={() => goToPage(currentPage - 1)}
 							disabled={currentPage <= 1}
 							data-testid="prev-page"
-							aria-label="Previous page"
+							aria-label={t("Previous page")}
 						>
 							<ChevronLeft className="size-3" />
 						</Button>
 
 						<div className="flex items-center gap-1">
-							<span>Page</span>
+							<span>{t("Page")}</span>
 							<span>{currentPage}</span>
 							<span>of {totalPages}</span>
 						</div>
@@ -317,7 +319,7 @@ export function LogsDataTable({
 							onClick={() => goToPage(currentPage + 1)}
 							disabled={totalPages === 0 || currentPage >= totalPages}
 							data-testid="next-page"
-							aria-label="Next page"
+							aria-label={t("Next page")}
 						>
 							<ChevronRight className="size-3" />
 						</Button>

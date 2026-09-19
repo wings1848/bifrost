@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { BaseProvider, RequestType } from "@/lib/types/config";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { isRequestTypeDisabled } from "@/lib/utils/validation";
 import { Settings2 } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -103,6 +104,7 @@ export function AllowedRequestsFields({
 	providerType,
 	disabled = false,
 }: AllowedRequestsFieldsProps) {
+	const { t } = useLocaleCtx();
 	const leftColumn = RequestTypes.slice(0, RequestTypes.length / 2);
 	const rightColumn = RequestTypes.slice(RequestTypes.length / 2);
 	const { getValues, setValue } = useFormContext();
@@ -131,7 +133,7 @@ export function AllowedRequestsFields({
 						className={`flex flex-row items-center justify-between rounded-sm border p-3 ${isDisabled ? "bg-muted/30 opacity-60" : ""}`}
 					>
 						<div className="space-y-0.5">
-							<FormLabel className={isDisabled ? "cursor-not-allowed" : ""}>{requestType.label}</FormLabel>
+							<FormLabel className={isDisabled ? "cursor-not-allowed" : ""}>{t(requestType.label)}</FormLabel>
 						</div>
 						<div className="flex items-center gap-2">
 							{/* Settings icon for path override - only show when enabled */}
@@ -149,14 +151,14 @@ export function AllowedRequestsFields({
 													<button
 														type="button"
 														className="text-muted-foreground hover:text-foreground transition-colors"
-														aria-label="Customize endpoint path"
+														aria-label={t("Customize endpoint path")}
 													>
 														<Settings2 className="h-4 w-4" />
 													</button>
 												</PopoverTrigger>
 												<PopoverContent className="w-80" align="end" onOpenAutoFocus={(e) => e.preventDefault()}>
 													<div className="space-y-2">
-														<h4 className="text-sm font-medium">Custom Path or URL</h4>
+														<h4 className="text-sm font-medium">{t("Custom Path or URL")}</h4>
 														<p className="text-muted-foreground text-xs">
 															Override with a path (e.g., /v1/chat) or a full URL (e.g., https://api.example.com/chat) to bypass base_url
 														</p>
@@ -196,7 +198,7 @@ export function AllowedRequestsFields({
 	return (
 		<div className="space-y-4">
 			<div>
-				<div className="text-sm font-medium">Allowed Request Types</div>
+				<div className="text-sm font-medium">{t("Allowed Request Types")}</div>
 				<p className="text-muted-foreground text-xs">
 					Select which request types this custom provider can handle.{" "}
 					{!isPathOverrideDisabled ? "Click the settings icon to customize endpoint paths or use full URLs." : ""}

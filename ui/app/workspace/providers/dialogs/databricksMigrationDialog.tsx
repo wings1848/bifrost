@@ -54,6 +54,7 @@ import {
 	runDatabricksMigration,
 } from "@/lib/utils/databricksMigration";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { AlertTriangle, Check, CircleDashed, Loader2, X } from "lucide-react";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 
@@ -79,6 +80,7 @@ const wrapError = (err: unknown): Error =>
 	});
 
 export default function DatabricksMigrationDialog({ show, provider, onDeferred, onMigrated }: Props) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const providerFormIsDirty = useAppSelector((state) => state.provider.isDirty);
 	const canCreate = useRbac(RbacResource.ModelProvider, RbacOperation.Create);
@@ -241,7 +243,7 @@ export default function DatabricksMigrationDialog({ show, provider, onDeferred, 
 								</>
 							)}
 							{stage === "preview" && <p>Review what will be migrated. Secrets are masked; anything that could not be read must be entered below.</p>}
-							{stage === "running" && <p>Migrating. Keep this window open until it finishes.</p>}
+							{stage === "running" && <p>{t("Migrating. Keep this window open until it finishes.")}</p>}
 							{stage === "finished" && result && <p>{result.message}</p>}
 						</div>
 					</AlertDialogDescription>
@@ -250,7 +252,7 @@ export default function DatabricksMigrationDialog({ show, provider, onDeferred, 
 				{loadError && (
 					<Alert variant="destructive">
 						<AlertTriangle className="h-4 w-4" />
-						<AlertTitle>Could not read the custom provider</AlertTitle>
+						<AlertTitle>{t("Could not read the custom provider")}</AlertTitle>
 						<AlertDescription>{loadError}</AlertDescription>
 					</Alert>
 				)}
@@ -270,7 +272,7 @@ export default function DatabricksMigrationDialog({ show, provider, onDeferred, 
 					{(stage === "intro" || stage === "loading") && (
 						<>
 							<AlertDialogCancel onClick={onDeferred} disabled={stage === "loading"} data-testid="databricks-migration-not-now">
-								Not now
+								{t("Not now")}
 							</AlertDialogCancel>
 							<DisabledTooltip reason={migrateDisabledReason}>
 								<Button onClick={loadPlan} disabled={!!migrateDisabledReason || stage === "loading"} data-testid="databricks-migration-start">
@@ -285,7 +287,7 @@ export default function DatabricksMigrationDialog({ show, provider, onDeferred, 
 							<Button variant="ghost" onClick={() => setStage("intro")}>
 								Back
 							</Button>
-							<AlertDialogCancel onClick={onDeferred}>Not now</AlertDialogCancel>
+							<AlertDialogCancel onClick={onDeferred}>{t("Not now")}</AlertDialogCancel>
 							<DisabledTooltip reason={migrateDisabledReason ?? (plan && planNeedsInput(plan) ? "Fill in the missing values above." : undefined)}>
 								<Button onClick={runMigration} disabled={!canMigrate} data-testid="databricks-migration-confirm">
 									Migrate
@@ -297,7 +299,7 @@ export default function DatabricksMigrationDialog({ show, provider, onDeferred, 
 						<>
 							{!result.ok && (
 								<AlertDialogCancel onClick={onDeferred} data-testid="databricks-migration-close">
-									Close
+									{t("Close")}
 								</AlertDialogCancel>
 							)}
 							{result.ok && (
@@ -333,6 +335,7 @@ interface PreviewProps {
 }
 
 function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKeyValueChange }: PreviewProps) {
+	const { t } = useLocaleCtx();
 	const net = plan.providerSettings.network_config;
 	const perf = plan.providerSettings.concurrency_and_buffer_size;
 	const otherHeaders = Object.keys(net.extra_headers ?? {});
@@ -340,10 +343,10 @@ function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKey
 	return (
 		<div className="space-y-4 text-sm" data-testid="databricks-migration-preview">
 			<section className="space-y-2">
-				<SectionTitle>Workspace</SectionTitle>
+				<SectionTitle>{t("Workspace")}</SectionTitle>
 				<div className="grid gap-3 sm:grid-cols-[1fr_180px]">
 					<div className="space-y-1">
-						<Label htmlFor="databricks-migration-workspace-url">Workspace URL</Label>
+						<Label htmlFor="databricks-migration-workspace-url">{t("Workspace URL")}</Label>
 						<Input
 							id="databricks-migration-workspace-url"
 							data-testid="databricks-migration-workspace-url"
@@ -354,7 +357,7 @@ function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKey
 						/>
 					</div>
 					<div className="space-y-1">
-						<Label>Inference surface</Label>
+						<Label>{t("Inference surface")}</Label>
 						<Select value={plan.apiFormat} onValueChange={(v) => onApiFormatChange(v as DatabricksApiFormat)}>
 							<SelectTrigger data-testid="databricks-migration-api-format">
 								<SelectValue />
@@ -401,12 +404,12 @@ function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKey
 								{key.blacklisted_models.length > 0 && <span>Blacklisted: {key.blacklisted_models.join(", ")}</span>}
 								<span>Weight: {key.weight}</span>
 								<span>Aliases: {Object.keys(key.aliases ?? {}).length}</span>
-								{!key.enabled && <span>Disabled</span>}
+								{!key.enabled && <span>{t("Disabled")}</span>}
 							</div>
 							{key.needsValue || !isSecretVarSet(key.value) ? (
 								<div className="space-y-1">
 									<Label htmlFor={`databricks-migration-token-${key.tempId}`}>
-										Personal access token <span className="text-destructive">*</span>
+										{t("Personal access token:")} <span className="text-destructive">*</span>
 									</Label>
 									<SecretVarInput
 										id={`databricks-migration-token-${key.tempId}`}
@@ -423,7 +426,7 @@ function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKey
 								</div>
 							) : (
 								<div className="text-xs">
-									<span className="text-muted-foreground">Personal access token: </span>
+									<span className="text-muted-foreground">{t("Personal access token:")} </span>
 									<code className="bg-muted rounded px-1 py-0.5 font-mono" data-testid={`databricks-migration-masked-${key.tempId}`}>
 										{maskSecret(key.value)}
 									</code>
@@ -462,7 +465,7 @@ function MigrationPreview({ plan, onWorkspaceUrlChange, onApiFormatChange, onKey
 			{plan.warnings.length > 0 && (
 				<Alert variant={plan.nameClash ? "destructive" : "default"} data-testid="databricks-migration-warnings">
 					<AlertTriangle className="h-4 w-4" />
-					<AlertTitle>Before you continue</AlertTitle>
+					<AlertTitle>{t("Before you continue")}</AlertTitle>
 					<AlertDescription>
 						<ul className="list-disc space-y-1 pl-4">
 							{plan.warnings.map((warning) => (

@@ -28,6 +28,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { OsIcon } from "@enterprise/lib/constants/edgeApps";
 import { useGetDeviceQuery } from "@enterprise/lib/store/apis/edgeControlApi";
 import { mapAppToClientApp, mapUserAgentToApp } from "@/lib/constants/logs";
@@ -84,7 +85,8 @@ function StatusPill({ label, tone }: { label: string; tone: MCPLogPillTone }) {
 }
 
 function CopyInlineButton({ text, testId }: { text: string; testId?: string }) {
-	const { copy } = useCopyToClipboard({ successMessage: "Copied" });
+	const { t } = useLocaleCtx();
+	const { copy } = useCopyToClipboard({ successMessage: t("Copied") });
 	return (
 		<button
 			type="button"
@@ -93,7 +95,7 @@ function CopyInlineButton({ text, testId }: { text: string; testId?: string }) {
 				copy(text);
 			}}
 			className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex h-6 w-6 items-center justify-center rounded-sm transition"
-			aria-label="Copy"
+			aria-label={t("Copy")}
 			data-testid={testId}
 		>
 			<Clipboard className="h-3.5 w-3.5" />
@@ -148,6 +150,7 @@ export function MCPLogDetailSheet({
 	hasPrev = false,
 	hasNext = false,
 }: MCPLogDetailSheetProps) {
+	const { t } = useLocaleCtx();
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const { data: userAgentMappings } = useGetUserAgentMappingsQuery();
@@ -193,7 +196,7 @@ export function MCPLogDetailSheet({
 			<Sheet open={open} onOpenChange={onOpenChange}>
 				<SheetContent className="border-secondary flex w-full flex-col gap-4 overflow-x-hidden border p-4 sm:max-w-[60%] md:p-8">
 					<div className="flex h-full items-center justify-center">
-						<SheetTitle className="sr-only">Loading MCP log details</SheetTitle>
+						<SheetTitle className="sr-only">{t("Loading MCP log details")}</SheetTitle>
 						<Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
 					</div>
 				</SheetContent>
@@ -229,11 +232,11 @@ export function MCPLogDetailSheet({
 	// value included.
 	const scopeLinks = (
 		[
-			["User", "Users", "user_id", displayLog.user_name, displayLog.user_id, undefined, undefined],
-			["Team", "Teams", "team_id", displayLog.team_name, displayLog.team_id, displayLog.team_names, displayLog.team_ids],
+			[t("User"), t("Users"), "user_id", displayLog.user_name, displayLog.user_id, undefined, undefined],
+			[t("Team"), t("Teams"), "team_id", displayLog.team_name, displayLog.team_id, displayLog.team_names, displayLog.team_ids],
 			[
-				"Customer",
-				"Customers",
+				t("Customer"),
+				t("Customers"),
 				"customer_id",
 				displayLog.customer_name,
 				displayLog.customer_id,
@@ -241,16 +244,16 @@ export function MCPLogDetailSheet({
 				displayLog.customer_ids,
 			],
 			[
-				"Business Unit",
-				"Business Units",
+				t("Business Unit"),
+				t("Business Units"),
 				"business_unit_id",
 				displayLog.business_unit_name,
 				displayLog.business_unit_id,
 				displayLog.business_unit_names,
 				displayLog.business_unit_ids,
 			],
-			["Project", "Projects", "project_id", displayLog.project_name, displayLog.project_id, undefined, undefined],
-			["Device", "Devices", "device_id", null, displayLog.device_id, undefined, undefined],
+			[t("Project"), t("Projects"), "project_id", displayLog.project_name, displayLog.project_id, undefined, undefined],
+			[t("Device"), t("Devices"), "device_id", null, displayLog.device_id, undefined, undefined],
 		] as const
 	)
 		.map(([label, pluralLabel, idKey, name, id, names, ids]) => {
@@ -278,7 +281,7 @@ export function MCPLogDetailSheet({
 							entityLabel="log"
 						/>
 						<SheetTitle className="flex w-fit items-center gap-2 font-medium">
-							<span className="text-foreground text-sm font-medium">Request details</span>
+							<span className="text-foreground text-sm font-medium">{t("Request details")}</span>
 						</SheetTitle>
 					</div>
 					{revealAvailable && (
@@ -333,11 +336,11 @@ export function MCPLogDetailSheet({
 						</DropdownMenu>
 						<AlertDialogContent>
 							<AlertDialogHeader>
-								<AlertDialogTitle>Are you sure you want to delete this log?</AlertDialogTitle>
-								<AlertDialogDescription>This action cannot be undone. This will permanently delete the log entry.</AlertDialogDescription>
+								<AlertDialogTitle>{t("Are you sure you want to delete this log?")}</AlertDialogTitle>
+								<AlertDialogDescription>{t("This action cannot be undone. This will permanently delete the log entry.")}</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
-								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
 								<AlertDialogAction
 									onClick={async (e) => {
 										e.preventDefault();
@@ -347,7 +350,7 @@ export function MCPLogDetailSheet({
 											setDeleteDialogOpen(false);
 											onOpenChange(false);
 										} catch (err) {
-											const errorMessage = err instanceof Error ? err.message : "Failed to delete log";
+											const errorMessage = err instanceof Error ? err.message : t("Failed to delete log");
 											toast.error(errorMessage);
 											// Keep dialog open on error so user can see the error and retry
 										}
@@ -374,7 +377,7 @@ export function MCPLogDetailSheet({
 								) : null}
 							</div>
 							<div className="mt-3 flex items-center gap-2">
-								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">Tool</div>
+								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">{t("Tool")}</div>
 								<Link
 									to="/workspace/mcp-logs"
 									search={{ tool_names: [displayLog.tool_name] }}
@@ -387,7 +390,7 @@ export function MCPLogDetailSheet({
 								<CopyInlineButton text={displayLog.tool_name} testId="mcplogdetails-copy-tool-name-button" />
 							</div>
 							<div className="mt-1 flex items-center gap-2">
-								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">Request</div>
+								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">{t("Request")}</div>
 								<code className="text-foreground truncate font-mono text-[13px]">{requestId || "—"}</code>
 								{requestId ? <CopyInlineButton text={requestId} testId="mcplogdetails-copy-request-id-button" /> : null}
 							</div>
@@ -409,7 +412,7 @@ export function MCPLogDetailSheet({
 							)}
 							{(displayLog.virtual_key || displayLog.virtual_key_id) && (
 								<div className="mt-1 flex items-center gap-2">
-									<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">Key</div>
+									<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">{t("Key")}</div>
 									<Link
 										to="/workspace/governance/virtual-keys"
 										search={{ selected_vk: displayLog.virtual_key?.id || displayLog.virtual_key_id! }}
@@ -435,7 +438,7 @@ export function MCPLogDetailSheet({
 							hasRightBorder
 						/>
 						<HeroStat
-							label="Server"
+							label={t("Server")}
 							mono
 							value={displayLog.source === "native" ? "Local" : displayLog.server_label || "—"}
 							sub={displayLog.source === "native" ? "native" : "mcp"}
@@ -443,14 +446,14 @@ export function MCPLogDetailSheet({
 							hasRightBorder
 						/>
 						<HeroStat
-							label="User"
+							label={t("User")}
 							value={displayLog.user_name || displayLog.user_id || "—"}
 							sub={displayLog.team_name || displayLog.team_id || ""}
 							valueClass={displayLog.user_name ? undefined : "font-mono text-[15px]"}
 							hasRightBorder
 						/>
 						<HeroStat
-							label="Device"
+							label={t("Device")}
 							mono={!device?.hostname}
 							value={
 								displayLog.device_id ? (
@@ -474,7 +477,7 @@ export function MCPLogDetailSheet({
 				</div>
 				<details className="group bg-card rounded-sm border" open={false}>
 					<summary className="hover:bg-muted/30 flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm transition">
-						<span className="text-foreground font-medium">More details</span>
+						<span className="text-foreground font-medium">{t("More details")}</span>
 						<span className="text-muted-foreground flex items-center gap-2 text-xs">
 							<span className="hidden md:inline">timings, request meta{metadataEntries.length > 0 ? ", metadata" : ""}</span>
 							<ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
@@ -484,11 +487,11 @@ export function MCPLogDetailSheet({
 						<p className="text-muted-foreground text-sm">{presentation.description}</p>
 						<DottedSeparator />
 						<div className="space-y-4">
-							<BlockHeader title="Timings" />
+							<BlockHeader title={t("Timings")} />
 							<div className="grid w-full grid-cols-1 items-center justify-between gap-4 md:grid-cols-3">
 								<LogEntryDetailsView
 									className="w-full"
-									label="Start Timestamp"
+									label={t("Start Timestamp")}
 									value={startTimestamp && isValid(startTimestamp) ? format(startTimestamp, "yyyy-MM-dd hh:mm:ss aa") : "N/A"}
 								/>
 								<LogEntryDetailsView
@@ -505,12 +508,12 @@ export function MCPLogDetailSheet({
 						</div>
 						<DottedSeparator />
 						<div className="space-y-4">
-							<BlockHeader title="Request Details" />
+							<BlockHeader title={t("Request Details")} />
 							<div className="grid w-full grid-cols-1 items-start justify-between gap-4 md:grid-cols-3">
-								<LogEntryDetailsView className="col-span-3 w-full" label="Request ID" value={requestId} />
+								<LogEntryDetailsView className="col-span-3 w-full" label={t("Request ID")} value={requestId} />
 								<LogEntryDetailsView
 									className="w-full"
-									label="App"
+									label={t("App")}
 									value={
 										<div className="flex items-center gap-2">
 											{appIcon && <img src={appIcon} alt={app.name} width={14} height={14} />}
@@ -520,12 +523,12 @@ export function MCPLogDetailSheet({
 								/>
 								<LogEntryDetailsView
 									className="w-full"
-									label="Tool Name"
+									label={t("Tool Name")}
 									value={<span className="font-mono">{displayLog.tool_name}</span>}
 								/>
 								<LogEntryDetailsView
 									className="w-full"
-									label="Server"
+									label={t("Server")}
 									value={
 										displayLog.source === "native" ? (
 											<Badge variant="secondary">Local · Native</Badge>
@@ -576,15 +579,15 @@ export function MCPLogDetailSheet({
 								{(displayLog.virtual_key || displayLog.virtual_key_id) && (
 									<LogEntryDetailsView
 										className="w-full"
-										label="Virtual Key"
+										label={t("Virtual Key")}
 										value={displayLog.virtual_key?.name || displayLog.virtual_key_name || displayLog.virtual_key_id}
 									/>
 								)}
-								{displayLog.decision && <LogEntryDetailsView className="w-full" label="Decision" value={displayLog.decision} />}
+								{displayLog.decision && <LogEntryDetailsView className="w-full" label={t("Decision")} value={displayLog.decision} />}
 								{displayLog.llm_request_id && (
 									<LogEntryDetailsView
 										className="col-span-3 w-full"
-										label="LLM Request ID"
+										label={t("LLM Request ID")}
 										value={<span className="font-mono text-xs">{displayLog.llm_request_id}</span>}
 									/>
 								)}
@@ -594,7 +597,7 @@ export function MCPLogDetailSheet({
 							<>
 								<DottedSeparator />
 								<div className="space-y-4">
-									<BlockHeader title="Metadata" />
+									<BlockHeader title={t("Metadata")} />
 									<div className="grid w-full grid-cols-1 items-start justify-between gap-4 md:grid-cols-3">
 										{metadataEntries.map(([key, value]) => (
 											<LogEntryDetailsView key={key} className="w-full" label={key} value={String(value)} />
@@ -625,7 +628,7 @@ export function MCPLogDetailSheet({
 						{/* Arguments */}
 						{displayedArguments && (
 							<div className="w-full rounded-sm border">
-								<div className="border-b px-4 py-2 text-sm font-medium md:px-6">Arguments</div>
+								<div className="border-b px-4 py-2 text-sm font-medium md:px-6">{t("Arguments")}</div>
 								<CodeEditor
 									className="z-0 w-full"
 									shouldAdjustInitialHeight={true}
@@ -642,7 +645,7 @@ export function MCPLogDetailSheet({
 						{/* Result */}
 						{displayedResult && displayLog.status !== "processing" && (
 							<div className="w-full rounded-sm border">
-								<div className="border-b px-4 py-2 text-sm font-medium md:px-6">Result</div>
+								<div className="border-b px-4 py-2 text-sm font-medium md:px-6">{t("Result")}</div>
 								<CodeEditor
 									className="z-0 w-full"
 									shouldAdjustInitialHeight={true}
@@ -659,7 +662,7 @@ export function MCPLogDetailSheet({
 						{/* Error Details */}
 						{displayedErrorDetails && (
 							<div className="border-destructive/50 w-full rounded-sm border">
-								<div className="border-destructive/50 text-destructive border-b px-4 py-2 text-sm font-medium md:px-6">Error Details</div>
+								<div className="border-destructive/50 text-destructive border-b px-4 py-2 text-sm font-medium md:px-6">{t("Error Details")}</div>
 								<CodeEditor
 									className="z-0 w-full"
 									shouldAdjustInitialHeight={true}

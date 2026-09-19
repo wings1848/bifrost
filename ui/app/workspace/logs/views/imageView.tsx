@@ -4,6 +4,7 @@ import { Image, ChevronLeft, ChevronRight } from "lucide-react";
 import { ImageMessage } from "@/components/chat/ImageMessage";
 import { Button } from "@/components/ui/button";
 import { RequestTypeLabels } from "@/lib/constants/logs";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface ImageGenerationInput {
 	prompt: string;
@@ -41,6 +42,7 @@ function getMethodTypeLabel(requestType?: string): string {
 }
 
 export default function ImageView({ imageInput, imageEditInput, imageVariationInput, imageOutput, requestType }: ImageViewProps) {
+	const { t } = useLocaleCtx();
 	const [currentIndex, setCurrentIndex] = useState(0);
 
 	// Get all valid images
@@ -74,7 +76,7 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 						{methodTypeLabel} Input
 					</div>
 					<div className="space-y-4 p-6">
-						<div className="text-muted-foreground mb-2 text-xs font-medium">PROMPT</div>
+						<div className="text-muted-foreground mb-2 text-xs font-medium">{t("PROMPT")}</div>
 						<div className="font-mono text-xs">{imageInput.prompt}</div>
 					</div>
 				</div>
@@ -90,7 +92,7 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 					<div className="space-y-4 p-6">
 						{imageEditInput.images && imageEditInput.images.length > 0 && (
 							<div>
-								<div className="text-muted-foreground mb-2 text-xs font-medium">INPUT IMAGES</div>
+								<div className="text-muted-foreground mb-2 text-xs font-medium">{t("INPUT IMAGES")}</div>
 								<div className="flex flex-wrap gap-2">
 									{imageEditInput.images.map((img, i) =>
 										img.image ? (
@@ -106,7 +108,7 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 							</div>
 						)}
 						<div>
-							<div className="text-muted-foreground mb-2 text-xs font-medium">PROMPT</div>
+							<div className="text-muted-foreground mb-2 text-xs font-medium">{t("PROMPT")}</div>
 							<div className="font-mono text-xs">{imageEditInput.prompt}</div>
 						</div>
 					</div>
@@ -121,7 +123,7 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 						{methodTypeLabel} Input
 					</div>
 					<div className="space-y-4 p-6">
-						<div className="text-muted-foreground mb-2 text-xs font-medium">INPUT IMAGE</div>
+						<div className="text-muted-foreground mb-2 text-xs font-medium">{t("INPUT IMAGE")}</div>
 						<img
 							src={getImageSrc(imageVariationInput.image.image)}
 							alt="Input image"
@@ -143,7 +145,7 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 							<>
 								{currentImage.revised_prompt && (
 									<div className="mb-4">
-										<div className="text-muted-foreground mb-2 text-xs font-medium">REVISED PROMPT</div>
+										<div className="text-muted-foreground mb-2 text-xs font-medium">{t("REVISED PROMPT")}</div>
 										<div className="font-mono text-xs">{currentImage.revised_prompt}</div>
 									</div>
 								)}
@@ -156,13 +158,13 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 
 								{totalImages > 1 && (
 									<div className="mt-3 flex items-center justify-center gap-4">
-										<Button variant="outline" size="sm" onClick={goToPrevious} aria-label="Previous image" title="Previous image">
+										<Button variant="outline" size="sm" onClick={goToPrevious} aria-label={t("Previous image")} title={t("Previous image")}>
 											<ChevronLeft className="h-4 w-4" />
 										</Button>
 										<span className="text-muted-foreground text-sm">
 											{currentIndex + 1} / {totalImages}
 										</span>
-										<Button variant="outline" size="sm" onClick={goToNext} aria-label="Next image" title="Next image">
+										<Button variant="outline" size="sm" onClick={goToNext} aria-label={t("Next image")} title={t("Next image")}>
 											<ChevronRight className="h-4 w-4" />
 										</Button>
 									</div>

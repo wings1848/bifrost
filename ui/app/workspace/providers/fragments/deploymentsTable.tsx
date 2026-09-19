@@ -10,6 +10,7 @@ import { AliasConfig, ModelFamily, ModelFamilyValues } from "@/lib/types/config"
 import { SecretVar } from "@/lib/types/schemas";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, Trash } from "lucide-react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useId, useMemo, useRef, useState } from "react";
 
 type DeploymentsValue = Record<string, AliasConfig> | undefined | null;
@@ -69,9 +70,10 @@ function FieldRow({ label, hint, children }: { label: string; hint?: string; chi
 }
 
 function SectionHeader({ title, description }: { title: string; description?: string }) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="border-b pb-2">
-			<h4 className="text-sm font-semibold">{title}</h4>
+			<h4 className="text-sm font-semibold">{t(title)}</h4>
 			{description && <p className="text-muted-foreground mt-0.5 text-xs">{description}</p>}
 		</div>
 	);
@@ -143,6 +145,7 @@ function TriStateOverrideRow({
 	disabled?: boolean;
 	testId?: string;
 }) {
+	const { t } = useLocaleCtx();
 	const id = useId();
 	const hintId = `${id}-hint`;
 	const selectValue = value === undefined ? "inherit" : value ? "on" : "off";
@@ -161,9 +164,9 @@ function TriStateOverrideRow({
 					<SelectValue />
 				</SelectTrigger>
 				<SelectContent>
-					<SelectItem value="inherit">Use key setting</SelectItem>
-					<SelectItem value="on">On</SelectItem>
-					<SelectItem value="off">Off</SelectItem>
+					<SelectItem value="inherit">{t("Use key setting")}</SelectItem>
+					<SelectItem value="on">{t("On")}</SelectItem>
+					<SelectItem value="off">{t("Off")}</SelectItem>
 				</SelectContent>
 			</Select>
 		</div>
@@ -206,6 +209,7 @@ function AzureSection({ config, onChange, disabled }: ProviderSectionProps) {
 }
 
 function VertexSection({ config, onChange, disabled }: ProviderSectionProps) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="space-y-4">
 			<SectionHeader
@@ -238,7 +242,7 @@ function VertexSection({ config, onChange, disabled }: ProviderSectionProps) {
 			</FieldRow>
 			<div className="flex items-start justify-between gap-4 rounded-md border p-3">
 				<div className="space-y-0.5">
-					<label className="text-sm font-medium">Force single region</label>
+					<label className="text-sm font-medium">{t("Force single region")}</label>
 					<p className="text-muted-foreground text-xs">
 						Call the region above as-is and skip multi-region promotion of multi-region-only models. Use for provisioned throughput.
 					</p>
@@ -322,11 +326,12 @@ function BedrockMantleSection({ config, onChange, disabled }: ProviderSectionPro
 }
 
 function ReplicateSection({ config, onChange, disabled }: ProviderSectionProps) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="space-y-4">
-			<SectionHeader title="Replicate overrides" description="Override key-level Replicate defaults for this deployment." />
+			<SectionHeader title="Replicate overrides" description={t("Override key-level Replicate defaults for this deployment.")} />
 			<TriStateOverrideRow
-				label="Use deployments endpoint"
+				label={t("Use Deployments Endpoint")}
 				hint="Route through Replicate's deployments endpoint instead of the models endpoint."
 				value={config.use_deployments_endpoint}
 				onChange={(next) => onChange({ use_deployments_endpoint: next })}
@@ -338,12 +343,13 @@ function ReplicateSection({ config, onChange, disabled }: ProviderSectionProps) 
 }
 
 function UseAnthropicEndpointsToggleSection({ config, onChange, disabled, providerName }: ProviderSectionProps & { providerName: string }) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="space-y-4">
 			<SectionHeader title={`${providerName} overrides`} description={`Override key-level ${providerName} defaults for this deployment.`} />
 			<TriStateOverrideRow
-				label="Use Anthropic endpoints"
-				hint="Route chat completions and responses requests through Anthropic-compatible endpoints."
+				label={t("Use Anthropic Endpoints")}
+				hint={t("Routes chat completions and responses requests through Anthropic-compatible endpoints.")}
 				value={config.use_anthropic_endpoints}
 				onChange={(next) => onChange({ use_anthropic_endpoints: next })}
 				disabled={disabled}
@@ -389,6 +395,7 @@ function ExpandedConfigPanel({
 	providerName: string;
 	disabled?: boolean;
 }) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="space-y-6 border-t p-4">
 			<div className="space-y-4">
@@ -407,10 +414,10 @@ function ExpandedConfigPanel({
 						disabled={disabled}
 					>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="Select a model family" />
+							<SelectValue placeholder={t("Select a model family")} />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="__none__">None</SelectItem>
+							<SelectItem value="__none__">{t("None")}</SelectItem>
 							{ModelFamilyValues.map((f) => (
 								<SelectItem key={f} value={f}>
 									{f}
@@ -426,7 +433,7 @@ function ExpandedConfigPanel({
 							const v = e.target.value;
 							onChange({ description: v === "" ? undefined : v });
 						}}
-						placeholder="What is this deployment used for?"
+						placeholder={t("What is this deployment used for?")}
 						rows={2}
 						disabled={disabled}
 					/>
@@ -438,6 +445,7 @@ function ExpandedConfigPanel({
 }
 
 export function DeploymentsTable({ value, onChange, providerName, disabled = false }: Props) {
+	const { t } = useLocaleCtx();
 	const normalized = useMemo(() => normalize(value), [value]);
 	const rows: Row[] = useMemo(() => Object.entries(normalized).map(([name, config]) => ({ name, config })), [normalized]);
 
@@ -559,9 +567,9 @@ export function DeploymentsTable({ value, onChange, providerName, disabled = fal
 		<div className="overflow-hidden rounded-md border">
 			<div className="bg-muted/50 text-foreground grid h-10 grid-cols-[28px_1fr_1fr_28px] items-center gap-2 border-b px-4 text-sm font-medium">
 				<div />
-				<div>Deployment name</div>
-				<div>Model ID</div>
-				<span className="sr-only">Actions</span>
+				<div>{t("Deployment name")}</div>
+				<div>{t("Model ID")}</div>
+				<span className="sr-only">{t("Actions")}</span>
 			</div>
 			<div className="divide-y">
 				{rowsWithIds.map((row) => {
@@ -586,7 +594,7 @@ export function DeploymentsTable({ value, onChange, providerName, disabled = fal
 										<Input
 											value={pending ?? row.name}
 											onChange={(e) => renameRow(row.rowId, row.name, e.target.value)}
-											placeholder="Request model name"
+											placeholder={t("Request model name")}
 											disabled={disabled}
 											data-testid={`deployment-name-${row.name}`}
 										/>
@@ -648,7 +656,7 @@ export function DeploymentsTable({ value, onChange, providerName, disabled = fal
 										commitDraftIfReady();
 									}
 								}}
-								placeholder="Request model name"
+								placeholder={t("Request model name")}
 								disabled={disabled}
 								data-testid="draft-deployment-name"
 							/>

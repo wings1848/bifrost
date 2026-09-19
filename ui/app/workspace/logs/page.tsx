@@ -21,6 +21,7 @@ import {
 	useGetUserAgentMappingsQuery,
 } from "@/lib/store";
 import { useLazyGetLogByIdQuery, useLazyGetLogsQuery } from "@/lib/store/apis/logsApi";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import type { DisplayLogEntry, LogEntry, LogFilters, Pagination } from "@/lib/types/logs";
 import { dateUtils } from "@/lib/types/logs";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -35,6 +36,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const chainChildrenPageLimit = 1000;
 
 export default function LogsPage() {
+	const { t } = useLocaleCtx();
 	const [error, setError] = useState<string | null>(null);
 	const [showEmptyState, setShowEmptyState] = useState(false);
 	const hasCheckedEmptyState = useRef(false);
@@ -583,8 +585,8 @@ export default function LogsPage() {
 	}, [userAgentMappingsData?.mappings]);
 
 	const columns = useMemo(
-		() => createColumns(handleDelete, hasDeleteAccess, metadataKeys, customAppIcons, grouped),
-		[customAppIcons, handleDelete, hasDeleteAccess, metadataKeys, grouped],
+		() => createColumns(handleDelete, hasDeleteAccess, metadataKeys, customAppIcons, grouped, t),
+		[customAppIcons, handleDelete, hasDeleteAccess, metadataKeys, grouped, t],
 	);
 
 	const columnIds = useMemo(
@@ -594,24 +596,24 @@ export default function LogsPage() {
 
 	const COLUMN_LABELS: Record<string, string> = useMemo(
 		() => ({
-			timestamp: "Time",
-			request_type: "Type",
-			input: "Message",
-			provider: "Provider",
-			model: "Model",
-			app: "App",
-			latency: "Latency",
-			tokens: "Tokens",
-			cost: "Cost",
-			service_tier: "Service Tier",
-			virtual_key: "Virtual Key",
-			routing_rule: "Routing Rule",
-			team: "Team",
-			customer: "Customer",
-			user: "User",
-			business_unit: "Business Unit",
+			timestamp: t("Time"),
+			request_type: t("Type"),
+			input: t("Message"),
+			provider: t("Provider"),
+			model: t("Model"),
+			app: t("App"),
+			latency: t("Latency"),
+			tokens: t("Tokens"),
+			cost: t("Cost"),
+			service_tier: t("Service Tier"),
+			virtual_key: t("Virtual Key"),
+			routing_rule: t("Routing Rule"),
+			team: t("Team"),
+			customer: t("Customer"),
+			user: t("User"),
+			business_unit: t("Business Unit"),
 		}),
-		[],
+		[t],
 	);
 
 	const DEFAULT_HIDDEN_COLUMNS = useMemo(

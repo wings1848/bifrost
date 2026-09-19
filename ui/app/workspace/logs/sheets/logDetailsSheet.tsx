@@ -5,6 +5,7 @@ import { useGetLogByIdQuery } from "@/lib/store/apis/logsApi";
 import { useGetPromptQuery } from "@/lib/store/apis/promptsApi";
 import type { LogEntry } from "@/lib/types/logs";
 import { useSheetNavigation } from "@/hooks/useSheetNavigation";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LogDetailView } from "./logDetailView";
@@ -36,6 +37,7 @@ export function LogDetailSheet({
 	onFilterByParentRequestId,
 	onFilterBySessionId,
 }: LogDetailSheetProps) {
+	const { t } = useLocaleCtx();
 	const [pollingInterval, setPollingInterval] = useState(0);
 	const {
 		data: fullLog,
@@ -78,7 +80,7 @@ export function LogDetailSheet({
 			<SheetContent className="border-secondary flex w-full flex-col gap-4 overflow-x-hidden border p-4 sm:max-w-[60%] md:p-8">
 				{!isFullDataReady ? (
 					<div className="flex h-full items-center justify-center">
-						<SheetTitle className="sr-only">Loading log details</SheetTitle>
+						<SheetTitle className="sr-only">{t("Loading log details")}</SheetTitle>
 						<Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
 					</div>
 				) : (

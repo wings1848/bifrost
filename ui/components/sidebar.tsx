@@ -67,6 +67,7 @@ import {
 	SidebarMenuSubItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HIDDEN_UNTIL_NAV_COOKIE, REMIND_LATER_COOKIE, useOnboardingChecklist } from "@/hooks/useOnboardingChecklist";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -202,6 +203,7 @@ const SidebarItemView = ({
 	expandSidebar: () => void;
 	highlightedUrl?: string;
 }) => {
+	const { t } = useLocaleCtx();
 	const [flyoutOpen, setFlyoutOpen] = useState(false);
 	const flyoutCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const openFlyout = () => {
@@ -267,7 +269,7 @@ const SidebarItemView = ({
 			<div className="flex w-full min-w-0 items-center gap-2">
 				<item.icon className={`h-4 w-4 shrink-0 ${isActive || isAnySubItemActive ? "text-primary" : "text-muted-foreground"}`} />
 				<span className={`min-w-0 truncate text-sm group-data-[collapsible=icon]:hidden ${isActive || isAnySubItemActive ? "font-medium" : "font-normal"}`}>
-					{item.title}
+					{t(item.title)}
 				</span>
 				{item.tag && (
 					<Badge variant="secondary" className="text-muted-foreground ml-auto text-xs group-data-[collapsible=icon]:hidden">
@@ -296,7 +298,7 @@ const SidebarItemView = ({
 	if (hasSubItems) {
 		menuButton = (
 			<SidebarMenuButton
-				tooltip={isSidebarCollapsed ? undefined : item.title}
+				tooltip={isSidebarCollapsed ? undefined : t(item.title)}
 				className={buttonClassName}
 				onClick={handleClick}
 				data-testid={`sidebar-item-btn-${slug(item.title)}`}
@@ -306,13 +308,13 @@ const SidebarItemView = ({
 		);
 	} else if (!item.hasAccess) {
 		menuButton = (
-			<SidebarMenuButton tooltip={item.title} data-nav-url={item.url} className={buttonClassName}>
+			<SidebarMenuButton tooltip={t(item.title)} data-nav-url={item.url} className={buttonClassName}>
 				{innerContent}
 			</SidebarMenuButton>
 		);
 	} else if (isExternal) {
 		menuButton = (
-			<SidebarMenuButton asChild tooltip={item.title} className={buttonClassName}>
+			<SidebarMenuButton asChild tooltip={t(item.title)} className={buttonClassName}>
 				<a
 					href={item.url}
 					target="_blank"
@@ -326,7 +328,7 @@ const SidebarItemView = ({
 		);
 	} else {
 		menuButton = (
-			<SidebarMenuButton asChild tooltip={item.title} className={buttonClassName}>
+			<SidebarMenuButton asChild tooltip={t(item.title)} className={buttonClassName}>
 				<Link
 					to={item.url}
 					preload="intent"
@@ -355,7 +357,7 @@ const SidebarItemView = ({
 						onMouseLeave={closeFlyout}
 						data-testid={`sidebar-flyout-content-${slug(item.title)}`}
 					>
-						<div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">{item.title}</div>
+						<div className="text-muted-foreground px-2 py-1.5 text-xs font-medium">{t(item.title)}</div>
 						{item.subItems?.map((subItem) => {
 							const baseHref = getSidebarItemHref(subItem);
 							const href = preserveTimeFilters(baseHref, subItem.url, pathname, search);
@@ -368,7 +370,7 @@ const SidebarItemView = ({
 										<SubItemIcon className={`h-3.5 w-3.5 shrink-0 ${isSubItemActive ? "text-primary" : "text-muted-foreground"}`} />
 									)}
 									<span className={`min-w-0 truncate text-sm ${isSubItemActive ? "text-primary font-medium" : "text-slate-500 dark:text-zinc-400"}`}>
-										{subItem.title}
+										{t(subItem.title)}
 									</span>
 									{subItem.tag && (
 										<Badge variant="secondary" className="text-muted-foreground ml-auto text-xs">
@@ -426,7 +428,7 @@ const SidebarItemView = ({
 								{SubItemIcon && (
 									<SubItemIcon className={`h-3.5 w-3.5 shrink-0 ${isSubItemActive ? "text-primary" : "text-muted-foreground"}`} />
 								)}
-								<span className={`min-w-0 truncate text-sm ${isSubItemActive ? "font-medium" : "font-normal"}`}>{subItem.title}</span>
+								<span className={`min-w-0 truncate text-sm ${isSubItemActive ? "font-medium" : "font-normal"}`}>{t(subItem.title)}</span>
 								{subItem.tag && (
 									<Badge variant="secondary" className="text-muted-foreground ml-auto text-xs">
 										{subItem.tag}
@@ -1156,6 +1158,7 @@ export default function AppSidebar() {
 
 	const { data: version } = useGetVersionQuery();
 	const { resolvedTheme } = useTheme();
+	const { t } = useLocaleCtx();
 	const showNewReleaseBanner = useMemo(() => {
 		if (IS_ENTERPRISE) return false;
 		if (latestRelease && version) {
@@ -1498,8 +1501,8 @@ export default function AppSidebar() {
 					<input
 						ref={searchInputRef}
 						type="text"
-						aria-label="Search sidebar navigation"
-						placeholder="Search..."
+						aria-label={t("Search sidebar navigation")}
+						placeholder={t("Search...")}
 						value={searchQuery}
 						onChange={(e) => {
 							setSearchQuery(e.target.value);

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import type { ModelProvider } from "@/lib/types/config";
 import { openaiConfigFormSchema, type OpenAIConfigFormSchema } from "@/lib/types/schemas";
@@ -17,6 +18,7 @@ interface OpenAIConfigFormFragmentProps {
 }
 
 export function OpenAIConfigFormFragment({ provider }: OpenAIConfigFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -49,11 +51,11 @@ export function OpenAIConfigFormFragment({ provider }: OpenAIConfigFormFragmentP
 		)
 			.unwrap()
 			.then(() => {
-				toast.success("OpenAI configuration updated successfully");
+				toast.success(t("OpenAI configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update OpenAI configuration", {
+				toast.error(t("Failed to update OpenAI configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -70,7 +72,7 @@ export function OpenAIConfigFormFragment({ provider }: OpenAIConfigFormFragmentP
 							<FormItem>
 								<div className="flex items-center justify-between space-x-2">
 									<div className="space-y-0.5">
-										<FormLabel>Disable Store</FormLabel>
+										<FormLabel>{t("Disable Store")}</FormLabel>
 										<p className="text-muted-foreground text-xs">
 											With the Responses API, store defaults to true, and when it is on, the generated response is stored for later
 											retrieval via API. OpenAI exposes endpoints to retrieve and delete stored responses, so your response IDs become

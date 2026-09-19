@@ -55,13 +55,21 @@ function batchAccountingDisplay(log: LogEntry): { model: string; usage: LLMUsage
 	return { model, usage };
 }
 
-function LogActionsMenu({ log, onDelete }: { log: LogEntry; onDelete: (log: LogEntry) => void }) {
+function LogActionsMenu({
+	log,
+	onDelete,
+	t = (key: string) => key,
+}: {
+	log: LogEntry;
+	onDelete: (log: LogEntry) => void;
+	t?: (key: string) => string;
+}) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
 			<DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
-				<Button variant="ghost" size="icon" data-testid="log-actions-btn" aria-label="Log actions" className="h-7 w-7">
+				<Button variant="ghost" size="icon" data-testid="log-actions-btn" aria-label={t("Log actions")} className="h-7 w-7">
 					<MoreHorizontal className="h-4 w-4" />
 				</Button>
 			</DropdownMenuTrigger>
@@ -252,6 +260,7 @@ export const createColumns = (
 	metadataKeys: string[] = [],
 	customAppIcons: Record<string, string> = {},
 	groupedView = false,
+	t: (key: string) => string = (key) => key,
 ): ColumnDef<LogEntry>[] => {
 	// Chevron that expands a fallback chain in the grouped view. Child rows get a
 	// corner connector instead so the hierarchy stays readable in any column order.
@@ -313,7 +322,7 @@ export const createColumns = (
 			accessorKey: "timestamp",
 			header: ({ column }) => (
 				<Button variant="ghost" data-testid="logs-time-sort-btn" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-					Time
+					{t("Time")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			),
@@ -335,7 +344,7 @@ export const createColumns = (
 		},
 		{
 			id: "request_type",
-			header: "Type",
+			header: t("Type"),
 			size: 150,
 			cell: ({ row }) => {
 				return (
@@ -353,13 +362,13 @@ export const createColumns = (
 		},
 		{
 			accessorKey: "input",
-			header: "Message",
+			header: t("Message"),
 			size: 350,
 			cell: ({ row }) => <LogMessageCell log={row.original} />,
 		},
 		{
 			accessorKey: "model",
-			header: "Model",
+			header: t("Model"),
 			size: 280,
 			cell: ({ row }) => {
 				const provider = row.original.provider as ProviderName | undefined;
@@ -380,7 +389,7 @@ export const createColumns = (
 		{
 			id: "app",
 			accessorKey: "app",
-			header: "App",
+			header: t("App"),
 			size: 140,
 			cell: ({ row }) => {
 				const app = row.original.app ? mapAppToClientApp(row.original.app) : mapUserAgentToApp(row.original.user_agent);
@@ -398,7 +407,7 @@ export const createColumns = (
 			accessorKey: "latency",
 			header: ({ column }) => (
 				<Button variant="ghost" data-testid="logs-latency-sort-btn" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-					Latency
+					{t("Latency")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			),
@@ -424,7 +433,7 @@ export const createColumns = (
 			accessorKey: "tokens",
 			header: ({ column }) => (
 				<Button variant="ghost" data-testid="logs-tokens-sort-btn" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-					Tokens
+					{t("Tokens")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			),
@@ -466,7 +475,7 @@ export const createColumns = (
 			accessorKey: "cost",
 			header: ({ column }) => (
 				<Button variant="ghost" data-testid="logs-cost-sort-btn" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-					Cost
+					{t("Cost")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			),
@@ -480,7 +489,7 @@ export const createColumns = (
 								<TooltipTrigger asChild>
 									<div className="text-muted-foreground pl-4 font-mono text-sm tabular-nums">{formatCost(batchCost)}</div>
 								</TooltipTrigger>
-								<TooltipContent>Settled cost of this batch, billed once.</TooltipContent>
+								<TooltipContent>{t("Settled cost of this batch, billed once.")}</TooltipContent>
 							</Tooltip>
 						);
 					}
@@ -514,7 +523,7 @@ export const createColumns = (
 	const attributionColumns: ColumnDef<LogEntry>[] = [
 		{
 			id: "service_tier",
-			header: "Service Tier",
+			header: t("Service Tier"),
 			size: 130,
 			cell: ({ row }) => {
 				const tier = row.original.service_tier;
@@ -530,19 +539,19 @@ export const createColumns = (
 		},
 		{
 			id: "virtual_key",
-			header: "Virtual Key",
+			header: t("Virtual Key"),
 			size: 170,
 			cell: ({ row }) => <AttributionCell name={row.original.virtual_key_name} id={row.original.virtual_key_id} />,
 		},
 		{
 			id: "routing_rule",
-			header: "Routing Rule",
+			header: t("Routing Rule"),
 			size: 170,
 			cell: ({ row }) => <AttributionCell name={row.original.routing_rule_name} id={row.original.routing_rule_id} />,
 		},
 		{
 			id: "team",
-			header: "Team",
+			header: t("Team"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell
@@ -555,7 +564,7 @@ export const createColumns = (
 		},
 		{
 			id: "customer",
-			header: "Customer",
+			header: t("Customer"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell
@@ -568,13 +577,13 @@ export const createColumns = (
 		},
 		{
 			id: "user",
-			header: "User",
+			header: t("User"),
 			size: 150,
 			cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} />,
 		},
 		{
 			id: "business_unit",
-			header: "Business Unit",
+			header: t("Business Unit"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell
@@ -587,7 +596,7 @@ export const createColumns = (
 		},
 		{
 			id: "project",
-			header: "Project",
+			header: t("Project"),
 			size: 150,
 			cell: ({ row }) => <AttributionCell name={row.original.project_name} id={row.original.project_id} />,
 		},
@@ -613,7 +622,7 @@ export const createColumns = (
 						const log = row.original;
 						return (
 							<div className="flex justify-center">
-								<LogActionsMenu log={log} onDelete={onDelete} />
+								<LogActionsMenu log={log} onDelete={onDelete} t={t} />
 							</div>
 						);
 					},

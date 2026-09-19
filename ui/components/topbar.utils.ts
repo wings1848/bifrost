@@ -34,6 +34,8 @@ function formatTitlePart(part: string) {
  * topbar agree, with one adjustment: where a sub-item's label is only
  * meaningful under its parent ("Rules", "Approvals", "Connectors", "Settings"),
  * the parent is folded in, because the topbar shows the title alone.
+ *
+ * 注意：这里的英文 key 会被顶栏翻译函数查字典转中文，不用改。
  */
 const routeTitleOverrides: Record<string, string> = {
 	"/workspace/adaptive-routing/settings": "Adaptive Routing Settings",

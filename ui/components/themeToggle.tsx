@@ -1,12 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdownMenu";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { Check, Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
+const THEME_LABEL_KEYS = ["Light", "Dark", "System"] as const;
+
 const THEMES = [
-	{ value: "light", label: "Light", icon: Sun },
-	{ value: "dark", label: "Dark", icon: Moon },
-	{ value: "system", label: "System", icon: Laptop },
+	{ value: "light", icon: Sun },
+	{ value: "dark", icon: Moon },
+	{ value: "system", icon: Laptop },
 ] as const;
 
 /**
@@ -15,13 +18,14 @@ const THEMES = [
  */
 export function ThemeToggleItems() {
 	const { theme, setTheme } = useTheme();
+	const { t } = useLocaleCtx();
 
 	return (
 		<>
-			{THEMES.map(({ value, label, icon: Icon }) => (
+			{THEMES.map(({ value, icon: Icon }, i) => (
 				<DropdownMenuItem key={value} onClick={() => setTheme(value)} className="cursor-pointer">
 					<Icon className="size-4" strokeWidth={2} />
-					<span className="flex-1">{label}</span>
+					<span className="flex-1">{t(THEME_LABEL_KEYS[i])}</span>
 					{theme === value && <Check className="text-muted-foreground size-3.5" strokeWidth={2.5} />}
 				</DropdownMenuItem>
 			))}

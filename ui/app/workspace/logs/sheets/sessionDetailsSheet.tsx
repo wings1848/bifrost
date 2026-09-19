@@ -12,6 +12,7 @@ import { useGetLogSessionSummaryByIdQuery, useLazyGetLogSessionByIdQuery } from 
 import { LogEntry } from "@/lib/types/logs";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -62,6 +63,7 @@ export function SessionDetailsSheet({
 	onLogClick,
 	onFilterByParentRequestId,
 }: SessionDetailsSheetProps) {
+	const { t } = useLocaleCtx();
 	const [triggerGetSession] = useLazyGetLogSessionByIdQuery();
 	const [sessionLogs, setSessionLogs] = useState<LogEntry[]>([]);
 	const [loadingSession, setLoadingSession] = useState(false);
@@ -80,34 +82,34 @@ export function SessionDetailsSheet({
 	const summaryCards: SummaryCard[] = useMemo(
 		() => [
 			{
-				label: "Logs",
+				label: t("Logs"),
 				value: (sessionSummary?.count || 0).toLocaleString(),
 				helper: sessionSummary && sessionLogs.length < sessionSummary.count ? `(${sessionLogs.length.toLocaleString()} loaded)` : undefined,
 			},
 			{
-				label: "Total Cost",
+				label: t("Total Cost"),
 				value: `$${(sessionSummary?.total_cost || 0).toFixed(4)}`,
 			},
 			{
-				label: "Total Tokens",
+				label: t("Total Tokens"),
 				value: (sessionSummary?.total_tokens || 0).toLocaleString(),
 			},
 			{
-				label: "Started",
+				label: t("Started"),
 				value: sessionSummary?.started_at ? format(new Date(sessionSummary.started_at), "MMM d, yyyy hh:mm:ss aa") : "N/A",
 				size: "sm",
 			},
 			{
-				label: "Latest Update",
+				label: t("Latest Update"),
 				value: sessionSummary?.latest_at ? format(new Date(sessionSummary.latest_at), "MMM d, yyyy hh:mm:ss aa") : "N/A",
 				size: "sm",
 			},
 			{
-				label: "Duration",
+				label: t("Duration"),
 				value: formatDurationFromMs(sessionSummary?.duration_ms),
 			},
 		],
-		[sessionSummary, sessionLogs.length],
+		[sessionSummary, sessionLogs.length, t],
 	);
 
 	const sortSessionLogs = useCallback(
@@ -130,7 +132,7 @@ export function SessionDetailsSheet({
 					pagination: { limit: SESSION_LOG_PAGE_SIZE, offset, order: sortOrder },
 				});
 				if (result.error) {
-					toast.error("Failed to load session logs", {
+					toast.error(t("Failed to load session logs"), {
 						description: getErrorMessage(result.error),
 					});
 					return;
@@ -156,7 +158,7 @@ export function SessionDetailsSheet({
 				setLoadingSession(false);
 			}
 		},
-		[onOpenChange, sessionId, sortOrder, sortSessionLogs, triggerGetSession],
+		[onOpenChange, sessionId, sortOrder, sortSessionLogs, triggerGetSession, t],
 	);
 
 	useEffect(() => {
@@ -184,7 +186,7 @@ export function SessionDetailsSheet({
 			<SheetContent className="flex w-full flex-col gap-4 overflow-x-hidden p-4 sm:max-w-[60%] md:p-8">
 				<div className="flex items-center justify-between gap-4">
 					<div>
-						<div className="text-lg font-medium">Session</div>
+						<div className="text-lg font-medium">{t("Session")}</div>
 						{sessionId && onFilterByParentRequestId ? (
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -195,7 +197,7 @@ export function SessionDetailsSheet({
 										{sessionId}
 									</code>
 								</TooltipTrigger>
-								<TooltipContent sideOffset={6}>Filter this session</TooltipContent>
+								<TooltipContent sideOffset={6}>{t("Filter this session")}</TooltipContent>
 							</Tooltip>
 						) : (
 							<code className="text-sm break-all">{sessionId}</code>
@@ -245,11 +247,11 @@ export function SessionDetailsSheet({
 						<TableHeader className="sticky top-0 z-10 bg-[#f9f9f9] dark:bg-[#27272a]">
 							<TableRow>
 								<TableHead className="w-2"></TableHead>
-								<TableHead>Time</TableHead>
-								<TableHead>Type</TableHead>
-								<TableHead>Message</TableHead>
-								<TableHead>Provider</TableHead>
-								<TableHead>Model</TableHead>
+								<TableHead>{t("Time")}</TableHead>
+								<TableHead>{t("Type")}</TableHead>
+								<TableHead>{t("Message")}</TableHead>
+								<TableHead>{t("Provider")}</TableHead>
+								<TableHead>{t("Model")}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>

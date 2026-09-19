@@ -4,6 +4,7 @@ import { SecretVarInput } from "@/components/ui/secretVarInput";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider } from "@/lib/types/config";
 import { proxyOnlyFormSchema, type SecretVar, type ProxyOnlyFormSchema } from "@/lib/types/schemas";
@@ -22,6 +23,7 @@ interface ProxyFormFragmentProps {
 }
 
 export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -72,11 +74,11 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 		)
 			.unwrap()
 			.then(() => {
-				toast.success("Provider configuration updated successfully");
+				toast.success(t("Provider configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update provider configuration", {
+				toast.error(t("Failed to update provider configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -100,7 +102,7 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 							name="proxy_config.type"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Proxy Type</FormLabel>
+									<FormLabel>{t("Proxy Type")}</FormLabel>
 									<Select
 										onValueChange={field.onChange}
 										value={field.value === "none" ? "" : field.value}
@@ -108,13 +110,13 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 									>
 										<FormControl>
 											<SelectTrigger className="w-48">
-												<SelectValue placeholder="Select type" />
+												<SelectValue placeholder={t("Select type")} />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
 											<SelectItem value="http">HTTP</SelectItem>
-											<SelectItem value="socks5">SOCKS5</SelectItem>
-											<SelectItem value="environment">Environment</SelectItem>
+											<SelectItem value="socks5">{t("SOCKS5")}</SelectItem>
+											<SelectItem value="environment">{t("Environment")}</SelectItem>
 										</SelectContent>
 									</Select>
 									<FormMessage />
@@ -134,7 +136,7 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 									name="proxy_config.url"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Proxy URL</FormLabel>
+											<FormLabel>{t("Proxy URL")}</FormLabel>
 											<FormControl>
 												<SecretVarInput
 													placeholder="http://proxy.example.com or env.OPENAI_PROXY_URL"
@@ -154,7 +156,7 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 										name="proxy_config.username"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Username</FormLabel>
+												<FormLabel>{t("Username")}</FormLabel>
 												<FormControl>
 													<SecretVarInput
 														placeholder="Proxy username or env.OPENAI_PROXY_USERNAME"
@@ -173,7 +175,7 @@ export function ProxyFormFragment({ provider }: ProxyFormFragmentProps) {
 										name="proxy_config.password"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Password</FormLabel>
+												<FormLabel>{t("Password")}</FormLabel>
 												<FormControl>
 													<SecretVarInput
 														type="password"

@@ -24,6 +24,7 @@ export const createMCPColumns = (
 	handleDelete: (log: MCPToolLogEntry) => Promise<void>,
 	hasDeleteAccess: boolean,
 	customAppIcons: Record<string, string> = {},
+	t: (key: string) => string = (key) => key,
 ): ColumnDef<MCPToolLogEntry>[] => [
 	{
 		accessorKey: "status",
@@ -46,7 +47,7 @@ export const createMCPColumns = (
 		accessorKey: "timestamp",
 		header: ({ column }) => (
 			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-				Time
+				{t("Time")}
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
@@ -67,7 +68,7 @@ export const createMCPColumns = (
 	},
 	{
 		accessorKey: "tool_name",
-		header: "Tool Name",
+		header: t("Tool Name"),
 		size: 300,
 		cell: ({ row }) => {
 			const toolName = row.getValue("tool_name") as string;
@@ -93,13 +94,13 @@ export const createMCPColumns = (
 	},
 	{
 		accessorKey: "source",
-		header: "Source",
+		header: t("Source"),
 		size: 90,
 		cell: ({ row }) => <Badge variant="secondary">{row.original.source === "native" ? "Native" : "MCP"}</Badge>,
 	},
 	{
 		accessorKey: "server_label",
-		header: "Server",
+		header: t("Server"),
 		size: 150,
 		cell: ({ row }) => {
 			const serverLabel = row.original.source === "native" ? "Local" : (row.getValue("server_label") as string);
@@ -115,7 +116,7 @@ export const createMCPColumns = (
 	{
 		id: "app",
 		accessorKey: "app",
-		header: "App",
+		header: t("App"),
 		size: 140,
 		cell: ({ row }) => {
 			const appKey = row.original.app || row.original.app_key;
@@ -133,7 +134,7 @@ export const createMCPColumns = (
 		accessorKey: "latency",
 		header: ({ column }) => (
 			<Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-				Latency
+				{t("Latency")}
 				<ArrowUpDown className="ml-2 h-4 w-4" />
 			</Button>
 		),
@@ -159,7 +160,7 @@ export const createMCPColumns = (
 	},
 	{
 		accessorKey: "cost",
-		header: "Cost",
+		header: t("Cost"),
 		size: 120,
 		cell: ({ row }) => {
 			const cost = row.original.cost;
@@ -169,17 +170,17 @@ export const createMCPColumns = (
 	},
 	{
 		id: "virtual_key",
-		header: "Virtual Key",
+		header: t("Virtual Key"),
 		size: 170,
 		cell: ({ row }) => {
 			const value = row.original.virtual_key?.name ?? row.original.virtual_key_name ?? row.original.virtual_key_id;
 			return <div className="max-w-[180px] truncate font-mono text-xs">{value || "-"}</div>;
 		},
 	},
-	{ id: "user", header: "User", size: 150, cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} /> },
+	{ id: "user", header: t("User"), size: 150, cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} /> },
 	{
 		id: "team",
-		header: "Team",
+		header: t("Team"),
 		size: 150,
 		cell: ({ row }) => (
 			<AttributionCell
@@ -192,7 +193,7 @@ export const createMCPColumns = (
 	},
 	{
 		id: "customer",
-		header: "Customer",
+		header: t("Customer"),
 		size: 150,
 		cell: ({ row }) => (
 			<AttributionCell
@@ -205,7 +206,7 @@ export const createMCPColumns = (
 	},
 	{
 		id: "business_unit",
-		header: "Business Unit",
+		header: t("Business Unit"),
 		size: 150,
 		cell: ({ row }) => (
 			<AttributionCell
@@ -218,11 +219,11 @@ export const createMCPColumns = (
 	},
 	{
 		id: "project",
-		header: "Project",
+		header: t("Project"),
 		size: 150,
 		cell: ({ row }) => <AttributionCell name={row.original.project_name} id={row.original.project_id} />,
 	},
-	{ id: "device", header: "Device", size: 150, cell: ({ row }) => <AttributionCell name={undefined} id={row.original.device_id} /> },
+	{ id: "device", header: t("Device"), size: 150, cell: ({ row }) => <AttributionCell name={undefined} id={row.original.device_id} /> },
 	...(hasDeleteAccess
 		? [
 				{
@@ -235,7 +236,7 @@ export const createMCPColumns = (
 							<div className="flex justify-center">
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
-										<Button variant="ghost" size="icon" data-testid="log-actions-btn" aria-label="Log actions" className="h-7 w-7">
+										<Button variant="ghost" size="icon" data-testid="log-actions-btn" aria-label={t("Log actions")} className="h-7 w-7">
 											<MoreHorizontal className="h-4 w-4" />
 										</Button>
 									</DropdownMenuTrigger>

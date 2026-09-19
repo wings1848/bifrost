@@ -3,6 +3,7 @@ import { ExternalLink, Video } from "lucide-react";
 import { CopyableId } from "@/components/copyableId";
 import { Badge } from "@/components/ui/badge";
 import { RequestTypeLabels } from "@/lib/constants/logs";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import {
 	BifrostVideoDeleteOutput,
 	BifrostVideoDownloadOutput,
@@ -39,6 +40,7 @@ function getVideoSrc(video: VideoAsset): string | null {
 }
 
 export default function VideoView({ videoInput, videoOutput, videoListOutput, requestType }: VideoViewProps) {
+	const { t } = useLocaleCtx();
 	const methodTypeLabel = getMethodTypeLabel(requestType);
 	const normalizedType = requestType?.toLowerCase() ?? "";
 	const isDownload = normalizedType.includes("video_download");
@@ -57,7 +59,7 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 						{methodTypeLabel} Input
 					</div>
 					<div className="space-y-2 p-6">
-						<div className="text-muted-foreground text-xs font-medium">PROMPT</div>
+						<div className="text-muted-foreground text-xs font-medium">{t("PROMPT")}</div>
 						<div className="font-mono text-xs">{videoInput.prompt}</div>
 					</div>
 				</div>
@@ -84,12 +86,12 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 									)}
 									{downloadOutput.content_type && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">CONTENT TYPE</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("CONTENT TYPE")}</div>
 											<div className="font-mono text-xs">{downloadOutput.content_type}</div>
 										</div>
 									)}
 								</div>
-								<p className="text-muted-foreground text-xs">Video content was successfully downloaded (content is not stored in logs)</p>
+								<p className="text-muted-foreground text-xs">{t("Video content was successfully downloaded (content is not stored in logs)")}</p>
 							</>
 						) : deleteOutput ? (
 							<div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -103,7 +105,7 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 									</div>
 								)}
 								<div className="space-y-1">
-									<div className="text-muted-foreground text-xs font-medium">DELETED</div>
+									<div className="text-muted-foreground text-xs font-medium">{t("DELETED")}</div>
 									<Badge variant="secondary" className="uppercase">
 										{deleteOutput.deleted ? "true" : "false"}
 									</Badge>
@@ -114,7 +116,7 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 								<div className="grid grid-cols-1 gap-3 md:grid-cols-3">
 									{generationOutput.id && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">VIDEO ID</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("VIDEO ID")}</div>
 											<div className="flex items-center gap-1">
 												<div className="font-mono text-xs break-all">{generationOutput.id}</div>
 												<CopyableId id={generationOutput.id} entityLabel="Video" testId="video-view-copy-generation-video-id-button" />
@@ -123,7 +125,7 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 									)}
 									{generationOutput.status && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">STATUS</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("STATUS")}</div>
 											<Badge variant="secondary" className="uppercase">
 												{generationOutput.status}
 											</Badge>
@@ -131,25 +133,25 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 									)}
 									{generationOutput.progress !== undefined && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">PROGRESS</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("PROGRESS")}</div>
 											<div className="font-mono text-xs">{generationOutput.progress}%</div>
 										</div>
 									)}
 									{generationOutput.seconds && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">DURATION</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("DURATION")}</div>
 											<div className="font-mono text-xs">{generationOutput.seconds}s</div>
 										</div>
 									)}
 									{generationOutput.size && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">SIZE</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("SIZE")}</div>
 											<div className="font-mono text-xs">{generationOutput.size}</div>
 										</div>
 									)}
 									{generationOutput.remixed_from_video_id && (
 										<div className="space-y-1">
-											<div className="text-muted-foreground text-xs font-medium">REMIXED FROM</div>
+											<div className="text-muted-foreground text-xs font-medium">{t("REMIXED FROM")}</div>
 											<div className="font-mono text-xs break-all">{generationOutput.remixed_from_video_id}</div>
 										</div>
 									)}
@@ -158,7 +160,7 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 								{generationOutput.error && (generationOutput.error.message || generationOutput.error.code) && (
 									<div className="flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
 										<div className="space-y-1">
-											<div className="text-muted-foreground font-medium">Error from provider</div>
+											<div className="text-muted-foreground font-medium">{t("Error from provider")}</div>
 											{generationOutput.error.code && <div className="font-medium">{generationOutput.error.code}</div>}
 											{generationOutput.error.message && <div className="text-muted-foreground">{generationOutput.error.message}</div>}
 										</div>

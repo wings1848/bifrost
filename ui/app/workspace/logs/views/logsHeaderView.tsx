@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTimezonePreference } from "@/lib/hooks/useTimezonePreference";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { getErrorMessage } from "@/lib/store";
 import { useCancelRecalculateCostJobMutation, useGetRecalculateCostStatusQuery } from "@/lib/store/apis/logsApi";
 import { getActiveTempToken } from "@/lib/store/apis/tempToken";
@@ -89,6 +90,7 @@ export function LogsHeaderView({
 	onToggleColumnVisibility,
 	onResetColumns,
 }: LogsHeaderViewProps) {
+	const { t } = useLocaleCtx();
 	const [openMoreActionsPopover, setOpenMoreActionsPopover] = useState(false);
 	const [recalcDialogOpen, setRecalcDialogOpen] = useState(false);
 	// Id of the recalculation job to track. Setting it starts polling via the query
@@ -155,7 +157,7 @@ export function LogsHeaderView({
 		async (mode: RecalculateCostMode) => {
 			setRecalcDialogOpen(false);
 			const missingCostOnly = mode === "missing";
-			toast.loading("Starting cost recalculation...", { id: RECALC_TOAST_ID });
+			toast.loading(t("Starting cost recalculation..."), { id: RECALC_TOAST_ID });
 
 			try {
 				// Recalculation runs as a background job. Enqueue it (or attach to the one
@@ -165,15 +167,15 @@ export function LogsHeaderView({
 					throw new Error("Recalculation job did not start");
 				}
 				if (alreadyRunning) {
-					toast.loading("A cost recalculation is already running...", { id: RECALC_TOAST_ID });
+					toast.loading(t("A cost recalculation is already running..."), { id: RECALC_TOAST_ID });
 				}
 				setRecalcCancelRequested(false);
 				setActiveRecalcJobId(status.id);
 			} catch (err) {
-				toast.error("Cost recalculation failed", { id: RECALC_TOAST_ID, description: getErrorMessage(err) });
+				toast.error(t("Cost recalculation failed"), { id: RECALC_TOAST_ID, description: getErrorMessage(err) });
 			}
 		},
-		[filters],
+		[filters, t],
 	);
 
 	// Stop the tracked job. The worker finishes the batch it is in the middle of and
@@ -185,9 +187,9 @@ export function LogsHeaderView({
 		const jobId = activeRecalcJobIdRef.current;
 		if (!jobId) return;
 		setRecalcCancelRequested(true);
-		toast.loading("Cancelling cost recalculation…", {
+		toast.loading(t("Cancelling cost recalculation…"), {
 			id: RECALC_TOAST_ID,
-			description: "Finishing the current batch. Costs already recalculated are kept.",
+			description: t("Finishing the current batch. Costs already recalculated are kept."),
 		});
 		try {
 			await cancelRecalcJob({ id: jobId }).unwrap();
@@ -197,24 +199,24 @@ export function LogsHeaderView({
 			// toast rather than stacking a second one on top of it. The next poll
 			// (2s) then restores the progress toast with its Cancel action, which
 			// is the truthful end state — the job is still running.
-			toast.error("Couldn't cancel the recalculation", {
+			toast.error(t("Couldn't cancel the recalculation"), {
 				id: RECALC_TOAST_ID,
 				description: getErrorMessage(err),
 			});
 		}
-	}, [cancelRecalcJob]);
+	}, [cancelRecalcJob, t]);
 
 	// If the status endpoint keeps failing, stop polling and surface the error so the
 	// user isn't left with a loading toast that never resolves.
 	useEffect(() => {
 		if (!activeRecalcJobId || !recalcJobStatusError) return;
-		toast.error("Cost recalculation failed", {
+		toast.error(t("Cost recalculation failed"), {
 			id: RECALC_TOAST_ID,
-			description: "Lost track of the recalculation job status. Please refresh and try again.",
+			description: t("Lost track of the recalculation job status. Please refresh and try again."),
 		});
 		setActiveRecalcJobId(null);
 		setRecalcCancelRequested(false);
-	}, [activeRecalcJobId, recalcJobStatusError]);
+	}, [activeRecalcJobId, recalcJobStatusError, t]);
 
 	// If we unmount while a job is still being tracked, polling stops but the global
 	// loading toast would otherwise linger — dismiss it on the way out.
@@ -231,20 +233,20 @@ export function LogsHeaderView({
 
 		if (isTerminalRecalcStatus(recalcJobStatus.status)) {
 			if (recalcJobStatus.status === "failed") {
-				toast.error("Cost recalculation failed", {
+				toast.error(t("Cost recalculation failed"), {
 					id: RECALC_TOAST_ID,
 					description: recalcJobStatus.last_error || recalcJobStatus.message || "The job did not complete",
 				});
 			} else if (recalcJobStatus.status === "cancelled") {
 				// Not an error: whatever the job committed before stopping is valid, so
 				// report the partial result rather than framing it as a failure.
-				toast.info("Cost recalculation cancelled", {
+				toast.info(t("Cost recalculation cancelled"), {
 					id: RECALC_TOAST_ID,
 					description: recalcJobStatus.message || `Stopped after ${recalcJobStatus.updated} updated, ${recalcJobStatus.skipped} skipped`,
 					duration: 5000,
 				});
 			} else {
-				toast.success("Cost recalculation complete", {
+				toast.success(t("Cost recalculation complete"), {
 					id: RECALC_TOAST_ID,
 					description: recalcJobStatus.message || `${recalcJobStatus.updated} updated, ${recalcJobStatus.skipped} skipped`,
 					duration: 5000,
@@ -265,14 +267,14 @@ export function LogsHeaderView({
 
 		const total = recalcJobStatus.total || 0;
 		const processed = total > 0 ? Math.min(recalcJobStatus.processed, total) : recalcJobStatus.processed;
-		toast.loading("Recalculating log costs...", {
+		toast.loading(t("Recalculating log costs..."), {
 			id: RECALC_TOAST_ID,
 			description:
 				total > 0
 					? `${processed}/${total} checked, ${recalcJobStatus.updated} updated, ${recalcJobStatus.skipped} skipped`
 					: `${recalcJobStatus.processed} checked, ${recalcJobStatus.updated} updated, ${recalcJobStatus.skipped} skipped`,
 			action: {
-				label: "Cancel",
+				label: t("Cancel"),
 				// preventDefault keeps the toast mounted so it can report the cancellation;
 				// sonner otherwise dismisses a toast as soon as its action fires.
 				onClick: (event) => {
@@ -281,7 +283,7 @@ export function LogsHeaderView({
 				},
 			},
 		});
-	}, [activeRecalcJobId, recalcJobStatus, recalcCancelRequested, handleCancelRecalculate, fetchLogs, fetchStats]);
+	}, [activeRecalcJobId, recalcJobStatus, recalcCancelRequested, handleCancelRecalculate, fetchLogs, fetchStats, t]);
 
 	const handleSearchChange = useCallback(
 		(value: string, mode: LogSearchMode) => {
@@ -395,7 +397,7 @@ export function LogsHeaderView({
 							variant="ghost"
 							size="sm"
 							className="text-muted-foreground h-7 shrink-0 rounded-none text-xs"
-							title="Choose whether the box searches log content or looks up a request ID"
+							title={t("Choose whether the box searches log content or looks up a request ID")}
 							data-testid="logs-search-mode-trigger"
 						>
 							{LOG_SEARCH_MODE_LABELS[searchMode]}
@@ -472,7 +474,7 @@ export function LogsHeaderView({
 								)}
 								<div className="flex flex-col">
 									<span className="text-sm">
-										{recalcCancelRequested ? "Cancelling…" : isRecalcRunning ? "Cancel recalculation" : "Recalculate costs"}
+										{recalcCancelRequested ? "Cancelling…" : isRecalcRunning ? "Cancel recalculation" : t("Recalculate costs")}
 									</span>
 									<span className="text-muted-foreground text-xs">
 										{recalcCancelRequested

@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TagInput } from "@/components/ui/tagInput";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { hasCopilotApiToken, isRedacted } from "@/lib/utils/validation";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Control, UseFormReturn } from "react-hook-form";
@@ -30,6 +31,7 @@ interface Props {
 
 // Batch API form field for all providers
 function BatchAPIFormField({ control }: { control: Control<any>; form: UseFormReturn<any> }) {
+	const { t } = useLocaleCtx();
 	return (
 		<FormField
 			control={control}
@@ -37,7 +39,7 @@ function BatchAPIFormField({ control }: { control: Control<any>; form: UseFormRe
 			render={({ field }) => (
 				<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 					<div className="space-y-1.5">
-						<FormLabel>Use for Batch APIs</FormLabel>
+						<FormLabel>{t("Use for Batch APIs")}</FormLabel>
 						<FormDescription>
 							Enable this key for batch API operations. Only keys with this enabled will be used for batch requests.
 						</FormDescription>
@@ -97,6 +99,7 @@ function VPCEndpointsFormField({
 	configKey: string;
 	services: typeof BEDROCK_VPC_ENDPOINT_SERVICES;
 }) {
+	const { t } = useLocaleCtx();
 	return (
 		<Accordion type="single" collapsible className="w-full">
 			<AccordionItem value="vpc-endpoints" className="rounded-sm border px-2 last:border-b">
@@ -117,8 +120,8 @@ function VPCEndpointsFormField({
 							name={`${configKey}.endpoints.${service.name}`}
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>{service.label}</FormLabel>
-									<FormDescription>{service.description}</FormDescription>
+									<FormLabel>{t(service.label)}</FormLabel>
+									<FormDescription>{t(service.description)}</FormDescription>
 									<FormControl>
 										<SecretVarInput
 											data-testid={`apikey-bedrock-endpoint-${service.name}-input`}
@@ -138,6 +141,7 @@ function VPCEndpointsFormField({
 }
 
 export function ApiKeyFormFragment({ control, providerName, baseProviderType, form }: Props) {
+	const { t } = useLocaleCtx();
 	// Credential UI keys off the base provider type for custom providers; the
 	// model list, deployments table, and API calls still use the real providerName.
 	const effectiveProvider = baseProviderType ?? providerName;
@@ -280,9 +284,9 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						name={`key.name`}
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Name</FormLabel>
+								<FormLabel>{t("Name")}</FormLabel>
 								<FormControl>
-									<Input placeholder="Production Key" type="text" {...field} />
+									<Input placeholder={t("Production Key")} type="text" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -295,7 +299,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 					render={({ field }) => (
 						<FormItem>
 							<div className="flex items-center gap-2">
-								<FormLabel>Weight</FormLabel>
+								<FormLabel>{t("Weight")}</FormLabel>
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
@@ -386,7 +390,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 										onChange={field.onChange}
 										label={
 											<>
-												<FormLabel>Allowed Models</FormLabel>
+												<FormLabel>{t("Allowed Models")}</FormLabel>
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -426,7 +430,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 										onChange={field.onChange}
 										label={
 											<>
-												<FormLabel>Blocked Models</FormLabel>
+												<FormLabel>{t("Blocked Models")}</FormLabel>
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -490,7 +494,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 				<div className="space-y-4">
 					<Separator className="my-6" />
 					<div className="space-y-2">
-						<FormLabel>Authentication Method</FormLabel>
+						<FormLabel>{t("Authentication Method")}</FormLabel>
 						<Tabs
 							value={azureAuthType}
 							onValueChange={(v) => {
@@ -626,7 +630,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 										<FormControl>
 											<TagInput
 												data-testid="apikey-azure-scopes-input"
-												placeholder="Add scope (Enter or comma)"
+												placeholder={t("Add scope (Enter or comma)")}
 												value={field.value ?? []}
 												onValueChange={field.onChange}
 											/>
@@ -644,7 +648,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 				<div className="space-y-4">
 					<Separator className="my-6" />
 					<div className="space-y-2">
-						<FormLabel>Authentication Method</FormLabel>
+						<FormLabel>{t("Authentication Method")}</FormLabel>
 						<Tabs
 							value={vertexAuthType}
 							onValueChange={(v) => {
@@ -697,7 +701,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						name={`key.vertex_key_config.project_number`}
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Project Number (Required only for fine-tuned models)</FormLabel>
+								<FormLabel>{t("Project Number (Required only for fine-tuned models)")}</FormLabel>
 								<FormControl>
 									<SecretVarInput placeholder="your-gcp-project-number or env.VERTEX_PROJECT_NUMBER" {...field} />
 								</FormControl>
@@ -744,7 +748,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 									{isRedacted(field.value?.value ?? "") && (
 										<div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
 											<Info className="h-3 w-3" />
-											<span>Credentials are stored securely. Edit to update.</span>
+											<span>{t("Credentials are stored securely. Edit to update.")}</span>
 										</div>
 									)}
 									<FormMessage />
@@ -759,7 +763,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 							name={`key.value`}
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>API Key (Supported only for gemini and fine-tuned models)</FormLabel>
+									<FormLabel>{t("API Key (Supported only for gemini and fine-tuned models)")}</FormLabel>
 									<FormControl>
 										<SecretVarInput data-testid="apikey-vertex-api-key-input" placeholder="API Key or env.MY_KEY" type="text" {...field} />
 									</FormControl>
@@ -774,7 +778,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel>Force single region</FormLabel>
+									<FormLabel>{t("Force single region")}</FormLabel>
 									<FormDescription>
 										Always call the region set above and skip automatic promotion of multi-region-only models to a multi-region endpoint.
 										Enable when serving these models from a single region via provisioned throughput.
@@ -798,7 +802,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel>Use Deployments Endpoint</FormLabel>
+									<FormLabel>{t("Use Deployments Endpoint")}</FormLabel>
 									<FormDescription>
 										Sends <strong>every</strong> model on this key to /v1/deployments/&#123;owner&#125;/&#123;name&#125;/predictions, so
 										plain model names stop working. To switch just one model, leave this off and set &quot;Use deployments endpoint&quot; on
@@ -837,7 +841,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Model Name (Required)</FormLabel>
-								<FormDescription>Exact model name served on this vLLM instance</FormDescription>
+								<FormDescription>{t("Exact model name served on this vLLM instance")}</FormDescription>
 								<FormControl>
 									<Input data-testid="key-input-vllm-model-name" placeholder="meta-llama/Llama-3-70b-hf" {...field} />
 								</FormControl>
@@ -874,7 +878,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						name="key.databricks_key_config.api_format"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Inference Surface</FormLabel>
+								<FormLabel>{t("Inference Surface")}</FormLabel>
 								<FormDescription>
 									Auto picks by model name: a dotted name such as system.ai.claude-sonnet-4-5 goes to the Unity AI Gateway, anything else to
 									Model Serving. Choose explicitly to pin one surface.
@@ -886,7 +890,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										<SelectItem value="auto">Auto (by model name)</SelectItem>
+										<SelectItem value="auto">{t("Auto (by model name)")}</SelectItem>
 										<SelectItem value="model_serving">Model Serving (/serving-endpoints)</SelectItem>
 										<SelectItem value="ai_gateway">Unity AI Gateway (/ai-gateway/mlflow/v1)</SelectItem>
 									</SelectContent>
@@ -897,7 +901,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 					/>
 					<Separator className="my-6" />
 					<div className="space-y-2">
-						<FormLabel>Authentication Method</FormLabel>
+						<FormLabel>{t("Authentication Method")}</FormLabel>
 						<Tabs
 							value={databricksAuthType}
 							onValueChange={(v) => {
@@ -914,7 +918,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						>
 							<TabsList className="grid w-full grid-cols-2">
 								<TabsTrigger data-testid="apikey-databricks-pat-tab" value="pat">
-									Personal Access Token
+									{t("Personal Access Token")}
 								</TabsTrigger>
 								<TabsTrigger data-testid="apikey-databricks-oauth-tab" value="oauth_m2m">
 									OAuth M2M (Service Principal)
@@ -928,7 +932,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 							name="key.value"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Personal Access Token</FormLabel>
+									<FormLabel>{t("Personal Access Token")}</FormLabel>
 									<FormDescription>Generate one from Settings &gt; Developer &gt; Access tokens in your workspace.</FormDescription>
 									<FormControl>
 										<SecretVarInput
@@ -954,7 +958,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								name="key.databricks_key_config.client_id"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Client ID</FormLabel>
+										<FormLabel>{t("Client ID")}</FormLabel>
 										<FormControl>
 											<SecretVarInput
 												data-testid="key-input-databricks-client-id"
@@ -972,7 +976,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								name="key.databricks_key_config.client_secret"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Client Secret</FormLabel>
+										<FormLabel>{t("Client Secret")}</FormLabel>
 										<FormControl>
 											<SecretVarInput
 												data-testid="key-input-databricks-client-secret"
@@ -993,7 +997,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel htmlFor="databricks-forward-gateway-tags-switch">Forward Governance Tags</FormLabel>
+									<FormLabel htmlFor="databricks-forward-gateway-tags-switch">{t("Forward Governance Tags")}</FormLabel>
 									<FormDescription>
 										Sends the virtual key, team and customer names as Databricks-Ai-Gateway-Request-Tags, so Databricks usage tracking
 										attributes spend the same way Bifrost does. Names only, never user identifiers.
@@ -1067,7 +1071,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 					<div className="space-y-1.5">
 						{/* Label, not FormLabel: this heads a section rather than labelling one
 						    control, so there is no FormItem id for htmlFor to point at. */}
-						<Label>GitHub App Credentials</Label>
+						<Label>{t("GitHub App Credentials")}</Label>
 						<p className="text-muted-foreground text-sm">
 							Leave these blank if you supplied a Copilot API token above. Otherwise all four are needed together. The App needs the Copilot
 							Requests permission at Read &amp; write, installed on the organization that should be billed with All repositories access, and
@@ -1195,8 +1199,8 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel htmlFor="use-anthropic-endpoints-alias-override-switch">Use Anthropic Endpoints</FormLabel>
-									<FormDescription>Routes chat completions and responses requests through Anthropic-compatible endpoints.</FormDescription>
+									<FormLabel htmlFor="use-anthropic-endpoints-alias-override-switch">{t("Use Anthropic Endpoints")}</FormLabel>
+									<FormDescription>{t("Routes chat completions and responses requests through Anthropic-compatible endpoints.")}</FormDescription>
 								</div>
 								<FormControl>
 									<Switch
@@ -1218,7 +1222,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel htmlFor="use-openai-endpoints-switch">Use OpenAI Endpoints</FormLabel>
+									<FormLabel htmlFor="use-openai-endpoints-switch">{t("Use OpenAI Endpoints")}</FormLabel>
 									<FormDescription>Routes requests through Bedrock&apos;s OpenAI-compatible endpoints instead of Converse.</FormDescription>
 								</div>
 								<FormControl>
@@ -1234,7 +1238,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 					/>
 					<Separator className="my-6" />
 					<div className="space-y-2">
-						<FormLabel>Authentication Method</FormLabel>
+						<FormLabel>{t("Authentication Method")}</FormLabel>
 						<Tabs
 							value={bedrockAuthType}
 							onValueChange={(v) => {
@@ -1273,10 +1277,10 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 							</TabsList>
 						</Tabs>
 						{bedrockAuthType === "iam_role" && (
-							<p className="text-muted-foreground text-sm">Uses IAM roles attached to your environment (EC2, Lambda, ECS, EKS).</p>
+							<p className="text-muted-foreground text-sm">{t("Uses IAM roles attached to your environment (EC2, Lambda, ECS, EKS).")}</p>
 						)}
 						{bedrockAuthType === "api_key" && (
-							<p className="text-muted-foreground text-sm">Uses a Bearer token for API key authentication.</p>
+							<p className="text-muted-foreground text-sm">{t("Uses a Bearer token for API key authentication.")}</p>
 						)}
 					</div>
 
@@ -1425,7 +1429,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Session Name (Optional)</FormLabel>
-										<FormDescription>AssumeRole session name (defaults to bifrost-session)</FormDescription>
+										<FormDescription>{t("AssumeRole session name (defaults to bifrost-session)")}</FormDescription>
 										<FormControl>
 											<SecretVarInput
 												data-testid="apikey-bedrock-session-name-input"
@@ -1483,7 +1487,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 				<div className="space-y-4">
 					<Separator className="my-6" />
 					<div className="space-y-2">
-						<FormLabel>Authentication Method</FormLabel>
+						<FormLabel>{t("Authentication Method")}</FormLabel>
 						<Tabs
 							value={bedrockMantleAuthType}
 							onValueChange={(v) => {
@@ -1522,10 +1526,10 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 							</TabsList>
 						</Tabs>
 						{bedrockMantleAuthType === "iam_role" && (
-							<p className="text-muted-foreground text-sm">Uses IAM roles attached to your environment (EC2, Lambda, ECS, EKS).</p>
+							<p className="text-muted-foreground text-sm">{t("Uses IAM roles attached to your environment (EC2, Lambda, ECS, EKS).")}</p>
 						)}
 						{bedrockMantleAuthType === "api_key" && (
-							<p className="text-muted-foreground text-sm">Uses a Bedrock Mantle API key sent as a Bearer token.</p>
+							<p className="text-muted-foreground text-sm">{t("Uses a Bedrock Mantle API key sent as a Bearer token.")}</p>
 						)}
 					</div>
 
@@ -1668,7 +1672,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Session Name (Optional)</FormLabel>
-										<FormDescription>AssumeRole session name (defaults to bifrost-session).</FormDescription>
+										<FormDescription>{t("AssumeRole session name (defaults to bifrost-session).")}</FormDescription>
 										<FormControl>
 											<SecretVarInput placeholder="bifrost-session or env.AWS_SESSION_NAME" {...field} />
 										</FormControl>

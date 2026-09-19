@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { HistogramBucket, LogsHistogramResponse, MCPHistogramResponse } from "@/lib/types/logs";
 import { getUnixRangeForPeriod } from "@/lib/utils/timeRange";
 import { ChevronDown, RotateCcw } from "lucide-react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { Component, type ErrorInfo, type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -129,7 +130,7 @@ interface CustomTooltipProps {
 type ChartMouseEvent = { activeTooltipIndex?: number | string | null };
 
 // Custom tooltip component
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, t = (key: string) => key }: CustomTooltipProps & { t?: (key: string) => string }) {
 	if (!active || !payload || !payload.length) return null;
 
 	const data = payload[0]?.payload;
@@ -142,28 +143,28 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 				<div className="mt-2 flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="bg-chart-seq-1 h-2 w-2 rounded-full" />
-						<span className="text-zinc-600 dark:text-zinc-400">Total</span>
+						<span className="text-zinc-600 dark:text-zinc-400">{t("Total")}</span>
 					</span>
 					<span className="font-medium">{data.count.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="bg-chart-success h-2 w-2 rounded-full" />
-						<span className="text-zinc-600 dark:text-zinc-400">Success</span>
+						<span className="text-zinc-600 dark:text-zinc-400">{t("Success")}</span>
 					</span>
 					<span className="text-chart-success-ink font-medium">{data.success.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="bg-chart-error h-2 w-2 rounded-full" />
-						<span className="text-zinc-600 dark:text-zinc-400">Error</span>
+						<span className="text-zinc-600 dark:text-zinc-400">{t("Error")}</span>
 					</span>
 					<span className="text-chart-error-ink font-medium">{data.error.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="bg-chart-neutral h-2 w-2 rounded-full" />
-						<span className="text-zinc-600 dark:text-zinc-400">Cancelled</span>
+						<span className="text-zinc-600 dark:text-zinc-400">{t("Cancelled")}</span>
 					</span>
 					<span className="font-medium text-zinc-600 dark:text-zinc-400">{(data.cancelled ?? 0).toLocaleString()}</span>
 				</div>
@@ -184,6 +185,7 @@ export function LogsVolumeChart({
 	period,
 	onOpenChange,
 }: LogsVolumeChartProps) {
+	const { t } = useLocaleCtx();
 	// State for drag selection
 	const [refAreaLeft, setRefAreaLeft] = useState<number | null>(null);
 	const [refAreaRight, setRefAreaRight] = useState<number | null>(null);
@@ -375,22 +377,22 @@ export function LogsVolumeChart({
 				<div className="flex items-center justify-between">
 					<CollapsibleTrigger data-testid="logs-volume-chart-trigger" className="flex items-center gap-2 hover:opacity-80">
 						<ChevronDown className={`text-muted-foreground h-4 w-4 transition-transform duration-200 ${isOpen ? "" : "-rotate-90"}`} />
-						<span className="text-muted-foreground text-sm font-medium">Request Volume</span>
+						<span className="text-muted-foreground text-sm font-medium">{t("Request Volume")}</span>
 					</CollapsibleTrigger>
 					<div className="mr-2 flex items-center gap-4">
 						{isOpen && (
 							<div className="flex items-center gap-3 text-xs">
 								<span className="flex items-center gap-1.5">
 									<span className="bg-chart-success h-2 w-2 rounded-full" />
-									<span className="text-muted-foreground">Success</span>
+									<span className="text-muted-foreground">{t("Success")}</span>
 								</span>
 								<span className="flex items-center gap-1.5">
 									<span className="bg-chart-error h-2 w-2 rounded-full" />
-									<span className="text-muted-foreground">Error</span>
+									<span className="text-muted-foreground">{t("Error")}</span>
 								</span>
 								<span className="flex items-center gap-1.5">
 									<span className="bg-chart-neutral h-2 w-2 rounded-full" />
-									<span className="text-muted-foreground">Cancelled</span>
+									<span className="text-muted-foreground">{t("Cancelled")}</span>
 								</span>
 							</div>
 						)}
@@ -442,7 +444,7 @@ export function LogsVolumeChart({
 											domain={[0, (dataMax: number) => Math.max(dataMax, 5)]}
 											allowDataOverflow={false}
 										/>
-										<Tooltip content={<CustomTooltip />} cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }} />
+										<Tooltip content={<CustomTooltip t={t} />} cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }} />
 										<CappedBarStack buckets={chartData.length}>
 											<Bar
 												dataKey="success"

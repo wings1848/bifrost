@@ -12,6 +12,8 @@ import { useNotificationSync } from "@/hooks/useNotificationSync";
 import { useStoreSync } from "@/hooks/useStoreSync";
 import { WebSocketProvider } from "@/hooks/useWebSocket";
 import { TopbarProvider } from "@/lib/contexts/topbarContext";
+import { LocaleContext } from "@/lib/i18n/context";
+import { useLocale } from "@/lib/i18n/index";
 import { getErrorMessage, ReduxProvider, useGetCoreConfigQuery, useIsAuthEnabledQuery } from "@/lib/store";
 import { BifrostConfig } from "@/lib/types/config";
 import { RbacProvider, useRbacContext } from "@enterprise/lib/contexts/rbacContext";
@@ -91,6 +93,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
 	// a single frame so this is imperceptible. Minimal/public shells don't use RBAC
 	// and are handled by the early returns below.
 	const { isLoading: rbacLoading } = useRbacContext();
+	const { locale, switchLocale, t } = useLocale();
 
 	useEffect(() => {
 		if (error) {
@@ -116,6 +119,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
 		<WebSocketProvider>
 			<CookiesProvider>
 				<StoreSyncInitializer />
+				<LocaleContext.Provider value={{ locale, switchLocale, t }}>
 				<TopbarProvider>
 					<SidebarProvider>
 						<Sidebar />
@@ -148,6 +152,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
 						</div>
 					</SidebarProvider>
 				</TopbarProvider>
+				</LocaleContext.Provider>
 			</CookiesProvider>
 		</WebSocketProvider>
 	);

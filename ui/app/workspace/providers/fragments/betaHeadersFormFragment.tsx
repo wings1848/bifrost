@@ -5,6 +5,7 @@ import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider, NetworkConfig } from "@/lib/types/config";
 import { betaHeadersFormSchema, type BetaHeadersFormSchema } from "@/lib/types/schemas";
@@ -117,6 +118,7 @@ interface BetaHeadersFormFragmentProps {
 }
 
 export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -186,11 +188,11 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 		)
 			.unwrap()
 			.then(() => {
-				toast.success("Beta header configuration updated successfully");
+				toast.success(t("Beta header configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update beta header configuration", {
+				toast.error(t("Failed to update beta header configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -269,9 +271,9 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 						<table className="w-full text-sm">
 							<thead>
 								<tr className="border-b">
-									<th className="px-3 py-2 text-left font-medium">Beta Header</th>
-									<th className="px-3 py-2 text-left font-medium">Default</th>
-									<th className="w-[180px] px-3 py-2 text-left font-medium">Override</th>
+									<th className="px-3 py-2 text-left font-medium">{t("Beta Header")}</th>
+									<th className="px-3 py-2 text-left font-medium">{t("Default")}</th>
+									<th className="w-[180px] px-3 py-2 text-left font-medium">{t("Override")}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -285,7 +287,7 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 										</td>
 										<td className="px-3 py-2">
 											<Badge variant={row.defaultSupported ? "default" : "secondary"} className="text-xs">
-												{row.defaultSupported ? "Supported" : "Unsupported"}
+												{row.defaultSupported ? t("Supported") : t("Unsupported")}
 											</Badge>
 										</td>
 										<td className="w-[180px] px-3 py-2">
@@ -301,9 +303,9 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="default">Default</SelectItem>
-													<SelectItem value="enabled">Supported</SelectItem>
-													<SelectItem value="disabled">Unsupported</SelectItem>
+													<SelectItem value="default">{t("Default")}</SelectItem>
+													<SelectItem value="enabled">{t("Supported")}</SelectItem>
+													<SelectItem value="disabled">{t("Unsupported")}</SelectItem>
 												</SelectContent>
 											</Select>
 										</td>
@@ -314,7 +316,7 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 										<td className="px-3 py-2">
 											<div className="flex flex-col gap-0.5">
 												<span className="font-mono text-xs">{prefix}*</span>
-												<span className="text-muted-foreground text-xs">Custom header</span>
+												<span className="text-muted-foreground text-xs">{t("Custom header")}</span>
 											</div>
 										</td>
 										<td className="px-3 py-2">
@@ -378,7 +380,7 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 								disabled={!hasUpdateProviderAccess}
 								className="h-8 text-xs"
 								data-testid="provider-beta-custom-prefix-input"
-								aria-label="Custom beta header prefix"
+								aria-label={t("Custom beta header prefix")}
 								aria-describedby={newPrefixError ? "custom-prefix-error" : undefined}
 							/>
 							{newPrefixError && (

@@ -3,6 +3,7 @@ import { ConfigSyncAlert } from "@/components/ui/configSyncAlert";
 import { Form } from "@/components/ui/form";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getErrorMessage } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useCreateProviderKeyMutation, useGetProviderKeysQuery, useUpdateProviderKeyMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider } from "@/lib/types/config";
 import { modelProviderKeySchema } from "@/lib/types/schemas";
@@ -31,6 +32,7 @@ const providerKeyFormSchema = z.object({
 type ProviderKeyFormValues = z.infer<typeof modelProviderKeySchema>;
 
 export default function ProviderKeyForm({ provider, keyId, onCancel, onSave }: Props) {
+	const { t } = useLocaleCtx();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [createProviderKey, { isLoading: isCreatingProviderKey }] = useCreateProviderKeyMutation();
 	const [updateProviderKey, { isLoading: isUpdatingProviderKey }] = useUpdateProviderKeyMutation();
@@ -146,7 +148,7 @@ export default function ProviderKeyForm({ provider, keyId, onCancel, onSave }: P
 				<div className="bg-card sticky bottom-0 border-t px-4 py-4 md:px-8">
 					<div className="flex justify-end space-x-3">
 						<Button type="button" variant="outline" onClick={onCancel} data-testid="key-cancel-btn">
-							Cancel
+							{t("Cancel")}
 						</Button>
 						<TooltipProvider>
 							<Tooltip>

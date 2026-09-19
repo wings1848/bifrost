@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import type { ColumnOrderState, ColumnPinningState, VisibilityState } from "@tanstack/react-table";
 import { ColumnDef, flexRender, getCoreRowModel, SortingState, useReactTable } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useCallback, useMemo, useState } from "react";
 
 interface DataTableProps {
@@ -54,6 +55,7 @@ export function MCPLogsDataTable({
 	onTogglePin,
 	onReorderColumns,
 }: DataTableProps) {
+	const { t } = useLocaleCtx();
 	const [sorting, setSorting] = useState<SortingState>([{ id: pagination.sort_by, desc: pagination.order === "desc" }]);
 
 	const fixedColumnIds = useMemo(() => new Set<string>(["actions"]), []);
@@ -224,13 +226,13 @@ export function MCPLogsDataTable({
 							onClick={() => goToPage(currentPage - 1)}
 							disabled={currentPage <= 1}
 							data-testid="prev-page"
-							aria-label="Previous page"
+							aria-label={t("Previous page")}
 						>
 							<ChevronLeft className="size-3" />
 						</Button>
 
 						<div className="flex items-center gap-1">
-							<span>Page</span>
+							<span>{t("Page")}</span>
 							<span>{currentPage}</span>
 							<span>of {totalPages}</span>
 						</div>
@@ -241,7 +243,7 @@ export function MCPLogsDataTable({
 							onClick={() => goToPage(currentPage + 1)}
 							disabled={totalPages === 0 || currentPage >= totalPages}
 							data-testid="next-page"
-							aria-label="Next page"
+							aria-label={t("Next page")}
 						>
 							<ChevronRight className="size-3" />
 						</Button>

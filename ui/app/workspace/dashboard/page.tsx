@@ -3,6 +3,7 @@ import { DateTimePickerWithRange } from "@/components/ui/datePickerWithRange";
 import { ScrollArea } from "@/components/ui/scrollArea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTimezonePreference } from "@/lib/hooks/useTimezonePreference";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { parseAsSafeArrayOf, parseAsSafeString } from "@/lib/queryParamsParser";
 import { useGetMCPAvailableFilterDataQuery } from "@/lib/store";
 import type { LogFilters, MCPToolLogFilters } from "@/lib/types/logs";
@@ -32,6 +33,7 @@ const nextFrames = () =>
 	});
 
 export default function DashboardPage() {
+	const { t } = useLocaleCtx();
 	// MCP filter data
 	const { data: mcpFilterData } = useGetMCPAvailableFilterDataQuery();
 
@@ -506,37 +508,37 @@ export default function DashboardPage() {
 								    stretch every tab across the row. */}
 								<TabsList className="w-max min-w-max">
 									<TabsTrigger className="shrink-0" value="overview" data-testid="dashboard-tab-overview">
-										Overview
+										{t("Overview")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="provider-usage" data-testid="dashboard-tab-provider-usage">
-										Provider Usage
+										{t("Provider Usage")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="rankings" data-testid="dashboard-tab-rankings">
-										Model Rankings
+										{t("Model Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="mcp" data-testid="dashboard-tab-mcp">
-										MCP usage
+										{t("MCP Usage")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="team-rankings" data-testid="dashboard-tab-team-rankings">
-										Team Rankings
+										{t("Team Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="user-rankings" data-testid="dashboard-tab-user-rankings">
-										User Rankings
+										{t("User Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="virtual-key-rankings" data-testid="dashboard-tab-virtual-key-rankings">
-										Virtual Key Rankings
+										{t("Virtual Key Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="customer-rankings" data-testid="dashboard-tab-customer-rankings">
-										Customer Rankings
+										{t("Customer Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="bu-rankings" data-testid="dashboard-tab-bu-rankings">
-										BU Rankings
+										{t("BU Rankings")}
 									</TabsTrigger>
 									<TabsTrigger className="shrink-0" value="project-rankings" data-testid="dashboard-tab-project-rankings">
-										Project Rankings
+										{t("Project Rankings")}
 									</TabsTrigger>
 									<TabsTrigger value="app-rankings" data-testid="dashboard-tab-app-rankings">
-										App Rankings
+										{t("App Rankings")}
 									</TabsTrigger>
 								</TabsList>
 							</div>

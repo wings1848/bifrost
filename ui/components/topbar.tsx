@@ -21,10 +21,11 @@ import { cn } from "@/lib/utils";
 import type { UserInfo } from "@enterprise/lib/store/utils/tokenManager";
 import { getUserInfo } from "@enterprise/lib/store/utils/tokenManager";
 import { BooksIcon, DiscordLogoIcon, GithubLogoIcon } from "@phosphor-icons/react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { BugIcon, ChevronDown, LogOut, Menu, User } from "lucide-react";
+import { BugIcon, ChevronDown, Languages, LogOut, Menu, User } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 
 // External links that used to live in the sidebar footer icon row. They now
 // render as labelled rows inside the topbar menu, which is both more legible
@@ -70,7 +71,15 @@ function usePageTitle() {
 	const pathname = useLocation({ select: (location) => location.pathname });
 	const override = useTopbarTitle();
 	const derived = useMemo(() => deriveTitleFromPathname(pathname), [pathname]);
-	return override ?? derived;
+	const { t } = useLocaleCtx();
+	const translate = useCallback(
+		(title: TopbarTitleValue): TopbarTitleValue => {
+			if (Array.isArray(title)) return title.map((c) => ({ ...c, label: t(c.label) }));
+			return t(title);
+		},
+		[t],
+	);
+	return translate(override ?? derived);
 }
 
 /**
@@ -139,6 +148,7 @@ export default function Topbar() {
 	const { data: version } = useGetVersionQuery();
 	const { resolvedTheme } = useTheme();
 	const { logoSrc, logoAlt } = useBranding(resolvedTheme === "dark");
+	const { locale, switchLocale, t } = useLocaleCtx();
 
 	// Enterprise SCIM/OAuth stashes the profile in localStorage. Read it after
 	// mount so SSR/first paint doesn't diverge from the hydrated tree.
@@ -189,6 +199,16 @@ export default function Topbar() {
 			<span ref={setMobileFilterSlot} className="flex shrink-0 items-center md:hidden" />
 			<NotificationCenter />
 			<ThemeToggle />
+			<button
+				type="button"
+				aria-label="切换语言 / Switch language"
+				title={locale === "zh" ? "切换为英文" : "切换为中文"}
+				onClick={() => switchLocale(locale === "zh" ? "en" : "zh")}
+				className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors"
+			>
+				<Languages className="size-4" strokeWidth={2} />
+				<span className="sr-only">{t("Language")}</span>
+			</button>
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
@@ -237,7 +257,7 @@ export default function Topbar() {
 							<DropdownMenuItem key={item.title} asChild>
 								<a href={item.url} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
 									<item.icon className="size-4" size={16} weight="regular" strokeWidth={item.strokeWidth} />
-									<span className="truncate">{item.title}</span>
+									<span className="truncate">{t(item.title)}</span>
 								</a>
 							</DropdownMenuItem>
 						))}
@@ -248,7 +268,7 @@ export default function Topbar() {
 							<DropdownMenuSeparator />
 							<DropdownMenuItem onClick={handleLogout} data-testid="topbar-logout-btn" className="cursor-pointer">
 								<LogOut className="size-4" strokeWidth={2} />
-								<span>Sign out</span>
+								<span>{t("Sign out")}</span>
 							</DropdownMenuItem>
 						</>
 					)}
@@ -259,7 +279,7 @@ export default function Topbar() {
 						<>
 							<DropdownMenuSeparator />
 							<DropdownMenuLabel className="text-muted-foreground flex items-center justify-between gap-2 py-1.5 text-xs font-normal">
-								<span>Version</span>
+								<span>{t("Version")}</span>
 								<span className="truncate font-mono">{version}</span>
 							</DropdownMenuLabel>
 						</>

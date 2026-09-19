@@ -3,6 +3,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { DefaultPerformanceConfig } from "@/lib/constants/config";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import { ModelProvider } from "@/lib/types/config";
 import { performanceFormSchema, type PerformanceFormSchema } from "@/lib/types/schemas";
@@ -18,6 +19,7 @@ interface PerformanceFormFragmentProps {
 }
 
 export function PerformanceFormFragment({ provider }: PerformanceFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -58,11 +60,11 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 		updateProvider(updatedProvider)
 			.unwrap()
 			.then(() => {
-				toast.success("Provider configuration updated successfully");
+				toast.success(t("Provider configuration updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update provider configuration", {
+				toast.error(t("Failed to update provider configuration"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -80,7 +82,7 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 								name="concurrency_and_buffer_size.concurrency"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Concurrency</FormLabel>
+										<FormLabel>{t("Concurrency")}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -113,7 +115,7 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 								name="concurrency_and_buffer_size.buffer_size"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Buffer Size</FormLabel>
+										<FormLabel>{t("Buffer Size")}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"

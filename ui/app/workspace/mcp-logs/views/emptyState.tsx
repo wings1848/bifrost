@@ -4,6 +4,7 @@ import { CodeEditor } from "@/components/ui/codeEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getExampleBaseUrl } from "@/lib/utils/port";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { AlertTriangle, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -39,6 +40,7 @@ interface CodeBlockProps {
 }
 
 function CodeBlock({ code, language, onLanguageChange, showLanguageSelect = false, readonly = true }: CodeBlockProps) {
+	const { t } = useLocaleCtx();
 	const { copy: copyToClipboard } = useCopyToClipboard();
 
 	return (
@@ -59,7 +61,7 @@ function CodeBlock({ code, language, onLanguageChange, showLanguageSelect = fals
 						</SelectContent>
 					</Select>
 				)}
-				<Button variant="ghost" size="icon" onClick={() => copyToClipboard(code)} aria-label="Copy to clipboard">
+				<Button variant="ghost" size="icon" onClick={() => copyToClipboard(code)} aria-label={t("Copy to clipboard")}>
 					<Copy className="size-4" />
 				</Button>
 			</div>
@@ -74,6 +76,7 @@ interface MCPEmptyStateProps {
 }
 
 export function MCPEmptyState({ error, statusIndicator }: MCPEmptyStateProps) {
+	const { t } = useLocaleCtx();
 	const [language, setLanguage] = useState<Language>("python");
 
 	// Generate examples dynamically using the port utility
@@ -257,16 +260,16 @@ if (response.choices[0].message.tool_calls) {
 			<div className="w-full space-y-6">
 				<div className="flex flex-row items-center gap-2">
 					<div>
-						<h3 className="text-lg font-semibold">Get Started with MCP Tool Execution</h3>
-						<p className="text-muted-foreground text-sm">Execute your first MCP tool call to see logs appear</p>
+						<h3 className="text-lg font-semibold">{t("Get Started with MCP Tool Execution")}</h3>
+						<p className="text-muted-foreground text-sm">{t("Execute your first MCP tool call to see logs appear")}</p>
 					</div>
 					<div className="ml-auto">{statusIndicator}</div>
 				</div>
 
 				<Tabs defaultValue="manual" className="w-full rounded-lg border">
 					<TabsList className="flex h-10 w-full justify-start rounded-t-lg rounded-b-none">
-						<TabsTrigger value="manual">Manual Tool Execution</TabsTrigger>
-						<TabsTrigger value="agent">Agent Mode (Auto-Execute)</TabsTrigger>
+						<TabsTrigger value="manual">{t("Manual Tool Execution")}</TabsTrigger>
+						<TabsTrigger value="agent">{t("Agent Mode (Auto-Execute)")}</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="manual" className="px-4">
@@ -283,7 +286,7 @@ if (response.choices[0].message.tool_calls) {
 
 					<TabsContent value="agent" className="px-4">
 						<div className="text-muted-foreground mb-3 text-sm">
-							<p>Autonomous execution for pre-approved tools. Configure auto-executable tools in MCP Gateway settings.</p>
+							<p>{t("Autonomous execution for pre-approved tools. Configure auto-executable tools in MCP Gateway settings.")}</p>
 						</div>
 						<CodeBlock
 							code={examples.agentMode[language]}
@@ -295,7 +298,7 @@ if (response.choices[0].message.tool_calls) {
 				</Tabs>
 
 				<div className="bg-muted/50 rounded-lg border p-4">
-					<h4 className="mb-2 text-sm font-semibold">Prerequisites</h4>
+					<h4 className="mb-2 text-sm font-semibold">{t("Prerequisites")}</h4>
 					<ul className="text-muted-foreground space-y-1 text-sm">
 						<li className="flex items-start gap-2">
 							<span className="text-primary">1.</span>

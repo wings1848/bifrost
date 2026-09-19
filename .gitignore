@@ -259,3 +259,8 @@ ui/app/routeTree.gen.ts
 bifrost-migration-cli
 
 tests/e2e/clis/reports
+# i18n 二进制/缓存（中文化自用，不进仓库）
+transports/bifrost-backend-tmp
+tmp/bifrost-data/
+.codegraph/
+.pnpm-store/

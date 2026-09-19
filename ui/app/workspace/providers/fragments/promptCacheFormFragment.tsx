@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { getErrorMessage, setProviderFormDirtyState, useAppDispatch } from "@/lib/store";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { useUpdateProviderMutation } from "@/lib/store/apis/providersApi";
 import type { CacheControlInjectionPoint, ModelProvider } from "@/lib/types/config";
 import { promptCacheFormSchema, type PromptCacheFormSchema } from "@/lib/types/schemas";
@@ -31,6 +32,7 @@ const toFormValues = (provider: ModelProvider): PromptCacheFormSchema => ({
 });
 
 export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentProps) {
+	const { t } = useLocaleCtx();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -69,11 +71,11 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 		)
 			.unwrap()
 			.then(() => {
-				toast.success("Prompt caching updated successfully");
+				toast.success(t("Prompt caching updated successfully"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update prompt caching", {
+				toast.error(t("Failed to update prompt caching"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -90,7 +92,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 							<FormItem>
 								<div className="flex items-center justify-between space-x-2">
 									<div className="space-y-0.5">
-										<FormLabel>Auto-inject cache breakpoints</FormLabel>
+										<FormLabel>{t("Auto-inject cache breakpoints")}</FormLabel>
 										<p className="text-muted-foreground text-xs">
 											Agentic clients such as Codex send no cache markers, so the cached prefix follows the newest message and every turn is
 											billed as a cache write. Turning this on marks the first cacheable block instead, which keeps the cached region stable
@@ -121,7 +123,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 						name="ttl"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Cache TTL</FormLabel>
+								<FormLabel>{t("Cache TTL")}</FormLabel>
 								<Select value={field.value ?? TTL_DEFAULT} onValueChange={field.onChange} disabled={!hasUpdateProviderAccess}>
 									<FormControl>
 										<SelectTrigger data-testid="provider-prompt-cache-ttl-select" className="w-56">
@@ -129,8 +131,8 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										<SelectItem value={TTL_DEFAULT}>Provider default (5 minutes)</SelectItem>
-										<SelectItem value="1h">1 hour</SelectItem>
+										<SelectItem value={TTL_DEFAULT}>{t("Provider default (5 minutes)")}</SelectItem>
+										<SelectItem value="1h">{t("1 hour")}</SelectItem>
 									</SelectContent>
 								</Select>
 								<p className="text-muted-foreground text-xs">
@@ -143,7 +145,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 
 					<div className="space-y-3">
 						<div className="space-y-0.5">
-							<FormLabel>Injection points</FormLabel>
+							<FormLabel>{t("Injection points")}</FormLabel>
 							<p className="text-muted-foreground text-xs">
 								Optional. Target specific messages instead of the first cacheable block. Adding any point{" "}
 								<span className="font-medium">replaces</span> the default strategy rather than adding to it. Each point needs a role, an
@@ -158,7 +160,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 									name={`cache_control_injection_points.${index}.role`}
 									render={({ field }) => (
 										<FormItem className="flex-1">
-											<FormLabel className="text-xs">Role</FormLabel>
+											<FormLabel className="text-xs">{t("Role")}</FormLabel>
 											<Select
 												value={field.value ?? ""}
 												onValueChange={(v) => field.onChange(v === "" ? undefined : v)}
@@ -166,7 +168,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 											>
 												<FormControl>
 													<SelectTrigger>
-														<SelectValue placeholder="Any role" />
+														<SelectValue placeholder={t("Any role")} />
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
@@ -185,7 +187,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 									name={`cache_control_injection_points.${index}.index`}
 									render={({ field }) => (
 										<FormItem className="flex-1">
-											<FormLabel className="text-xs">Index</FormLabel>
+											<FormLabel className="text-xs">{t("Index")}</FormLabel>
 											<FormControl>
 												<Input
 													type="number"
@@ -212,7 +214,7 @@ export function PromptCacheFormFragment({ provider }: PromptCacheFormFragmentPro
 						))}
 
 						{form.formState.errors.cache_control_injection_points && (
-							<p className="text-destructive text-xs">Each point needs a role, an index, or both.</p>
+							<p className="text-destructive text-xs">{t("Each point needs a role, an index, or both.")}</p>
 						)}
 
 						<Button

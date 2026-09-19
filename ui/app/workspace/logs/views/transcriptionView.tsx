@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { CodeEditor } from "@/components/ui/codeEditor";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { BifrostTranscribe, TranscriptionInput } from "@/lib/types/logs";
 import { Clock, FileAudio, Mic } from "lucide-react";
 import AudioPlayer from "./audioPlayer";
@@ -11,6 +12,7 @@ interface TranscriptionViewProps {
 }
 
 export default function TranscriptionView({ transcriptionInput, transcriptionOutput, isStreaming }: TranscriptionViewProps) {
+	const { t } = useLocaleCtx();
 	const formatTime = (seconds: number) => {
 		const mins = Math.floor(seconds / 60);
 		const secs = (seconds % 60).toFixed(1);
@@ -27,7 +29,7 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 						Transcription Input
 					</div>
 					<div className="space-y-4 p-6">
-						<div className="text-muted-foreground mb-2 text-xs font-medium">AUDIO FILE</div>
+						<div className="text-muted-foreground mb-2 text-xs font-medium">{t("AUDIO FILE")}</div>
 						{/* Audio Controls */}
 						<AudioPlayer src={transcriptionInput.file} />
 					</div>
@@ -44,7 +46,7 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 
 					<div className="space-y-4 p-6">
 						{!transcriptionOutput && isStreaming ? (
-							<div className="font-mono text-xs">Output was streamed and is not available.</div>
+							<div className="font-mono text-xs">{t("Output was streamed and is not available.")}</div>
 						) : (
 							<>
 								{/* Main Transcription Text */}
@@ -57,21 +59,21 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 									<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 										{transcriptionOutput?.task && (
 											<div>
-												<div className="text-muted-foreground mb-2 text-xs font-medium">TASK</div>
+												<div className="text-muted-foreground mb-2 text-xs font-medium">{t("TASK")}</div>
 												<div className="font-mono text-xs">{transcriptionOutput.task}</div>
 											</div>
 										)}
 
 										{transcriptionOutput?.language && (
 											<div>
-												<div className="text-muted-foreground mb-2 text-xs font-medium">DETECTED LANGUAGE</div>
+												<div className="text-muted-foreground mb-2 text-xs font-medium">{t("DETECTED LANGUAGE")}</div>
 												<div className="font-mono text-xs">{transcriptionOutput.language}</div>
 											</div>
 										)}
 
 										{transcriptionOutput?.duration && (
 											<div>
-												<div className="text-muted-foreground mb-2 text-xs font-medium">DURATION</div>
+												<div className="text-muted-foreground mb-2 text-xs font-medium">{t("DURATION")}</div>
 												<div className="font-mono text-xs">{transcriptionOutput.duration.toFixed(1)}s</div>
 											</div>
 										)}
@@ -81,7 +83,7 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 								{/* Words with Timing */}
 								{transcriptionOutput?.words && transcriptionOutput.words.length > 0 && (
 									<div>
-										<div className="text-muted-foreground mb-2 text-xs font-medium">WORD-LEVEL TIMING</div>
+										<div className="text-muted-foreground mb-2 text-xs font-medium">{t("WORD-LEVEL TIMING")}</div>
 										<div className="max-h-40 overflow-y-auto">
 											<div className="flex flex-wrap gap-2">
 												{transcriptionOutput.words.map((word, index) => (
@@ -102,7 +104,7 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 								{/* Segments */}
 								{transcriptionOutput?.segments && transcriptionOutput.segments.length > 0 && (
 									<div>
-										<div className="text-muted-foreground mb-2 text-xs font-medium">SEGMENTS</div>
+										<div className="text-muted-foreground mb-2 text-xs font-medium">{t("SEGMENTS")}</div>
 										<div className="max-h-60 space-y-2 overflow-y-auto">
 											{transcriptionOutput.segments.map((segment) => (
 												<div key={segment.id} className="rounded border p-3">
@@ -130,7 +132,7 @@ export default function TranscriptionView({ transcriptionInput, transcriptionOut
 								{/* Log Probabilities */}
 								{transcriptionOutput?.logprobs && transcriptionOutput.logprobs.length > 0 && (
 									<div>
-										<div className="text-muted-foreground mb-2 text-xs font-medium">LOG PROBABILITIES</div>
+										<div className="text-muted-foreground mb-2 text-xs font-medium">{t("LOG PROBABILITIES")}</div>
 										<CodeEditor
 											className="z-0 w-full"
 											shouldAdjustInitialHeight={true}

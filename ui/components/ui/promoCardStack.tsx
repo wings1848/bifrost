@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "./card";
@@ -19,6 +20,7 @@ interface PromoCardStackProps {
 }
 
 export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss }: PromoCardStackProps) {
+	const { t } = useLocaleCtx();
 	const [items, setItems] = useState(() => {
 		// Sort so non-dismissible cards appear at the top
 		return [...cards].sort((a, b) => {
@@ -117,7 +119,7 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 								)}
 							>
 								<div className="flex items-start justify-between">
-									<div className="min-w-0 flex-1">{typeof card.title === "string" ? card.title : card.title}</div>
+									<div className="min-w-0 flex-1">{typeof card.title === "string" ? t(card.title) : card.title}</div>
 									{card.dismissible !== false && isTopCard && (
 										<button
 											aria-label="Dismiss"
@@ -132,7 +134,7 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 								</div>
 							</CardHeader>
 							<CardContent className="text-muted-foreground mt-0 flex-1 overflow-y-auto px-1 pt-0 pb-1 text-xs">
-								{typeof card.description === "string" ? card.description : card.description}
+								{typeof card.description === "string" ? t(card.description) : card.description}
 							</CardContent>
 						</Card>
 					</div>

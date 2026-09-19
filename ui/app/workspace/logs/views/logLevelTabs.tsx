@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { LOG_LEVEL_BADGE_CLASSES, LOG_LEVELS, type LogLevel } from "@/lib/utils/logLevel";
 
 interface LogLevelTabsProps {
@@ -13,8 +14,9 @@ interface LogLevelTabsProps {
  * level's badge colors so it reads the same as the badges on the rows it filters.
  */
 export default function LogLevelTabs({ value, onChange, testId }: LogLevelTabsProps) {
+	const { t } = useLocaleCtx();
 	return (
-		<div role="group" aria-label="Minimum log level" className="bg-muted/60 inline-flex gap-0.5 rounded-sm p-0.5" data-testid={testId}>
+		<div role="group" aria-label={t("Minimum log level")} className="bg-muted/60 inline-flex gap-0.5 rounded-sm p-0.5" data-testid={testId}>
 			{LOG_LEVELS.map((level) => {
 				const active = level === value;
 				return (

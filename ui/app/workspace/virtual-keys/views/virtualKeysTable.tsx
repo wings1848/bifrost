@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { resetDurationLabels } from "@/lib/constants/governance";
+import { useLocaleCtx } from "@/lib/i18n/context";
 import { getUserPicker } from "@/lib/registries/userPicker";
 import { useVirtualKeyAccessAudit } from "@enterprise/lib/hooks/useVirtualKeyAccessAudit";
 import {
@@ -225,6 +226,7 @@ function VKActionsMenu({
 	onEdit: (vk: VirtualKey) => void;
 	onDelete: (vkId: string) => void;
 }) {
+	const { t } = useLocaleCtx();
 	const [isOpen, setIsOpen] = useState(false);
 	const { isManagedByProfile } = useVirtualKeyUsage(vk);
 	const [deleteOpen, setDeleteOpen] = useState(false);
@@ -237,7 +239,7 @@ function VKActionsMenu({
 						variant="ghost"
 						size="icon"
 						className="h-8 w-8"
-						aria-label="Virtual key actions"
+						aria-label={t("Virtual key actions")}
 						data-testid={`vk-actions-btn-${vk.name}`}
 					>
 						<MoreHorizontal className="h-4 w-4" />
@@ -283,7 +285,7 @@ function VKActionsMenu({
 			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Virtual Key</AlertDialogTitle>
+						<AlertDialogTitle>{t("Delete Virtual Key")}</AlertDialogTitle>
 						<AlertDialogDescription>
 							Are you sure you want to delete &quot;
 							{vk.name.length > 20 ? `${vk.name.slice(0, 20)}...` : vk.name}
@@ -291,7 +293,7 @@ function VKActionsMenu({
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel data-testid={`vk-delete-cancel-${vk.name}`}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel data-testid={`vk-delete-cancel-${vk.name}`}>{t("Cancel")}</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => onDelete(vk.id)}
 							disabled={isDeleting}
@@ -350,6 +352,7 @@ export default function VirtualKeysTable({
 	selectedVkId,
 	onSelectedVkChange,
 }: VirtualKeysTableProps) {
+	const { t } = useLocaleCtx();
 	const [showVirtualKeySheet, setShowVirtualKeySheet] = useState(false);
 	const [editingVirtualKeyId, setEditingVirtualKeyId] = useState<string | null>(null);
 	const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
@@ -427,7 +430,7 @@ export default function VirtualKeysTable({
 	const handleDelete = async (vkId: string) => {
 		try {
 			await deleteVirtualKey(vkId).unwrap();
-			toast.success("Virtual key deleted successfully");
+			toast.success(t("Virtual key deleted successfully"));
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		}
@@ -690,12 +693,12 @@ export default function VirtualKeysTable({
 			<Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
 				<DialogContent className="sm:max-w-[425px]">
 					<DialogHeader className="pb-0">
-						<DialogTitle>Export Virtual Keys</DialogTitle>
-						<DialogDescription>Download as CSV with current filters and sorting applied.</DialogDescription>
+						<DialogTitle>{t("Export Virtual Keys")}</DialogTitle>
+						<DialogDescription>{t("Download as CSV with current filters and sorting applied.")}</DialogDescription>
 					</DialogHeader>
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<Label className="text-sm">Export scope</Label>
+							<Label className="text-sm">{t("Export scope")}</Label>
 							<div className="grid grid-cols-1 gap-2 sm:grid-cols-2" data-testid="vk-export-scope">
 								<button
 									type="button"
@@ -707,7 +710,7 @@ export default function VirtualKeysTable({
 											: "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
 									)}
 								>
-									<span className="font-medium">Current page</span>
+									<span className="font-medium">{t("Current page")}</span>
 									<span className="text-muted-foreground text-xs">{virtualKeys.length} entries</span>
 								</button>
 								<button
@@ -720,7 +723,7 @@ export default function VirtualKeysTable({
 											: "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
 									)}
 								>
-									<span className="font-medium">All entries</span>
+									<span className="font-medium">{t("All entries")}</span>
 									<span className="text-muted-foreground text-xs">{totalCount} total</span>
 								</button>
 							</div>
@@ -759,7 +762,7 @@ export default function VirtualKeysTable({
 
 						<div className="text-muted-foreground flex items-center gap-2">
 							<ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-							<p className="text-xs">API tokens are excluded from the export.</p>
+							<p className="text-xs">{t("API tokens are excluded from the export.")}</p>
 						</div>
 					</div>
 					<DialogFooter className="pt-0">
@@ -809,7 +812,7 @@ export default function VirtualKeysTable({
 			<div className="flex min-h-0 w-full grow flex-col overflow-hidden">
 				{/* Toolbar: Search + Filters + Actions */}
 				<div className="mb-4 flex shrink-0 flex-wrap items-center gap-3">
-					<PageTitle title="Virtual Keys">Manage virtual keys, their permissions, budgets, and rate limits.</PageTitle>
+					<PageTitle title={t("Virtual Keys")}>{t("Manage virtual keys, their permissions, budgets, and rate limits.")}</PageTitle>
 					<div className="relative w-full max-w-sm min-w-0 flex-1 basis-full sm:min-w-[180px] sm:basis-auto">
 						<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 						<Input
@@ -827,13 +830,13 @@ export default function VirtualKeysTable({
 						<CustomerSelector
 							value={customerFilter}
 							onChange={onCustomerFilterChange}
-							placeholder="All Customers"
+							placeholder={t("All Customers")}
 							triggerClassName="h-9"
 							className="w-full min-w-0"
 						/>
 						<FilterClearButton
 							show={!!customerFilter}
-							label="Clear customer filter"
+							label={t("Clear customer filter")}
 							onClear={() => onCustomerFilterChange("")}
 							data-testid="vk-customer-filter-clear-btn"
 						/>
@@ -843,13 +846,13 @@ export default function VirtualKeysTable({
 						<TeamSelector
 							value={teamFilter}
 							onChange={onTeamFilterChange}
-							placeholder="All Teams"
+							placeholder={t("All Teams")}
 							triggerClassName="h-9"
 							className="w-full min-w-0"
 						/>
 						<FilterClearButton
 							show={!!teamFilter}
-							label="Clear team filter"
+							label={t("Clear team filter")}
 							onClear={() => onTeamFilterChange("")}
 							data-testid="vk-team-filter-clear-btn"
 						/>
@@ -862,13 +865,13 @@ export default function VirtualKeysTable({
 							<UserPicker
 								value={userFilter}
 								onChange={onUserFilterChange}
-								placeholder="All Users"
+								placeholder={t("All Users")}
 								triggerClassName="h-9"
 								className="w-full min-w-0"
 							/>
 							<FilterClearButton
 								show={!!userFilter}
-								label="Clear user filter"
+								label={t("Clear user filter")}
 								onClear={() => onUserFilterChange("")}
 								data-testid="vk-user-filter-clear-btn"
 							/>
@@ -906,21 +909,21 @@ export default function VirtualKeysTable({
 									<Checkbox
 										checked={allVisibleSelected || (someVisibleSelected ? "indeterminate" : false)}
 										onCheckedChange={(checked) => toggleSelectAllVisible(checked === true)}
-										aria-label="Select all virtual keys on this page"
+										aria-label={t("Select all virtual keys on this page")}
 										data-testid="vk-select-all-checkbox"
 									/>
 								</TableHead>
 								<TableHead className="w-[250px]">
-									<SortableHeader column="name" label="Name" />
+									<SortableHeader column="name" label={t("Name")} />
 								</TableHead>
-								<TableHead className="w-[160px]">Assigned To</TableHead>
-								<TableHead className="w-[440px]">Key</TableHead>
+								<TableHead className="w-[160px]">{t("Assigned To")}</TableHead>
+								<TableHead className="w-[440px]">{t("Key")}</TableHead>
 								<TableHead className="w-[200px]">
-									<SortableHeader column="budget_spent" label="Budget" />
+									<SortableHeader column="budget_spent" label={t("Budget")} />
 								</TableHead>
-								<TableHead className="w-[200px]">Rate Limits</TableHead>
+								<TableHead className="w-[200px]">{t("Rate Limits")}</TableHead>
 								<TableHead className="w-[120px]">
-									<SortableHeader column="status" label="Status" />
+									<SortableHeader column="status" label={t("Status")} />
 								</TableHead>
 								<TableHead className={`bg-muted sticky right-0 z-30 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
 							</TableRow>
@@ -929,7 +932,7 @@ export default function VirtualKeysTable({
 							{virtualKeys.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={8} className="h-24 text-center">
-										<span className="text-muted-foreground text-sm">No matching virtual keys found.</span>
+										<span className="text-muted-foreground text-sm">{t("No matching virtual keys found.")}</span>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -1039,13 +1042,13 @@ export default function VirtualKeysTable({
 								onClick={() => onOffsetChange(Math.max(0, offset - limit))}
 								disabled={offset === 0}
 								data-testid="vk-pagination-prev-btn"
-								aria-label="Previous page"
+								aria-label={t("Previous page")}
 							>
 								<ChevronLeft className="size-3" />
 							</Button>
 
 							<div className="flex items-center gap-1">
-								<span>Page</span>
+								<span>{t("Page")}</span>
 								<span>{Math.floor(offset / limit) + 1}</span>
 								<span>of {Math.ceil(totalCount / limit)}</span>
 							</div>
@@ -1056,7 +1059,7 @@ export default function VirtualKeysTable({
 								onClick={() => onOffsetChange(offset + limit)}
 								disabled={offset + limit >= totalCount}
 								data-testid="vk-pagination-next-btn"
-								aria-label="Next page"
+								aria-label={t("Next page")}
 							>
 								<ChevronRight className="size-3" />
 							</Button>
