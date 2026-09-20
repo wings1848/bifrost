@@ -47,7 +47,7 @@ export default function GrantsTable({
 							<TableHead>{t("Client")}</TableHead>
 							<TableHead>
 								<HeaderWithTooltip
-									label="Bound to"
+									label={t("Bound to")}
 									tooltip={t(
 										"The identity this grant is tied to: an end user (via SSO), a virtual key (shared by anyone using that VK), or an anonymous session. This determines which upstream per-user OAuth sessions are reachable under this grant.",
 									)}
@@ -55,7 +55,7 @@ export default function GrantsTable({
 							</TableHead>
 							<TableHead>
 								<HeaderWithTooltip
-									label="Access token expiry"
+									label={t("Access token expiry")}
 									tooltip={t(
 										"When the current JWT access token expires. MCP clients silently refresh using the refresh token, so an active grant past its expiry will mint a new token automatically on the next request.",
 									)}
@@ -64,7 +64,7 @@ export default function GrantsTable({
 							<TableHead>{t("Created")}</TableHead>
 							<TableHead>
 								<HeaderWithTooltip
-									label="Last used"
+									label={t("Last used")}
 									tooltip={t(
 										"When this grant last refreshed its access token. MCP clients refresh as their token nears expiry, so this tracks the grant's most recent activity. Grants that have not refreshed since they were authorized fall back to when they were created.",
 									)}

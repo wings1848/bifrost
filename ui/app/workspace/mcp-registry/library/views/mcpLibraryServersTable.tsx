@@ -56,7 +56,6 @@ export function MCPLibraryServersTable({
 				</TableHeader>
 				<TableBody>
 					{servers.map((server) => {
-						const { t } = useLocaleCtx();
 						const isInstalled = installedServerSlugs.has(server.slug);
 						return (
 							<TableRow key={server.slug} className="group" data-testid={`mcp-library-table-row-${server.slug}`}>

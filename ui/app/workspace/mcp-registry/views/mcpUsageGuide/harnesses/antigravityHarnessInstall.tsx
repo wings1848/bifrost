@@ -5,6 +5,7 @@ import { buildAntigravityConfig } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { HarnessInstallProps } from "../types";
 import { getRegistrationLabel, getUserHomePrefix } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function AntigravityIcon({ className }: { className?: string }) {
 	return <Orbit className={cn("text-muted-foreground", className)} />;
@@ -19,6 +20,7 @@ export function AntigravityHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const configPath = `${getUserHomePrefix(platform)}/.gemini/antigravity/mcp_config.json`;
 
 	const config = useMemo(
@@ -39,7 +41,7 @@ export function AntigravityHarnessInstall({
 			copySuccessMessage="Config copied"
 			emptyMessage={emptyMessage}
 			harnessName="Antigravity"
-			label="Config"
+			label={t("Config")}
 			logoSrc="/images/harness/antigravity.svg"
 			registrationLabel={`${configPath} · ${getRegistrationLabel(serverScope, selectedServers)}`}
 		/>

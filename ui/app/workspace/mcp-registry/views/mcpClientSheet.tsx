@@ -458,7 +458,6 @@ export default function MCPClientSheet({
 	});
 
 	const onSubmit = async (data: MCPClientUpdateSchema) => {
-		const { t } = useLocaleCtx();
 		try {
 			if (mcpClient.config.auth_type === "per_user_headers" && (!data.per_user_header_keys || data.per_user_header_keys.length === 0)) {
 				toast({
@@ -732,7 +731,10 @@ export default function MCPClientSheet({
 											</div>
 										)}
 										<div className="space-y-4">
-											<SectionHeader title={t("Basic Information")} description="Identify this server and review its connection details." />
+											<SectionHeader
+												title={t("Basic Information")}
+												description={t("Identify this server and review its connection details.")}
+											/>
 											<FormField
 												control={form.control}
 												name="name"
@@ -832,7 +834,7 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Server Behavior")}
-												description="Control how this server participates in code mode and health checks."
+												description={t("Control how this server participates in code mode and health checks.")}
 											/>
 											<div className="divide-y rounded-md border">
 												<FormField
@@ -956,14 +958,13 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Sync & Timeouts")}
-												description="Override the global tool sync interval and execution timeout for this server."
+												description={t("Override the global tool sync interval and execution timeout for this server.")}
 											/>
 											<div className="divide-y rounded-md border">
 												<FormField
 													control={form.control}
 													name="tool_sync_interval"
 													render={({ field }) => {
-														const { t } = useLocaleCtx();
 														const isUsingGlobal = field.value === undefined || field.value === null || field.value === 0;
 														return (
 															<FormItem className="flex flex-row items-center justify-between gap-4 px-4 py-3">
@@ -1010,7 +1011,6 @@ export default function MCPClientSheet({
 													control={form.control}
 													name="tool_execution_timeout"
 													render={({ field }) => {
-														const { t } = useLocaleCtx();
 														const isUsingGlobal = field.value === undefined || field.value === null || field.value === 0;
 														return (
 															<FormItem className="flex flex-row items-center justify-between gap-4 px-4 py-3">
@@ -1103,7 +1103,7 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Headers")}
-												description="Static headers and header-based access rules sent with every request to this server."
+												description={t("Static headers and header-based access rules sent with every request to this server.")}
 												testId="headers-heading"
 											/>
 											<FormField
@@ -1133,7 +1133,9 @@ export default function MCPClientSheet({
 												<div className="space-y-4">
 													<SectionHeader
 														title={t("Required Headers")}
-														description="Comma-separated header names each caller must supply on first use, e.g. X-API-Key, X-Tenant-ID. Values are submitted per user, not stored on this server config."
+														description={t(
+															"Comma-separated header names each caller must supply on first use, e.g. X-API-Key, X-Tenant-ID. Values are submitted per user, not stored on this server config.",
+														)}
 														testId="required-headers-heading"
 														tooltip={t(
 															"Changing this list marks existing per-user header submissions as needing an update, so callers resubmit values on next use.",
@@ -1185,7 +1187,9 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Allowed Extra Headers")}
-												description="Comma-separated dynamic request header names, or * to allow all. Leave empty to block all extra headers."
+												description={t(
+													"Comma-separated dynamic request header names, or * to allow all. Leave empty to block all extra headers.",
+												)}
 											/>
 											<FormField
 												control={form.control}
@@ -1235,7 +1239,6 @@ export default function MCPClientSheet({
 										)}
 
 										{(() => {
-											const { t } = useLocaleCtx();
 											const showTLS = mcpClient.config.connection_type === "http" || mcpClient.config.connection_type === "sse";
 											const showOAuth = supportsOAuthCredentialUpdate;
 											const showTokenExchange = supportsTokenExchangeCredentialUpdate;
@@ -1249,7 +1252,7 @@ export default function MCPClientSheet({
 															<div className="space-y-4">
 																<SectionHeader
 																	title={t("TLS / Certificate")}
-																	description="Configure certificate verification for HTTPS connections to this server."
+																	description={t("Configure certificate verification for HTTPS connections to this server.")}
 																	testId="tls-config-heading"
 																/>
 																<div className="space-y-4 rounded-md border p-4">
@@ -1265,7 +1268,7 @@ export default function MCPClientSheet({
 															<div className="space-y-4">
 																<SectionHeader
 																	title={t("OAuth Configuration")}
-																	description="Credentials and endpoints this server uses to authenticate via OAuth."
+																	description={t("Credentials and endpoints this server uses to authenticate via OAuth.")}
 																	testId="oauth-advanced-heading"
 																/>
 																<div className="space-y-4 rounded-md border p-4">
@@ -1327,7 +1330,9 @@ export default function MCPClientSheet({
 															<div className="space-y-4">
 																<SectionHeader
 																	title={t("Token Exchange Configuration")}
-																	description="Credentials and scopes used to exchange caller identity tokens for access to this server."
+																	description={t(
+																		"Credentials and scopes used to exchange caller identity tokens for access to this server.",
+																	)}
 																	testId="token-exchange-advanced-heading"
 																/>
 																<div className="space-y-4 rounded-md border p-4">
@@ -1400,7 +1405,7 @@ export default function MCPClientSheet({
 											<div className="flex items-start justify-between gap-4">
 												<SectionHeader
 													title={`Available Tools (${mcpClient.tools?.length || 0})`}
-													description="Enable, auto-execute, and price individual tools exposed by this server."
+													description={t("Enable, auto-execute, and price individual tools exposed by this server.")}
 												/>
 												{mcpClient.tools && mcpClient.tools.length > 0 && (
 													<div className="flex items-center gap-4">
@@ -1549,7 +1554,6 @@ export default function MCPClientSheet({
 														</TableHeader>
 														<TableBody>
 															{mcpClient.tools.map((tool, index) => {
-																const { t } = useLocaleCtx();
 																const currentTools = form.watch("tools_to_execute") || [];
 																const currentAutoExecute = form.watch("tools_to_auto_execute") || [];
 																const isToolEnabled = currentTools?.includes("*") || currentTools?.includes(tool.name);
@@ -1697,7 +1701,7 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Access Control")}
-												description="Control whether this server is reachable without an explicit assignment."
+												description={t("Control whether this server is reachable without an explicit assignment.")}
 											/>
 											<FormField
 												control={form.control}
@@ -1738,7 +1742,7 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Virtual Key Assignments")}
-												description="Control which virtual keys can use this server and which tools they're allowed to call."
+												description={t("Control which virtual keys can use this server and which tools they're allowed to call.")}
 												action={
 													<VirtualKeySelector
 														mode="add"
@@ -1849,7 +1853,7 @@ export default function MCPClientSheet({
 										<div className="space-y-4">
 											<SectionHeader
 												title={t("Virtual MCPs")}
-												description="Virtual MCPs that bundle this server's tools and re-serve them at their own endpoint."
+												description={t("Virtual MCPs that bundle this server's tools and re-serve them at their own endpoint.")}
 											/>
 											{virtualMcpsLoading ? (
 												<div className="text-muted-foreground rounded-sm border p-6 text-center">

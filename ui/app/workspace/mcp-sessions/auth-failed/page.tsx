@@ -12,7 +12,7 @@ export default function MCPSessionsAuthFailedPage() {
 					<AlertCircle className="text-destructive size-6" />
 				</div>
 				<h1 className="text-xl font-semibold tracking-tight">{t("Authentication failed")}</h1>
-				<p className="text-muted-foreground mt-2 text-sm">{error ?? "We couldn't complete the authentication flow."}</p>
+				<p className="text-muted-foreground mt-2 text-sm">{error ?? t("We couldn't complete the authentication flow.")}</p>
 				<p className="text-muted-foreground mt-4 text-sm">
 					{t("You can close this tab and retry the original request from your MCP client to generate a fresh authentication link.")}
 				</p>

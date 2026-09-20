@@ -436,7 +436,10 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 		<>
 			{/* Server Behavior */}
 			<div className="space-y-4">
-				<SectionHeader title={t("Server Behavior")} description="Control how this server participates in code mode and health checks." />
+				<SectionHeader
+					title={t("Server Behavior")}
+					description={t("Control how this server participates in code mode and health checks.")}
+				/>
 				<div className="divide-y rounded-md border">
 					<FormField
 						control={control}
@@ -711,7 +714,7 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 						<>
 							<DottedSeparator />
 							<div className="space-y-4">
-								<SectionHeader title={t("Headers")} description="Static headers sent with every request to this server." />
+								<SectionHeader title={t("Headers")} description={t("Static headers sent with every request to this server.")} />
 								<FormField
 									control={control}
 									name="headers"
@@ -745,7 +748,9 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 								    tool use via the inline auth landing page. */}
 								<SectionHeader
 									title={t("Required Headers")}
-									description="Comma-separated header names each caller must supply on first use, e.g. X-API-Key, X-Tenant-ID. Values are submitted per user, not stored on this server config."
+									description={t(
+										"Comma-separated header names each caller must supply on first use, e.g. X-API-Key, X-Tenant-ID. Values are submitted per user, not stored on this server config.",
+									)}
 								/>
 								<div className="rounded-md border p-4">
 									<Textarea
@@ -761,7 +766,10 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 
 							{/* Optional static admin headers (e.g. a fixed tenant header) */}
 							<div className="space-y-4">
-								<SectionHeader title={t("Static Headers")} description="Optional, applied alongside the values each caller supplies." />
+								<SectionHeader
+									title={t("Static Headers")}
+									description={t("Optional, applied alongside the values each caller supplies.")}
+								/>
 								<FormField
 									control={control}
 									name="headers"
@@ -795,7 +803,7 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 							<div className="space-y-4" data-testid="token-exchange-fields">
 								<SectionHeader
 									title={t("Token Exchange Configuration")}
-									description="Credentials and scopes used to exchange caller identity tokens for access to this server."
+									description={t("Credentials and scopes used to exchange caller identity tokens for access to this server.")}
 									testId="token-exchange-heading"
 								/>
 								<div className="space-y-4 rounded-md border p-4">
@@ -886,7 +894,7 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 							<div className="space-y-4">
 								<SectionHeader
 									title={t("OAuth Configuration")}
-									description="Credentials and endpoints this server uses to authenticate via OAuth."
+									description={t("Credentials and endpoints this server uses to authenticate via OAuth.")}
 									testId="oauth-advanced-heading"
 								/>
 								<div className="space-y-4 rounded-md border p-4">
@@ -927,7 +935,7 @@ export function MCPClientFormFields({ form, satellites, headersValidationError, 
 					<div className="space-y-4">
 						<SectionHeader
 							title={t("TLS / Certificate")}
-							description="Configure certificate verification for HTTPS connections to this server."
+							description={t("Configure certificate verification for HTTPS connections to this server.")}
 							testId="tls-config-heading"
 						/>
 						<div className="space-y-4 rounded-md border p-4">

@@ -52,7 +52,7 @@ export function CursorHarnessInstall({
 			deeplink={deeplink}
 			emptyMessage={emptyMessage}
 			harnessName="Cursor"
-			label="Config"
+			label={t("Config")}
 			logoSrc="/images/harness/cursor.svg"
 			registrationLabel={`${configPath} · ${getRegistrationLabel(serverScope, selectedServers)}`}
 		/>

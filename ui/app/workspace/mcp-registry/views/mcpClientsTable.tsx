@@ -371,7 +371,6 @@ export default function MCPClientsTable({
 	};
 
 	const handleReconnect = async (client: MCPClient) => {
-		const { t } = useLocaleCtx();
 		try {
 			setReconnectingClients((prev) => [...prev, client.config.client_id]);
 			await reconnectMCPClient(client.config.client_id).unwrap();
@@ -387,7 +386,6 @@ export default function MCPClientsTable({
 	};
 
 	const handleStartBootstrap = async (client: MCPClient) => {
-		const { t } = useLocaleCtx();
 		// per_user_headers takes a synchronous form-based path, token_exchange
 		// opens the same "Re-verify as me" confirm dialog used to repair an
 		// already-verified client; OAuth-based types kick off the existing
@@ -432,7 +430,6 @@ export default function MCPClientsTable({
 	};
 
 	const handleReauthorize = async (client: MCPClient) => {
-		const { t } = useLocaleCtx();
 		try {
 			setReauthorizingClients((prev) => [...prev, client.config.client_id]);
 			const response = await reauthorizeMCPClient(client.config.client_id).unwrap();
@@ -479,7 +476,6 @@ export default function MCPClientsTable({
 	};
 
 	const handleVerifyExchange = async (client: MCPClient) => {
-		const { t } = useLocaleCtx();
 		try {
 			setVerifyingExchangeClients((prev) => [...prev, client.config.client_id]);
 			const response = await verifyMCPClientExchange(client.config.client_id).unwrap();
@@ -495,7 +491,6 @@ export default function MCPClientsTable({
 	};
 
 	const handleDelete = async (client: MCPClient) => {
-		const { t } = useLocaleCtx();
 		try {
 			await deleteMCPClient(client.config.client_id).unwrap();
 			toast({ title: t("Deleted"), description: `Client ${client.config.name} removed successfully.` });
@@ -663,7 +658,6 @@ export default function MCPClientsTable({
 					open={!!bootstrapAuthorize}
 					onClose={() => setBootstrapAuthorize(null)}
 					onSuccess={async () => {
-						const { t } = useLocaleCtx();
 						toast({
 							title: t("Success"),
 							description: bootstrapAuthorize.isPerUserOauth
@@ -676,11 +670,9 @@ export default function MCPClientsTable({
 						}
 					}}
 					onError={(error) => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("Authorization failed"), description: error, variant: "destructive" });
 					}}
 					onConflict={(error) => {
-						const { t } = useLocaleCtx();
 						setBootstrapAuthorize(null);
 						toast({ title: t("Authorization failed"), description: error, variant: "destructive" });
 					}}
@@ -695,7 +687,6 @@ export default function MCPClientsTable({
 					open={!!bootstrapHeadersClient}
 					onClose={() => setBootstrapHeadersClient(null)}
 					onSuccess={async () => {
-						const { t } = useLocaleCtx();
 						toast({
 							title: t("Success"),
 							description: t("Headers verified successfully. Each user will submit their own values when using this MCP server."),
@@ -709,7 +700,6 @@ export default function MCPClientsTable({
 						/* error state rendered by the dialog itself */
 					}}
 					onConflict={async (error) => {
-						const { t } = useLocaleCtx();
 						// 409: tools were already discovered (e.g. double submit or a
 						// concurrent verification) — the client is verified; refresh.
 						toast({ title: t("Already verified"), description: error });
@@ -988,7 +978,7 @@ export default function MCPClientsTable({
 								<TableHead className="w-[160px] font-semibold">{t("Auto-execute Tools")}</TableHead>
 								<TableHead className="w-[140px] font-semibold">
 									<HeaderWithTooltip
-										label="State"
+										label={t("State")}
 										tooltip={
 											<>
 												<p>
@@ -1134,7 +1124,6 @@ export default function MCPClientsTable({
 																if (refetch) refetch();
 															})
 															.catch((err) => {
-																const { t } = useLocaleCtx();
 																toast({ title: t("Error"), description: getErrorMessage(err), variant: "destructive" });
 															})
 															.finally(() => {
@@ -1229,7 +1218,6 @@ export default function MCPClientsTable({
 					open={!!reauthorizeFlow}
 					onClose={() => setReauthorizeFlow(null)}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						toast({
 							title: t("Success"),
 							description: reauthorizeFlow.isPerUserOauth
@@ -1240,11 +1228,9 @@ export default function MCPClientsTable({
 						if (refetch) void refetch();
 					}}
 					onError={(error) => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("Reauthorization failed"), description: error, variant: "destructive" });
 					}}
 					onConflict={() => {
-						const { t } = useLocaleCtx();
 						// 409: the flow's completion raced (popup postMessage vs.
 						// status polling both call complete-oauth) or this was a
 						// double submit. Either way the credential is already live
@@ -1270,7 +1256,6 @@ export default function MCPClientsTable({
 					open={!!headersRefreshFlow}
 					onClose={() => setHeadersRefreshFlow(null)}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("Success"), description: t("Admin discovery credential refreshed successfully.") });
 						setHeadersRefreshFlow(null);
 						if (refetch) void refetch();
@@ -1279,7 +1264,6 @@ export default function MCPClientsTable({
 						/* error state rendered by the dialog itself */
 					}}
 					onConflict={(error) => {
-						const { t } = useLocaleCtx();
 						// 409: the flow's completion raced (double submit / concurrent
 						// verification) or the credential no longer needed a refresh;
 						// either way the client is fine, so treat it as success.

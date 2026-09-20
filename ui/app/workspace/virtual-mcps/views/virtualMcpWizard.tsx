@@ -65,7 +65,6 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 	const goBack = () => setStepIdx((i) => Math.max(0, i - 1));
 
 	const handleCreate = async () => {
-		const { t } = useLocaleCtx();
 		setSubmitting(true);
 		try {
 			// Create only once; a retry after a partial failure reuses the existing record.
@@ -235,7 +234,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 	const endpoint = `${getExternalBaseUrl(coreConfig?.client_config)}/mcp/${previewSlug}`;
 	const { data: clientsData } = useGetMCPClientsQuery({ limit: 1000 });
 	const nameById = new Map((clientsData?.clients ?? []).map((c) => [c.config.client_id, c.config.name]));
-	const { copy, copied } = useCopyToClipboard({ successMessage: "Endpoint copied" });
+	const { copy, copied } = useCopyToClipboard({ successMessage: t("Endpoint copied") });
 	const rows: { label: string; value: React.ReactNode }[] = [
 		{ label: t("Name"), value: name.trim() || <span className="text-muted-foreground">—</span> },
 		{ label: t("Endpoint"), value: <span className="font-mono text-sm">/mcp/{previewSlug || "—"}</span> },
@@ -247,7 +246,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 				<span className="text-muted-foreground">—</span>
 			),
 		},
-		{ label: t("Status"), value: enabled ? "Enabled" : "Disabled" },
+		{ label: t("Status"), value: enabled ? t("Enabled") : t("Disabled") },
 		{
 			label: t("Servers"),
 			value: tools.length === 0 ? <span className="text-muted-foreground">{t("None")}</span> : `${tools.length} configured`,
@@ -280,7 +279,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 										{nameById.get(spec.mcp_client_id) ?? spec.mcp_client_id}
 									</span>
 									<span className="text-muted-foreground min-w-0 flex-1 text-sm">
-										{all ? "All tools" : `${spec.tool_names.length} tools`}
+										{all ? t("All tools") : t("{count} tools", { count: spec.tool_names.length })}
 									</span>
 								</div>
 							);

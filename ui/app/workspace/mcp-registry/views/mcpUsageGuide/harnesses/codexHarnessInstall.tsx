@@ -49,7 +49,7 @@ export function CodexHarnessInstall({
 				copySuccessMessage="Config copied"
 				emptyMessage={emptyMessage}
 				harnessName="Codex"
-				label="config.toml"
+				label={t("config.toml")}
 				logoSrc="/images/harness/codex.svg"
 				registrationLabel={`${configPath} · ${getRegistrationLabel(serverScope, selectedServers)}`}
 			/>

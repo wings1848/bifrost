@@ -119,7 +119,6 @@ export function TokenExchangeFields({
 						control={control}
 						name="token_exchange.use_idp_credentials"
 						render={({ field }) => {
-							const { t } = useLocaleCtx();
 							const checked = !!field.value;
 							const select = (value: boolean) => {
 								field.onChange(value);

@@ -121,7 +121,6 @@ export function MCPLibraryAddServerSheet({ open, onClose }: MCPLibraryAddServerS
 	};
 
 	const onSubmit = async (data: MCPLibraryAddServerFormData) => {
-		const { t } = useLocaleCtx();
 		const tags = parseList(data.tags);
 		const payload: CreateMCPLibraryEntryRequest = {
 			name: data.name.trim(),
@@ -186,7 +185,7 @@ export function MCPLibraryAddServerSheet({ open, onClose }: MCPLibraryAddServerS
 
 							{/* Listing details */}
 							<div className="space-y-4">
-								<SectionHeader title={t("Listing Details")} description="How this server appears to members browsing the library." />
+								<SectionHeader title={t("Listing Details")} description={t("How this server appears to members browsing the library.")} />
 								<div className="space-y-4 rounded-md border p-4">
 									<FormField
 										control={control}
@@ -227,7 +226,7 @@ export function MCPLibraryAddServerSheet({ open, onClose }: MCPLibraryAddServerS
 							<div className="space-y-4">
 								<SectionHeader
 									title={t("Connection")}
-									description="How Bifrost will reach this server once a member installs the listing."
+									description={t("How Bifrost will reach this server once a member installs the listing.")}
 								/>
 								<div className="space-y-4 rounded-md border p-4">
 									<FormField
@@ -341,7 +340,7 @@ export function MCPLibraryAddServerSheet({ open, onClose }: MCPLibraryAddServerS
 									<div className="space-y-4">
 										<SectionHeader
 											title={t("Authentication")}
-											description="The scheme this server expects. It prefills the install form; no secrets are stored on the listing."
+											description={t("The scheme this server expects. It prefills the install form; no secrets are stored on the listing.")}
 										/>
 										<div className="space-y-4 rounded-md border p-4">
 											<FormItem className="w-full">
@@ -407,7 +406,10 @@ export function MCPLibraryAddServerSheet({ open, onClose }: MCPLibraryAddServerS
 
 							{/* Catalog metadata */}
 							<div className="space-y-4">
-								<SectionHeader title={t("Discovery")} description="Optional metadata used to browse, filter, and attribute this listing." />
+								<SectionHeader
+									title={t("Discovery")}
+									description={t("Optional metadata used to browse, filter, and attribute this listing.")}
+								/>
 								<div className="space-y-4 rounded-md border p-4">
 									<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 										<FormField

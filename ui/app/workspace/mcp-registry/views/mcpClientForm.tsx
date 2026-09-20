@@ -91,7 +91,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 	}, [open, reset, resetSatellites]);
 
 	const onSubmit = async (data: CreateMCPClientRequest) => {
-		const { t } = useLocaleCtx();
 		const isValid = validateMCPClientForm({
 			data,
 			satellites,
@@ -241,14 +240,12 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						setOauthFlow(null);
 					}}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("Success"), description: t("MCP server connected with OAuth") });
 						setOauthFlow(null);
 						onClose();
 						onSaved();
 					}}
 					onError={(error) => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("OAuth Error"), description: error, variant: "destructive" });
 					}}
 					onConflict={(error) => {
@@ -274,7 +271,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						setHeadersFlow(null);
 					}}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						setHeadersFlow(null);
 						toast({ title: t("Success"), description: t("MCP server connected with per-user headers") });
 						onSaved();

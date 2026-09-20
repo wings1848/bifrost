@@ -78,7 +78,6 @@ export default function OAuthGrantsPage() {
 	const handleOffsetChange = (offset: number) => setUrlState({ offset });
 
 	const confirmRevoke = async () => {
-		const { t } = useLocaleCtx();
 		if (!pendingDelete) return;
 		const row = pendingDelete;
 		setPendingDelete(null);

@@ -63,7 +63,7 @@ export function MCPClientSessionsSection({ mcpClient }: Props) {
 
 function OAuthCredentialBlock({ mcpClient }: Props) {
 	const { t } = useLocaleCtx();
-	const copy = oauthCredentialCopy(mcpClient.config.auth_type);
+	const copy = oauthCredentialCopy(mcpClient.config.auth_type, t);
 	const credential = mcpClient.credential?.kind === "oauth" ? mcpClient.credential : undefined;
 
 	return (
@@ -73,7 +73,7 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 				<EmptyCredential>{copy.empty}</EmptyCredential>
 			) : (
 				<DefinitionList>
-					<Row label="Status">
+					<Row label={t("Status")}>
 						<CredentialStatusBadge status={credential.status} />
 						{credential.status === "needs_reauth" && <Hint>{copy.needsReauth}</Hint>}
 						{credential.status_reason && (
@@ -85,7 +85,7 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 							</div>
 						)}
 					</Row>
-					<Row label="Access token expires">
+					<Row label={t("Access token expires")}>
 						{credential.expires_at ? (
 							<>
 								{formatTokenExpiry(credential.expires_at, credential.status, credential.has_refresh_token)}
@@ -105,17 +105,17 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 							</>
 						)}
 					</Row>
-					<Row label="Refresh token">
+					<Row label={t("Refresh token")}>
 						<RefreshTokenValue credential={credential} notIssuedHint={copy.notIssued} />
 					</Row>
-					<Row label="Granted scopes">
+					<Row label={t("Granted scopes")}>
 						{credential.scopes?.length ? (
 							<ScopeChips scopes={credential.scopes} max={credential.scopes.length} />
 						) : (
 							<span className="text-muted-foreground">{t("Not reported by the provider")}</span>
 						)}
 					</Row>
-					<Row label="Authorized">{formatAbsoluteDate(credential.created_at)}</Row>
+					<Row label={t("Authorized")}>{formatAbsoluteDate(credential.created_at)}</Row>
 				</DefinitionList>
 			)}
 		</div>
@@ -125,8 +125,16 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 // Copy for the three auth types that hold an OAuth credential of their own.
 // The repair action named in each string matches the label of the
 // actions-menu item that replaces that credential.
-function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
-	const { t } = useLocaleCtx();
+/**
+ * 纯查表函数：t 由调用方传入。
+ *
+ * 它不渲染任何东西，只是按 auth_type 选一段文案，所以不能自己调 hook
+ * （rules-of-hooks）；调用点 OAuthCredentialBlock 已在组件顶层拿到 t。
+ */
+function oauthCredentialCopy(
+	authType: MCPClient["config"]["auth_type"],
+	t: (key: string, params?: Record<string, string | number>) => string,
+) {
 	switch (authType) {
 		case "per_user_oauth": {
 			const repairAction = "Refresh admin credential";
@@ -135,9 +143,14 @@ function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
 				description: t(
 					"Kept on file only to refresh this server's tool list. End users sign in individually; their tokens are listed under MCP sessions.",
 				),
-				empty: `No admin credential on file, so the tool list is not refreshed automatically. Use ${repairAction} from the server's actions menu to add one.`,
-				needsReauth: `The provider rejected the refresh token. Use ${repairAction} from the actions menu. User sessions are not affected.`,
-				notIssued: `This provider did not return a refresh token. Use ${repairAction} once the access token expires.`,
+				empty: t(
+					"No admin credential on file, so the tool list is not refreshed automatically. Use {action} from the server's actions menu to add one.",
+					{ action: repairAction },
+				),
+				needsReauth: t("The provider rejected the refresh token. Use {action} from the actions menu. User sessions are not affected.", {
+					action: repairAction,
+				}),
+				notIssued: t("This provider did not return a refresh token. Use {action} once the access token expires.", { action: repairAction }),
 			};
 		}
 		case "token_exchange": {
@@ -147,19 +160,31 @@ function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
 				description: t(
 					"The token exchanged from the admin's own sign-in at verification, kept on file only to refresh this server's tool list. Callers have their own identity tokens exchanged on every tool call.",
 				),
-				empty: `No admin credential on file, so the tool list is not refreshed automatically. Use ${repairAction} from the server's actions menu to add one.`,
-				needsReauth: `The identity provider rejected the refresh token. Use ${repairAction} from the actions menu. Callers' tool calls are not affected.`,
-				notIssued: `The identity provider did not return a refresh token. Add offline_access to the exchange scopes where it is supported so the credential renews itself, then use ${repairAction}.`,
+				empty: t(
+					"No admin credential on file, so the tool list is not refreshed automatically. Use {action} from the server's actions menu to add one.",
+					{ action: repairAction },
+				),
+				needsReauth: t(
+					"The identity provider rejected the refresh token. Use {action} from the actions menu. Callers' tool calls are not affected.",
+					{ action: repairAction },
+				),
+				notIssued: t(
+					"The identity provider did not return a refresh token. Add offline_access to the exchange scopes where it is supported so the credential renews itself, then use {action}.",
+					{ action: repairAction },
+				),
 			};
 		}
 		default: {
 			const repairAction = "Reauthorize";
 			return {
 				title: t("OAuth Credential"),
-				description: `The shared token every caller of this server uses. Read-only. Use ${repairAction} from the server's actions menu to replace it.`,
-				empty: "No credential yet. Complete the one-time authorization from the server's actions menu to connect this server.",
-				needsReauth: `The provider rejected the refresh token. Use ${repairAction} from the server's actions menu.`,
-				notIssued: `This provider did not return a refresh token. Use ${repairAction} once the access token expires.`,
+				description: t(
+					"The shared token every caller of this server uses. Read-only. Use {action} from the server's actions menu to replace it.",
+					{ action: repairAction },
+				),
+				empty: t("No credential yet. Complete the one-time authorization from the server's actions menu to connect this server."),
+				needsReauth: t("The provider rejected the refresh token. Use {action} from the server's actions menu.", { action: repairAction }),
+				notIssued: t("This provider did not return a refresh token. Use {action} once the access token expires.", { action: repairAction }),
 			};
 		}
 	}
@@ -193,7 +218,9 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 		<div className="space-y-4" data-testid="mcpclient-credential-section">
 			<SectionHeader
 				title={t("Admin Verification Values")}
-				description="Sample values supplied at verification. Bifrost uses them only to refresh the tool list. They are stored encrypted and never shown."
+				description={t(
+					"Sample values supplied at verification. Bifrost uses them only to refresh the tool list. They are stored encrypted and never shown.",
+				)}
 				testId="mcpclient-credential-heading"
 			/>
 			{!credential ? (
@@ -204,7 +231,7 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 				</EmptyCredential>
 			) : (
 				<DefinitionList>
-					<Row label="Status">
+					<Row label={t("Status")}>
 						<CredentialStatusBadge status={credential.status} />
 						{credential.status === "needs_update" && (
 							<Hint>
@@ -214,7 +241,7 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 							</Hint>
 						)}
 					</Row>
-					<Row label="Covers headers">
+					<Row label={t("Covers headers")}>
 						{covered.length === 0 && missing.length === 0 ? (
 							<span className="text-muted-foreground">-</span>
 						) : (
@@ -241,8 +268,8 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 							</div>
 						)}
 					</Row>
-					<Row label="Submitted">{formatAbsoluteDate(credential.created_at)}</Row>
-					<Row label="Last updated">{formatRelativePast(credential.updated_at)}</Row>
+					<Row label={t("Submitted")}>{formatAbsoluteDate(credential.created_at)}</Row>
+					<Row label={t("Last updated")}>{formatRelativePast(credential.updated_at)}</Row>
 				</DefinitionList>
 			)}
 		</div>

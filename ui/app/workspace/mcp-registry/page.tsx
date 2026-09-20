@@ -19,6 +19,7 @@ function resolveBooleanFacet(selected: string[]): boolean | undefined {
 }
 
 export default function MCPServersPage() {
+	const { t } = useLocaleCtx();
 	const [urlState, setUrlState] = useQueryStates(
 		{
 			search: parseAsString.withDefault(""),
@@ -118,7 +119,6 @@ export default function MCPServersPage() {
 	const { toast } = useToast();
 
 	useEffect(() => {
-		const { t } = useLocaleCtx();
 		if (error) {
 			const message = getErrorMessage(error);
 			if (message.toLowerCase().includes("mcp is not configured in this bifrost instance")) return;

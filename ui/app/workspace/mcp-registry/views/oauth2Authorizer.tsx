@@ -125,7 +125,6 @@ export const OAuth2Authorizer: React.FC<OAuth2AuthorizerProps> = ({
 	);
 
 	const checkOAuthStatus = useCallback(async () => {
-		const { t } = useLocaleCtx();
 		if (cancelledRef.current) return;
 		try {
 			const result = await getOAuthStatus(oauthConfigId).unwrap();

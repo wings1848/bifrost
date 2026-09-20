@@ -57,7 +57,7 @@ export function VSCodeHarnessInstall({
 			deeplink={deeplink}
 			emptyMessage={emptyMessage}
 			harnessName="VS Code"
-			label="Config"
+			label={t("Config")}
 			logoSrc="/images/harness/vscode.svg"
 			registrationLabel={`${configPath} · ${getRegistrationLabel(serverScope, selectedServers)}`}
 		/>

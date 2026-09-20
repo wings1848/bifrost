@@ -79,7 +79,6 @@ export default function SessionsTable({
 	const [pendingActionRowId, setPendingActionRowId] = useState<string | null>(null);
 
 	const handleReauth = async (row: MCPSessionRow) => {
-		const { t } = useLocaleCtx();
 		setPendingActionRowId(row.id);
 		try {
 			const res = await reauth(row.id).unwrap();
@@ -99,10 +98,10 @@ export default function SessionsTable({
 		setPendingActionRowId(row.id);
 		try {
 			await revoke(row.id).unwrap();
-			toast({ title: row.kind === "header" ? "Header values revoked" : "Session revoked" });
+			toast({ title: row.kind === "header" ? t("Header values revoked") : t("Session revoked") });
 		} catch (err) {
 			toast({
-				title: row.kind === "header" ? "Failed to revoke header values" : "Failed to revoke session",
+				title: row.kind === "header" ? t("Failed to revoke header values") : t("Failed to revoke session"),
 				description: getErrorMessage(err),
 				variant: "destructive",
 			});
@@ -171,7 +170,7 @@ export default function SessionsTable({
 								<TableHead>{t("MCP server")}</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Type"
+										label={t("Type")}
 										tooltip={t(
 											"OAuth: per-user OAuth credential, either a stored token from a completed sign-in, or a pending sign-in flow. Headers: per-user header values (API keys / signed tokens), either stored or pending submission.",
 										)}
@@ -179,7 +178,7 @@ export default function SessionsTable({
 								</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Bound to"
+										label={t("Bound to")}
 										tooltip={t(
 											"The identity this credential is keyed to: an end user (via SSO), a virtual key (shared by anyone using that VK), or a client-issued session ID (asserted via the x-bf-mcp-session-id header).",
 										)}
@@ -187,7 +186,7 @@ export default function SessionsTable({
 								</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Status"
+										label={t("Status")}
 										tooltip={t(
 											"Active: credential valid and usable. Pending: OAuth flow in progress, user must complete sign-in. Needs re-auth: upstream credential expired or revoked at the provider; user must reconnect. Needs update: the admin changed the required header keys; user must resubmit. Orphaned: the user lost access to this MCP (e.g. an access profile change); credential is preserved and will become Active automatically if access is restored.",
 										)}
@@ -195,7 +194,7 @@ export default function SessionsTable({
 								</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Scopes"
+										label={t("Scopes")}
 										tooltip={t(
 											"Scopes the provider granted at sign-in, as reported in its token response. Shown as a dash when the provider did not report them. Header submissions and pending sign-ins have no scopes.",
 										)}
@@ -203,7 +202,7 @@ export default function SessionsTable({
 								</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Access token expiry"
+										label={t("Access token expiry")}
 										tooltip={t(
 											"When the current access token expires. With a refresh token, Bifrost renews it on the next request, so an active row past its expiry silently mints a new token at use time. Without one, a past expiry means the row must be re-authenticated. Header rows do not have an upstream expiry; their values stay valid until revoked or the schema changes.",
 										)}
@@ -211,7 +210,7 @@ export default function SessionsTable({
 								</TableHead>
 								<TableHead>
 									<HeaderWithTooltip
-										label="Refresh token"
+										label={t("Refresh token")}
 										tooltip={t(
 											"Whether the provider issued a refresh token. Present: Bifrost renews the access token automatically at use time. Not issued: the row must be re-authenticated once the access token expires. Rejected upstream: the provider refused the last refresh, so the row needs re-auth. Header rows and pending sign-ins have no token.",
 										)}
@@ -418,9 +417,10 @@ const SESSION_STATUS_LABELS: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
+	const { t } = useLocaleCtx();
 	return (
 		<Badge className={MCP_CREDENTIAL_STATUS_COLORS[status] ?? MCP_CREDENTIAL_STATUS_COLORS.unknown}>
-			{SESSION_STATUS_LABELS[status] ?? titleCaseFromSnakeCase(status)}
+			{t(SESSION_STATUS_LABELS[status] ?? titleCaseFromSnakeCase(status))}
 		</Badge>
 	);
 }
@@ -499,7 +499,7 @@ function RowActions({ row, reauthing, revoking, isPendingRow, onReauth, onRevoke
 								}}
 							>
 								<Pencil className="h-4 w-4" />
-								{row.status === "needs_update" ? "Update values" : "Edit values"}
+								{row.status === "needs_update" ? t("Update values") : t("Edit values")}
 							</DropdownMenuItem>
 						)}
 						<DropdownMenuItem

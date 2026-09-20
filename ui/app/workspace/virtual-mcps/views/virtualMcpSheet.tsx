@@ -127,7 +127,6 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 	const canSave = name.trim().length > 0 && !saving && isDirty && hasSavePermission;
 
 	const handleSave = async () => {
-		const { t } = useLocaleCtx();
 		if (!canSave) return;
 		const body: VirtualMCPRequest = {
 			name: name.trim(),
@@ -157,7 +156,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 			onClose();
 		} catch (err) {
 			toast({
-				title: isCreate ? "Failed to create Virtual MCP" : "Failed to update Virtual MCP",
+				title: isCreate ? t("Failed to create Virtual MCP") : t("Failed to update Virtual MCP"),
 				description: getErrorMessage(err),
 				variant: "destructive",
 			});
@@ -181,7 +180,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 					<div className="flex w-full items-center justify-between gap-2">
 						<div className="space-y-2">
 							<SheetTitle className="flex w-fit items-center gap-2 font-medium">
-								{isCreate ? "New Virtual MCP" : "Edit Virtual MCP"}
+								{isCreate ? t("New Virtual MCP") : t("Edit Virtual MCP")}
 								{enabled ? <Badge>{t("Enabled")}</Badge> : <Badge variant="secondary">{t("Disabled")}</Badge>}
 							</SheetTitle>
 							<SheetDescription>
@@ -252,7 +251,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 						</Button>
 						<Button onClick={handleSave} disabled={!canSave} data-testid="virtual-mcp-save-btn">
 							{saving && <Loader2 className="h-4 w-4 animate-spin" />}
-							{isCreate ? "Create" : "Save changes"}
+							{isCreate ? t("Create") : t("Save changes")}
 						</Button>
 					</div>
 				</SheetFooter>

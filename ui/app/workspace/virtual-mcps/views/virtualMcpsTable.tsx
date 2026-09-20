@@ -145,11 +145,10 @@ export default function VirtualMCPsTable({
 
 	// PATCH-style update: send only `enabled`, so the toggle never touches the tools or name.
 	const toggleEnabled = async (row: VirtualMCP, enabled: boolean) => {
-		const { t } = useLocaleCtx();
 		setTogglingIds((prev) => new Set(prev).add(row.id));
 		try {
 			await updateVirtualMCP({ id: row.id, data: { enabled } }).unwrap();
-			toast({ title: enabled ? "Virtual MCP enabled" : "Virtual MCP disabled" });
+			toast({ title: enabled ? t("Virtual MCP enabled") : t("Virtual MCP disabled") });
 		} catch (err) {
 			toast({ title: t("Failed to update Virtual MCP"), description: getErrorMessage(err), variant: "destructive" });
 		} finally {
@@ -162,7 +161,6 @@ export default function VirtualMCPsTable({
 	};
 
 	const confirmDelete = async () => {
-		const { t } = useLocaleCtx();
 		if (!pendingDelete) return;
 		const row = pendingDelete;
 		setPendingDelete(null);
@@ -298,7 +296,7 @@ export default function VirtualMCPsTable({
 													checked={row.enabled}
 													disabled={!canUpdate || togglingIds.has(row.id)}
 													onAsyncCheckedChange={(checked) => toggleEnabled(row, checked)}
-													aria-label={row.enabled ? "Disable Virtual MCP" : "Enable Virtual MCP"}
+													aria-label={row.enabled ? t("Disable Virtual MCP") : t("Enable Virtual MCP")}
 													data-testid={`virtual-mcp-enabled-switch-${row.id}`}
 												/>
 											</TableCell>
@@ -373,7 +371,7 @@ export default function VirtualMCPsTable({
 function EndpointCell({ slug, baseUrl }: { slug: string; baseUrl: string }) {
 	const { t } = useLocaleCtx();
 	const fullUrl = `${baseUrl}/mcp/${slug}`;
-	const { copy, copied } = useCopyToClipboard({ successMessage: "Endpoint copied" });
+	const { copy, copied } = useCopyToClipboard({ successMessage: t("Endpoint copied") });
 	return (
 		<button
 			type="button"

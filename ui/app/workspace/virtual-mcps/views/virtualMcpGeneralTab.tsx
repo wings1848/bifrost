@@ -73,8 +73,8 @@ export default function VirtualMCPGeneralTab({
 				/>
 				<p className="text-muted-foreground text-xs">
 					{isCreate
-						? "The URL-safe path this Virtual MCP is served at. Immutable after creation."
-						: "The endpoint slug cannot be changed after creation."}
+						? t("The URL-safe path this Virtual MCP is served at. Immutable after creation.")
+						: t("The endpoint slug cannot be changed after creation.")}
 				</p>
 				{isCreate && previewSlug && (
 					<p className="text-muted-foreground text-xs" data-testid="virtual-mcp-slug-preview">

@@ -149,7 +149,6 @@ function OAuthAuthView() {
 	}
 
 	const handleAuthenticate = async () => {
-		const { t } = useLocaleCtx();
 		try {
 			const res = await startFlow(flowId).unwrap();
 			window.location.href = res.authorize_url;
@@ -171,13 +170,14 @@ function OAuthAuthView() {
 				<ShieldCheck className="text-primary size-6" />
 			</div>
 			<h1 className="text-xl font-semibold tracking-tight">
-				{isReauth ? "Re-authenticate with" : "Authenticate with"} {mcpClientName}
+				{isReauth ? t("Re-authenticate with") : t("Authenticate with")} {mcpClientName}
 			</h1>
 			<p className="text-muted-foreground mt-2 text-sm">
 				{isReauth ? (
 					<>
-						{t("An active credential already exists for the binding below. Completing this flow will")} <strong>{t("replace")}</strong>{" "}
-						{t("it with a fresh credential. You can also close this tab to keep using the existing one.")}
+						{t(
+							"An active credential already exists for the binding below. Completing this flow will replace it with a fresh credential. You can also close this tab to keep using the existing one.",
+						)}
 					</>
 				) : (
 					<>
@@ -189,15 +189,15 @@ function OAuthAuthView() {
 			</p>
 
 			<dl className="bg-muted/40 mt-6 space-y-3 rounded-sm border p-4 text-sm">
-				<DetailRow label="MCP client" value={mcpClientName} mono={!flow.mcp_client?.name} />
-				<DetailRow label="Bound to" value={<BindingValue flow={flow} />} />
-				<DetailRow label="Flow expires" value={formatExpiry(flow.expires_at)} />
+				<DetailRow label={t("MCP client")} value={mcpClientName} mono={!flow.mcp_client?.name} />
+				<DetailRow label={t("Bound to")} value={<BindingValue flow={flow} />} />
+				<DetailRow label={t("Flow expires")} value={formatExpiry(flow.expires_at)} />
 			</dl>
 
 			<div className="mt-6 flex gap-3">
 				<Button onClick={handleAuthenticate} disabled={starting} data-testid="mcp-auth-authenticate-button">
 					{starting ? <Loader2 className="size-4 animate-spin" /> : <ExternalLink className="size-4" />}
-					<span>{isReauth ? "Re-authenticate" : "Authenticate"}</span>
+					<span>{isReauth ? t("Re-authenticate") : t("Authenticate")}</span>
 				</Button>
 				{showLoginOption && !showTempTokenSSOWarning ? (
 					<Button asChild variant="outline" data-testid="mcp-auth-login-instead-inline-button">
@@ -295,7 +295,6 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 	}
 
 	const handleSubmit = async (values: Record<string, string>) => {
-		const { t } = useLocaleCtx();
 		try {
 			await submit({ flowId, body: { headers: values } }).unwrap();
 			void setSubmitted("true");
@@ -334,9 +333,9 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 			</p>
 
 			<dl className="bg-muted/40 mt-6 space-y-3 rounded-sm border p-4 text-sm">
-				<DetailRow label="MCP client" value={mcpClientName} mono={!detail.mcp_client?.name} />
-				<DetailRow label="Bound to" value={<HeadersBindingValue flow={detail} />} />
-				<DetailRow label="Flow expires" value={formatExpiry(detail.expires_at)} />
+				<DetailRow label={t("MCP client")} value={mcpClientName} mono={!detail.mcp_client?.name} />
+				<DetailRow label={t("Bound to")} value={<HeadersBindingValue flow={detail} />} />
+				<DetailRow label={t("Flow expires")} value={formatExpiry(detail.expires_at)} />
 			</dl>
 
 			<div className="mt-6">
@@ -346,7 +345,7 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 					previouslySubmittedKeys={detail.submitted_keys}
 					onSubmit={handleSubmit}
 					busy={submitting}
-					submitLabel={isEdit ? "Save" : "Submit"}
+					submitLabel={isEdit ? t("Save") : t("Submit")}
 					testIdPrefix="mcp-headers-submit"
 				/>
 			</div>
@@ -394,25 +393,26 @@ function HeadersBindingValue({ flow }: { flow: MCPHeadersFlowDetail }) {
 }
 
 function CompletedFlowView({ flow }: { flow: MCPFlowDetail }) {
+	const { t } = useLocaleCtx();
 	const mcpClientName = flow.mcp_client?.name || flow.mcp_client?.client_id || "this MCP server";
 	// has_active_token wins over the flow's row status: a pending flow with an
 	// existing active token means OAuth was re-initiated unnecessarily.
 	const effectivelyAuthorized = flow.status === "authorized" || flow.has_active_token;
 	const title = effectivelyAuthorized
-		? "Already authenticated"
+		? t("Already authenticated")
 		: flow.status === "expired"
-			? "This authentication flow has expired"
-			: "This authentication flow can no longer be completed";
+			? t("This authentication flow has expired")
+			: t("This authentication flow can no longer be completed");
 	const body = effectivelyAuthorized
-		? `The OAuth credential for ${mcpClientName} is already stored. You can close this tab.`
-		: "Trigger the original action again so a fresh flow is created.";
+		? t("The OAuth credential for {name} is already stored. You can close this tab.", { name: mcpClientName })
+		: t("Trigger the original action again so a fresh flow is created.");
 	return (
 		<CenteredCard>
 			<h1 className="text-xl font-semibold tracking-tight">{title}</h1>
 			<p className="text-muted-foreground mt-2 text-sm">{body}</p>
 			<dl className="bg-muted/40 mt-6 space-y-3 rounded-sm border p-4 text-sm">
-				<DetailRow label="MCP client" value={mcpClientName} mono={!flow.mcp_client?.name} />
-				<DetailRow label="Bound to" value={<BindingValue flow={flow} />} />
+				<DetailRow label={t("MCP client")} value={mcpClientName} mono={!flow.mcp_client?.name} />
+				<DetailRow label={t("Bound to")} value={<BindingValue flow={flow} />} />
 			</dl>
 			<div className="mt-6">
 				<SessionsTabLink />

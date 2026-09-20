@@ -108,7 +108,6 @@ export default function MCPLibraryPage() {
 	const { data: mcpClientsData, error: mcpClientsError } = useGetMCPClientsQuery({ limit: 100, offset: 0 });
 
 	useEffect(() => {
-		const { t } = useLocaleCtx();
 		if (!libraryError && !mcpClientsError) return;
 		const err = libraryError || mcpClientsError;
 		if (!err) return;

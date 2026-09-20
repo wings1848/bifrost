@@ -3,6 +3,7 @@ import { buildWindsurfConfig } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { HarnessInstallProps } from "../types";
 import { getRegistrationLabel, getUserHomePrefix } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function WindsurfHarnessInstall({
 	canGenerateCommand,
@@ -13,6 +14,7 @@ export function WindsurfHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const configPath = `${getUserHomePrefix(platform)}/.codeium/windsurf/mcp_config.json`;
 
 	const config = useMemo(
@@ -33,7 +35,7 @@ export function WindsurfHarnessInstall({
 			copySuccessMessage="Config copied"
 			emptyMessage={emptyMessage}
 			harnessName="Windsurf (Devin)"
-			label="Config"
+			label={t("Config")}
 			logoSrc="/images/harness/windsurf.svg"
 			registrationLabel={`${configPath} · ${getRegistrationLabel(serverScope, selectedServers)}`}
 		/>

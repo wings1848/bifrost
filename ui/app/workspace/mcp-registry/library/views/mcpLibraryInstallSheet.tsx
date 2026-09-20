@@ -149,7 +149,6 @@ export function MCPLibraryInstallSheet({ server, open, onClose, onInstalled }: M
 	}, [defaultValues, open, reset, resetSatellites, satellitesInit]);
 
 	const onSubmit = async (data: CreateMCPClientRequest) => {
-		const { t } = useLocaleCtx();
 		// The transport inputs are locked to the library entry, so a listing
 		// published without a target would post an empty URL or command and
 		// leave the installer staring at a server error they can't act on.
@@ -351,14 +350,12 @@ export function MCPLibraryInstallSheet({ server, open, onClose, onInstalled }: M
 					open={!!oauthFlow}
 					onClose={() => setOauthFlow(null)}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("Installed"), description: `${server.name} MCP server connected with OAuth.` });
 						setOauthFlow(null);
 						onInstalled();
 						onClose();
 					}}
 					onError={(error) => {
-						const { t } = useLocaleCtx();
 						toast({ title: t("OAuth Error"), description: error, variant: "destructive" });
 					}}
 					onConflict={(error) => {
@@ -377,7 +374,6 @@ export function MCPLibraryInstallSheet({ server, open, onClose, onInstalled }: M
 					open={!!headersFlow}
 					onClose={() => setHeadersFlow(null)}
 					onSuccess={() => {
-						const { t } = useLocaleCtx();
 						setHeadersFlow(null);
 						toast({ title: t("Installed"), description: `${server.name} MCP server connected with per-user headers.` });
 						onInstalled();

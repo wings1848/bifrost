@@ -80,7 +80,6 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 	}, [config, formValues, isDirty]);
 
 	const onSubmit = async (data: MCPLibrarySettingsFormData) => {
-		const { t } = useLocaleCtx();
 		if (!bifrostConfig) {
 			toast.error(t("Unable to load current settings. Please retry."));
 			return;
@@ -102,7 +101,6 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 	};
 
 	const handleForceSync = async () => {
-		const { t } = useLocaleCtx();
 		try {
 			await forceSyncMCPLibrary().unwrap();
 			toast.success(t("MCP Library sync triggered successfully."));

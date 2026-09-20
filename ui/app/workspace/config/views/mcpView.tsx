@@ -192,7 +192,6 @@ export default function MCPView() {
 	}, []);
 
 	const handleSave = useCallback(async () => {
-		const { t } = useLocaleCtx();
 		try {
 			const agentDepth = Number.parseInt(localValues.mcp_agent_depth);
 			const toolTimeout = Number.parseInt(localValues.mcp_tool_execution_timeout);
@@ -330,7 +329,7 @@ export default function MCPView() {
 						<p className="text-muted-foreground text-sm">
 							{t(
 								"When enabled, MCP tools are not automatically included in every request. Tools are only injected when explicitly specified via request headers ({header}) and still must be allowed by the virtual key MCP configuration.",
-								{ header: "x-bf-mcp-include-tools" },
+								{ header: t("x-bf-mcp-include-tools") },
 							)}
 						</p>
 					</div>
@@ -640,7 +639,7 @@ export default function MCPView() {
 			</div>
 			<div className="flex justify-end pt-2">
 				<Button onClick={handleSave} disabled={!hasChanges || isLoading || !hasSettingsUpdateAccess} data-testid="mcp-settings-save-btn">
-					{isLoading ? "Saving..." : "Save Changes"}
+					{isLoading ? t("Saving...") : t("Save Changes")}
 				</Button>
 			</div>
 		</div>
