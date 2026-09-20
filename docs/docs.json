@@ -238,6 +238,7 @@
               "features/retries-and-fallbacks",
               "features/compat-plugin",
               "features/keys-management",
+              "features/management-api-tokens",
               "features/async-inference",
               "features/webhooks",
               {

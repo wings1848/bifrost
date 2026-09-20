@@ -1,0 +1,62 @@
+---
+title: "管理 API Token"
+description: "为 Bifrost 管理接口创建可吊销的长期 API Token：创建、查看、吊销，以及每条行为的验收命令。实现时以本文档的验收表为准。"
+icon: "key"
+---
+
+## 背景：现在只能拿账号密码调管理接口
+
+今天所有管理接口（建 provider、加 key、改配置）都走面板登录那一套认证，只有两种凭证：
+
+- 登录后发的会话 cookie，有效期 30 天（`session.go:139-142`：`uuid` + `ExpiresAt: 30 天`），过期就要重新登录拿新的；
+- 每次请求直接带 `Basic base64(用户名:密码)`（`middlewares.go:1164` 起的 `middleware` 函数里验的）。
+
+ temp-token 只管 3 个 OAuth 页面（`handlers/temptokens.go` 的 3 个 scope），推理用的 virtual key 只能调模型、建不了 provider。所以写脚本管 Bifrost 时，要么存一份账号密码明文，要么每 30 天人工重新登录一次。
+
+## 本功能：多发一种长期凭证
+
+新增一种专门给脚本用的管理凭证（API Token），跟登录会话平级。它能通过的接口和登录后一样，但：
+
+- 可以建很多个（比如给 CI 一个、给同步脚本一个），每个单独命名、单独吊销；
+- 有可选有效期，到期自动失效；
+- 泄露时只吊销那一个，不用改管理员密码；
+- 改管理员密码时不受影响（现在改密码会清掉**所有**会话，`config.go:998` 的 `FlushSessions`；API Token 不跟着清，否则脚本全断）。
+
+## 接口设计（给实现者）
+
+| 接口 | 方法 | 说明 |
+| --- | --- | --- |
+| `/api/tokens` | `GET` | 列出所有 Token（只给看元数据+上次使用时间，不返明文） |
+| `/api/tokens` | `POST` | 创建 Token，请求体带名字和可选有效期；明文只在这一次响应里返回 |
+| `/api/tokens/{id}` | `DELETE` | 吊销 Token，之后用它调接口一律 401 |
+
+认证方式：`Authorization: Bearer <token>`。中间件里先按现有会话查（`rdb.go:6926` 的 `GetSession`），查不到再按 Token 查，查到就跟登录会话一样放行。
+
+存储：新表 `api_tokens`（字段跟 `sessions` 表对齐：`framework/configstore/tables/sessions.go:12-20`），Token 存哈希不存明文（跟会话表 `TokenHash` 一个做法），支持加密开启时加密。
+
+不变量（实现时不能打破的）：
+
+1. 推理接口的认证逻辑不动——virtual key 照常工作，`InferenceMiddleware`（`middlewares.go:1086`）原样保留；
+2. 创建首个管理员账号仍要 setup token（`config.go:936` 的 `ValidateSetupToken`），Token 建不了管理员账号；
+3. 改管理员密码清会话时不清 Token（`config.go:998` 的 `FlushSessions` 只清 `sessions` 表）。
+
+## 验收标准
+
+下面每条都是一句话标准 + 一条判定命令 + 期望输出。命令里的 `$BIFROST` 是网关地址（如 `http://192.168.31.10:8080`），`$ADMIN` 是 `base64(用户名:密码)`。
+
+| # | 标准 | 判定命令 | 期望输出 |
+| --- | --- | --- | --- |
+| 1 | 能创建一个带名字的 Token，明文只返回一次 | `curl -s -X POST $BIFROST/api/tokens -H "Authorization: Basic $ADMIN" -d '{"name":"ci"}'` | 响应里有 `token` 明文字段和 `id` |
+| 2 | 用 Token 能调管理接口 | `curl -s $BIFROST/api/providers -H "Authorization: Bearer <token>"` | 200，返回 provider 列表 |
+| 3 | Token 列表不泄露明文 | `curl -s $BIFROST/api/tokens -H "Authorization: Basic $ADMIN"` | 200，每条有 `name`/`id`，没有任何条目带 `token` 明文 |
+| 4 | 吊销后立即失效 | `curl -s -X DELETE $BIFROST/api/tokens/<id> -H "Authorization: Basic $ADMIN"` 后再 `curl -s $BIFROST/api/providers -H "Authorization: Bearer <token>"` | 第一条 200，第二条 401 |
+| 5 | 过期 Token 自动失效 | 建一个有效期 1 分钟的 Token，等 2 分钟后调 `GET /api/providers` | 401 |
+| 6 | 改管理员密码不影响 Token | 改密码后用旧 Token 调 `GET /api/providers` | 200（会话会被清掉，但 Token 照常可用） |
+| 7 | Token 调推理接口不越权 | `curl -s $BIFROST/v1/models -H "Authorization: Bearer <token>"` | 按无 virtual key 处理（401 或空列表，不返回模型数据） |
+| 8 | 数据库里看不到 Token 明文 | `SELECT token FROM api_tokens;`（或对应字段） | 查出来的是哈希/密文，不是创建时返回的明文 |
+
+## 已知不做
+
+- Token 不分权限等级：能用的接口和管理员登录后一样，不做细粒度 scope；要限制先用 virtual key 管推理。
+- 不做 Token 轮换提醒：到期前不发通知，到期直接 401，调用方自己重建。
+- 不给 Token 配额/限流：限流继续用 virtual key + budget 那套。
