@@ -6,10 +6,12 @@ import { useEffect, useState } from "react";
 import VirtualMCPSheet, { VirtualMCPSheetTarget } from "./views/virtualMcpSheet";
 import VirtualMCPWizard from "./views/virtualMcpWizard";
 import VirtualMCPsTable from "./views/virtualMcpsTable";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const PAGE_SIZE = 25;
 
 export default function VirtualMCPsPage() {
+	const { t } = useLocaleCtx();
 	const [urlState, setUrlState] = useQueryStates(
 		{
 			q: parseAsString.withDefault(""),
@@ -54,7 +56,7 @@ export default function VirtualMCPsPage() {
 		return (
 			<div className="mx-auto w-full max-w-7xl px-4 md:px-0">
 				<div className="border-destructive bg-destructive/10 text-destructive rounded-lg border p-6 text-sm">
-					Failed to load Virtual MCPs: {getErrorMessage(error)}
+					{t("Failed to load Virtual MCPs:")} {getErrorMessage(error)}
 				</div>
 			</div>
 		);

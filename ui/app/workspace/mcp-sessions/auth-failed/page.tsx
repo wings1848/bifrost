@@ -1,7 +1,9 @@
 import { AlertCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export default function MCPSessionsAuthFailedPage() {
+	const { t } = useLocaleCtx();
 	const [error] = useQueryState("error");
 	return (
 		<div className="mx-auto flex min-h-[60vh] w-full max-w-xl items-center justify-center p-6">
@@ -9,10 +11,10 @@ export default function MCPSessionsAuthFailedPage() {
 				<div className="bg-destructive/10 mx-auto mb-5 flex size-12 items-center justify-center rounded-full">
 					<AlertCircle className="text-destructive size-6" />
 				</div>
-				<h1 className="text-xl font-semibold tracking-tight">Authentication failed</h1>
+				<h1 className="text-xl font-semibold tracking-tight">{t("Authentication failed")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">{error ?? "We couldn't complete the authentication flow."}</p>
 				<p className="text-muted-foreground mt-4 text-sm">
-					You can close this tab and retry the original request from your MCP client to generate a fresh authentication link.
+					{t("You can close this tab and retry the original request from your MCP client to generate a fresh authentication link.")}
 				</p>
 			</div>
 		</div>

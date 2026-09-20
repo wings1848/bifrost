@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { toIntervalHours } from "./mcpLibrarySettingsSheet.utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const mcpLibrarySettingsSchema = z.object({
 	// file:// is accepted so air-gapped deployments can point the catalog at a
@@ -19,8 +20,7 @@ const mcpLibrarySettingsSchema = z.object({
 		.string()
 		.trim()
 		.refine(
-			(value) =>
-				value === "" || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("file://"),
+			(value) => value === "" || value.startsWith("http://") || value.startsWith("https://") || value.startsWith("file://"),
 			"URL must start with http://, https://, or file://",
 		),
 	// 0 disables background syncing entirely. Force Sync Now still works.
@@ -41,6 +41,7 @@ interface MCPLibrarySettingsSheetProps {
 }
 
 export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsSheetProps) {
+	const { t } = useLocaleCtx();
 	const hasSettingsUpdateAccess = useRbac(RbacResource.Settings, RbacOperation.Update);
 	const { data: bifrostConfig, isLoading: isConfigLoading, isError: isConfigError } = useGetCoreConfigQuery({ fromDB: true });
 	const config = bifrostConfig?.framework_config;
@@ -79,8 +80,9 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 	}, [config, formValues, isDirty]);
 
 	const onSubmit = async (data: MCPLibrarySettingsFormData) => {
+		const { t } = useLocaleCtx();
 		if (!bifrostConfig) {
-			toast.error("Unable to load current settings. Please retry.");
+			toast.error(t("Unable to load current settings. Please retry."));
 			return;
 		}
 		try {
@@ -92,7 +94,7 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 					mcp_library_sync_interval: data.mcp_library_sync_interval_hours * 3600,
 				},
 			}).unwrap();
-			toast.success("MCP Library settings updated successfully.");
+			toast.success(t("MCP Library settings updated successfully."));
 			reset(data);
 		} catch (error) {
 			toast.error(getErrorMessage(error));
@@ -100,9 +102,10 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 	};
 
 	const handleForceSync = async () => {
+		const { t } = useLocaleCtx();
 		try {
 			await forceSyncMCPLibrary().unwrap();
-			toast.success("MCP Library sync triggered successfully.");
+			toast.success(t("MCP Library sync triggered successfully."));
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		}
@@ -112,18 +115,20 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 		<Sheet open={open} onOpenChange={(sheetOpen) => !sheetOpen && onClose()}>
 			<SheetContent className="flex w-full flex-col overflow-x-hidden px-0">
 				<SheetHeader className="flex flex-col items-start pt-8" headerClassName="px-4 md:px-6">
-					<SheetTitle>MCP Library Settings</SheetTitle>
-					<SheetDescription>Configure the sync source and interval for the MCP server catalog.</SheetDescription>
+					<SheetTitle>{t("MCP Library Settings")}</SheetTitle>
+					<SheetDescription>{t("Configure the sync source and interval for the MCP server catalog.")}</SheetDescription>
 				</SheetHeader>
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
 					<div className="flex-1 space-y-4 overflow-y-auto px-4 md:px-8">
 						<div className="space-y-2 rounded-sm border p-4">
 							<div className="space-y-0.5">
-								<Label htmlFor="mcp-library-url">Library Sync URL</Label>
+								<Label htmlFor="mcp-library-url">{t("Library Sync URL")}</Label>
 								<p className="text-muted-foreground text-sm">
-									URL to a custom MCP server catalog. Leave empty to use the default Bifrost catalog. Use a{" "}
-									<code>file://</code> URL to load the catalog from local disk in air-gapped deployments.
+									{t(
+										"URL to a custom MCP server catalog. Leave empty to use the default Bifrost catalog. Use a {fileScheme} URL to load the catalog from local disk in air-gapped deployments.",
+										{ fileScheme: "file://" },
+									)}
 								</p>
 							</div>
 							<Input
@@ -139,10 +144,11 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 
 						<div className="space-y-2 rounded-sm border p-4">
 							<div className="space-y-0.5">
-								<Label htmlFor="mcp-library-sync-interval">Sync Interval (hours)</Label>
+								<Label htmlFor="mcp-library-sync-interval">{t("Sync Interval (hours)")}</Label>
 								<p className="text-muted-foreground text-sm">
-									How often to sync the MCP server catalog from the source URL. Set to 0 to disable background syncing;
-									Force Sync Now still works.
+									{t(
+										"How often to sync the MCP server catalog from the source URL. Set to 0 to disable background syncing; Force Sync Now still works.",
+									)}
 								</p>
 							</div>
 							<Input
@@ -175,7 +181,7 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 								{isForceSyncing ? "Syncing..." : "Force Sync Now"}
 							</Button>
 							<Button type="button" variant="outline" onClick={onClose} disabled={isLoading} data-testid="mcp-library-settings-cancel-btn">
-								Cancel
+								{t("Cancel")}
 							</Button>
 							<Button
 								type="submit"

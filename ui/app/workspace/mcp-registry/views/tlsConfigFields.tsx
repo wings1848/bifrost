@@ -2,6 +2,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { SecretVarInput } from "@/components/ui/secretVarInput";
 import { Switch } from "@/components/ui/switch";
 import type { Control } from "react-hook-form";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface TLSConfigFieldsProps {
 	// Loosely typed on purpose: this fragment is shared between the create form
@@ -13,6 +14,7 @@ interface TLSConfigFieldsProps {
 
 /** Skip TLS Verification switch + CA Certificate PEM input, shared by the MCP create form and edit sheet. */
 export function TLSConfigFields({ control, disabled }: TLSConfigFieldsProps) {
+	const { t } = useLocaleCtx();
 	return (
 		<>
 			<FormField
@@ -21,9 +23,9 @@ export function TLSConfigFields({ control, disabled }: TLSConfigFieldsProps) {
 				render={({ field }) => (
 					<FormItem className="flex flex-row items-center justify-between gap-4">
 						<div className="space-y-0.5">
-							<FormLabel>Skip TLS verification</FormLabel>
+							<FormLabel>{t("Skip TLS verification")}</FormLabel>
 							<p className="text-muted-foreground text-sm">
-								Disable TLS certificate verification. Use only in trusted isolated environments. Takes priority over CA certificate.
+								{t("Disable TLS certificate verification. Use only in trusted isolated environments. Takes priority over CA certificate.")}
 							</p>
 						</div>
 						<FormControl>
@@ -42,9 +44,9 @@ export function TLSConfigFields({ control, disabled }: TLSConfigFieldsProps) {
 				name="tls_config.ca_cert_pem"
 				render={({ field }) => (
 					<FormItem>
-						<FormLabel>CA Certificate (PEM) (Optional)</FormLabel>
+						<FormLabel>{t("CA Certificate (PEM) (Optional)")}</FormLabel>
 						<p className="text-muted-foreground text-xs">
-							PEM-encoded CA certificate to trust for MCP server connections (e.g. self-signed or private CA).
+							{t("PEM-encoded CA certificate to trust for MCP server connections (e.g. self-signed or private CA).")}
 						</p>
 						<FormControl>
 							<SecretVarInput

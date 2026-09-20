@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import type { HarnessPlatform } from "./types";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface PlatformSelectProps {
 	platform: HarnessPlatform;
@@ -8,10 +9,11 @@ interface PlatformSelectProps {
 }
 
 export function PlatformSelect({ platform, onPlatformChange }: PlatformSelectProps) {
+	const { t } = useLocaleCtx();
 	const platforms: Array<{ value: HarnessPlatform; label: string; icon: string }> = [
-		{ value: "macos", label: "macOS", icon: "/images/platforms/mac.svg" },
-		{ value: "windows", label: "Windows", icon: "/images/platforms/windows.svg" },
-		{ value: "linux", label: "Linux", icon: "/images/platforms/linux.svg" },
+		{ value: "macos", label: t("macOS"), icon: "/images/platforms/mac.svg" },
+		{ value: "windows", label: t("Windows"), icon: "/images/platforms/windows.svg" },
+		{ value: "linux", label: t("Linux"), icon: "/images/platforms/linux.svg" },
 	];
 
 	return (
@@ -29,7 +31,7 @@ export function PlatformSelect({ platform, onPlatformChange }: PlatformSelectPro
 					data-testid={`mcp-usage-guide-platform-${option.value}`}
 				>
 					<img src={option.icon} alt="" aria-hidden="true" className="size-4 shrink-0" />
-					<span className="font-medium">{option.label}</span>
+					<span className="font-medium">{t(option.label)}</span>
 					{platform === option.value && <Check className="ml-auto size-4 text-green-600" />}
 				</button>
 			))}

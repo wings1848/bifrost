@@ -6,12 +6,14 @@ import { parseAsArrayOf, parseAsInteger, parseAsString, useQueryStates } from "n
 import { useCallback, useEffect, useMemo } from "react";
 import { MCPSessionFilters, MCPSessionsFilterSidebar } from "./views/mcpSessionsFilterSidebar";
 import SessionsTable from "./views/sessionsTable";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 // Page size larger than the governance default (25) since session rows are
 // denser than VK rows and the page is the only screen of MCP-auth content.
 const PAGE_SIZE = 50;
 
 export default function MCPSessionsPage() {
+	const { t } = useLocaleCtx();
 	const [urlState, setUrlState] = useQueryStates(
 		{
 			q: parseAsString.withDefault(""),
@@ -87,7 +89,7 @@ export default function MCPSessionsPage() {
 		return (
 			<div className="mx-auto w-full max-w-7xl">
 				<div className="border-destructive bg-destructive/10 text-destructive rounded-lg border p-6 text-sm">
-					Failed to load MCP sessions: {getErrorMessage(error)}
+					{t("Failed to load MCP sessions:")} {getErrorMessage(error)}
 				</div>
 			</div>
 		);

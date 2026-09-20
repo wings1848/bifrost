@@ -1,23 +1,31 @@
 import { MCPClientConfigEntry, MCPClientConfigsEditor } from "@/components/mcp/mcpClientConfigsEditor";
 import { VirtualMCPToolSpec } from "@/lib/types/virtualMcps";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const TOOL_WILDCARD = "*";
-
-const TOOLS_TOOLTIP = (
-	<p>
-		Pick which of your MCP servers this Virtual MCP exposes and, for each, which tools. After adding a server, select specific tools or
-		choose <span className="font-medium">Allow All Tools</span> to expose all of them.
-	</p>
-);
 
 interface VirtualMcpToolsEditorProps {
 	value: VirtualMCPToolSpec[];
 	onChange: (specs: VirtualMCPToolSpec[]) => void;
 }
 
+/** 富文本提示需要 t()，所以做成组件而不是模块级常量。 */
+function ToolsTooltip() {
+	const { t } = useLocaleCtx();
+	return (
+		<p>
+			{t(
+				"Pick which of your MCP servers this Virtual MCP exposes and, for each, which tools. After adding a server, select specific tools or choose {allowAll} to expose all of them.",
+				{ allowAll: t("Allow All Tools") },
+			)}
+		</p>
+	);
+}
+
 // Adapts id-native Virtual MCP specs to the shared editor, which resolves names and tools.
 // A deleted server keeps its id (name falls back to it), so edits don't drop it.
 export default function VirtualMcpToolsEditor({ value, onChange }: VirtualMcpToolsEditorProps) {
+	const { t } = useLocaleCtx();
 	const editorValue: MCPClientConfigEntry[] = value.map((spec) => ({
 		mcp_client_id: spec.mcp_client_id,
 		mcp_client_name: spec.mcp_client_id,
@@ -37,12 +45,12 @@ export default function VirtualMcpToolsEditor({ value, onChange }: VirtualMcpToo
 		<MCPClientConfigsEditor
 			value={editorValue}
 			onChange={handleChange}
-			label="Tools"
-			tooltip={TOOLS_TOOLTIP}
+			label={t("Tools")}
+			tooltip={<ToolsTooltip />}
 			allClientTools
 			emptyState={
 				<div className="text-muted-foreground rounded-md border border-dashed p-6 text-center text-sm">
-					No tools attached yet. Add an MCP server above to expose its tools through this Virtual MCP.
+					{t("No tools attached yet. Add an MCP server above to expose its tools through this Virtual MCP.")}
 				</div>
 			}
 		/>

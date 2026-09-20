@@ -23,6 +23,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { ReactNode } from "react";
 import { SectionHeader } from "./sectionHeader";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface Props {
 	mcpClient: MCPClient;
@@ -61,6 +62,7 @@ export function MCPClientSessionsSection({ mcpClient }: Props) {
 }
 
 function OAuthCredentialBlock({ mcpClient }: Props) {
+	const { t } = useLocaleCtx();
 	const copy = oauthCredentialCopy(mcpClient.config.auth_type);
 	const credential = mcpClient.credential?.kind === "oauth" ? mcpClient.credential : undefined;
 
@@ -94,8 +96,12 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 							</>
 						) : (
 							<>
-								<span className="text-muted-foreground">No expiry reported</span>
-								{credential.last_refreshed_at && <Sub>refreshed {formatRelativePast(credential.last_refreshed_at)}</Sub>}
+								<span className="text-muted-foreground">{t("No expiry reported")}</span>
+								{credential.last_refreshed_at && (
+									<Sub>
+										{t("refreshed")} {formatRelativePast(credential.last_refreshed_at)}
+									</Sub>
+								)}
 							</>
 						)}
 					</Row>
@@ -106,7 +112,7 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 						{credential.scopes?.length ? (
 							<ScopeChips scopes={credential.scopes} max={credential.scopes.length} />
 						) : (
-							<span className="text-muted-foreground">Not reported by the provider</span>
+							<span className="text-muted-foreground">{t("Not reported by the provider")}</span>
 						)}
 					</Row>
 					<Row label="Authorized">{formatAbsoluteDate(credential.created_at)}</Row>
@@ -120,13 +126,15 @@ function OAuthCredentialBlock({ mcpClient }: Props) {
 // The repair action named in each string matches the label of the
 // actions-menu item that replaces that credential.
 function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
+	const { t } = useLocaleCtx();
 	switch (authType) {
 		case "per_user_oauth": {
 			const repairAction = "Refresh admin credential";
 			return {
-				title: "Admin Credential",
-				description:
+				title: t("Admin Credential"),
+				description: t(
 					"Kept on file only to refresh this server's tool list. End users sign in individually; their tokens are listed under MCP sessions.",
+				),
 				empty: `No admin credential on file, so the tool list is not refreshed automatically. Use ${repairAction} from the server's actions menu to add one.`,
 				needsReauth: `The provider rejected the refresh token. Use ${repairAction} from the actions menu. User sessions are not affected.`,
 				notIssued: `This provider did not return a refresh token. Use ${repairAction} once the access token expires.`,
@@ -135,9 +143,10 @@ function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
 		case "token_exchange": {
 			const repairAction = "Re-verify as me";
 			return {
-				title: "Admin Credential",
-				description:
+				title: t("Admin Credential"),
+				description: t(
 					"The token exchanged from the admin's own sign-in at verification, kept on file only to refresh this server's tool list. Callers have their own identity tokens exchanged on every tool call.",
+				),
 				empty: `No admin credential on file, so the tool list is not refreshed automatically. Use ${repairAction} from the server's actions menu to add one.`,
 				needsReauth: `The identity provider rejected the refresh token. Use ${repairAction} from the actions menu. Callers' tool calls are not affected.`,
 				notIssued: `The identity provider did not return a refresh token. Add offline_access to the exchange scopes where it is supported so the credential renews itself, then use ${repairAction}.`,
@@ -146,7 +155,7 @@ function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
 		default: {
 			const repairAction = "Reauthorize";
 			return {
-				title: "OAuth Credential",
+				title: t("OAuth Credential"),
 				description: `The shared token every caller of this server uses. Read-only. Use ${repairAction} from the server's actions menu to replace it.`,
 				empty: "No credential yet. Complete the one-time authorization from the server's actions menu to connect this server.",
 				needsReauth: `The provider rejected the refresh token. Use ${repairAction} from the server's actions menu.`,
@@ -160,12 +169,13 @@ function oauthCredentialCopy(authType: MCPClient["config"]["auth_type"]) {
 // that tells the admin what it means for this server. The needs_reauth case
 // is already explained under Status, so it carries no second hint.
 function RefreshTokenValue({ credential, notIssuedHint }: { credential: MCPClientCredential; notIssuedHint: string }) {
+	const { t } = useLocaleCtx();
 	return (
 		<>
 			<RefreshTokenStatus hasRefreshToken={credential.has_refresh_token} status={credential.status} />
 			{credential.status !== "needs_reauth" &&
 				(credential.has_refresh_token ? (
-					<Hint>Bifrost renews the access token automatically on the next request after expiry.</Hint>
+					<Hint>{t("Bifrost renews the access token automatically on the next request after expiry.")}</Hint>
 				) : (
 					<Hint>{notIssuedHint}</Hint>
 				))}
@@ -174,6 +184,7 @@ function RefreshTokenValue({ credential, notIssuedHint }: { credential: MCPClien
 }
 
 function HeaderCredentialBlock({ mcpClient }: Props) {
+	const { t } = useLocaleCtx();
 	const credential = mcpClient.credential?.kind === "headers" ? mcpClient.credential : undefined;
 	const covered = credential?.header_keys ?? [];
 	const missing = credential ? missingHeaderKeys(mcpClient.config.per_user_header_keys, covered) : [];
@@ -181,14 +192,15 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 	return (
 		<div className="space-y-4" data-testid="mcpclient-credential-section">
 			<SectionHeader
-				title="Admin Verification Values"
+				title={t("Admin Verification Values")}
 				description="Sample values supplied at verification. Bifrost uses them only to refresh the tool list. They are stored encrypted and never shown."
 				testId="mcpclient-credential-heading"
 			/>
 			{!credential ? (
 				<EmptyCredential>
-					No admin values on file, so the tool list is not refreshed automatically. Run Verify headers from the server's actions menu to add
-					them.
+					{t(
+						"No admin values on file, so the tool list is not refreshed automatically. Run Verify headers from the server's actions menu to add them.",
+					)}
 				</EmptyCredential>
 			) : (
 				<DefinitionList>
@@ -196,8 +208,9 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 						<CredentialStatusBadge status={credential.status} />
 						{credential.status === "needs_update" && (
 							<Hint>
-								Required headers changed after these values were submitted. Run Verify headers from the actions menu to refresh tool
-								discovery.
+								{t(
+									"Required headers changed after these values were submitted. Run Verify headers from the actions menu to refresh tool discovery.",
+								)}
 							</Hint>
 						)}
 					</Row>
@@ -222,7 +235,7 @@ function HeaderCredentialBlock({ mcpClient }: Props) {
 								))}
 								{missing.length > 0 && (
 									<span className="text-muted-foreground rounded-sm border px-1 font-mono text-[10px] tracking-wider uppercase">
-										missing
+										{t("missing")}
 									</span>
 								)}
 							</div>

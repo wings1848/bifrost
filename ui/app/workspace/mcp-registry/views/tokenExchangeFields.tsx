@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Info, TriangleAlert } from "lucide-react";
 import type { Control } from "react-hook-form";
 import { useWatch } from "react-hook-form";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface TokenExchangeScopesFieldProps {
 	variant: "input" | "textarea";
@@ -105,6 +106,7 @@ export function TokenExchangeFields({
 	scopes,
 	gridClassName = "grid grid-cols-1 gap-4 md:grid-cols-2",
 }: TokenExchangeFieldsProps) {
+	const { t } = useLocaleCtx();
 	const useIdPCredentials = useWatch({ control, name: "token_exchange.use_idp_credentials" });
 	const credentialFieldsDisabled = disabled || !!useIdPCredentials;
 
@@ -117,6 +119,7 @@ export function TokenExchangeFields({
 						control={control}
 						name="token_exchange.use_idp_credentials"
 						render={({ field }) => {
+							const { t } = useLocaleCtx();
 							const checked = !!field.value;
 							const select = (value: boolean) => {
 								field.onChange(value);
@@ -146,7 +149,7 @@ export function TokenExchangeFields({
 												aria-checked={!checked}
 												data-testid={`${useIdPCredentialsTestId}-dedicated`}
 											>
-												Dedicated application
+												{t("Dedicated application")}
 											</Button>
 											<Button
 												type="button"
@@ -163,7 +166,7 @@ export function TokenExchangeFields({
 												aria-checked={checked}
 												data-testid={`${useIdPCredentialsTestId}-idp`}
 											>
-												Identity provider application
+												{t("Identity provider application")}
 											</Button>
 										</div>
 									</FormControl>
@@ -272,7 +275,7 @@ export function TokenExchangeFields({
 										field.onChange(e);
 										onAudienceTouched?.();
 									}}
-									placeholder="api://my-mcp-server"
+									placeholder={t("api://my-mcp-server")}
 									data-testid={audienceTestId}
 								/>
 							</FormControl>
@@ -321,7 +324,7 @@ export function TokenExchangeFields({
 								value={scopes.value}
 								disabled={scopes.disabled ?? disabled}
 								onChange={(e) => scopes.onChange(e.target.value)}
-								placeholder="jira.read, jira.write, offline_access"
+								placeholder={t("jira.read, jira.write, offline_access")}
 								data-testid={scopes.testId}
 							/>
 						</FormControl>
@@ -338,7 +341,7 @@ export function TokenExchangeFields({
 						<Textarea
 							aria-labelledby="mcp-token-exchange-scopes-label"
 							className="h-20"
-							placeholder="jira.read, jira.write, offline_access"
+							placeholder={t("jira.read, jira.write, offline_access")}
 							value={scopes.value}
 							disabled={scopes.disabled ?? disabled}
 							onChange={(e) => scopes.onChange(e.target.value)}

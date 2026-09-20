@@ -9,6 +9,7 @@ import { useGetVirtualKeysQuery } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ChevronDown, LoaderCircle, PanelLeftClose, RotateCcw, Search } from "lucide-react";
 import { type Ref, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const COLLAPSE_STORAGE_KEY = "mcp-clients-filter-sidebar-collapsed";
 const VK_PAGE_SIZE = 25;
@@ -91,6 +92,7 @@ interface SidebarProps {
 // ---------------------------------------------------------------------------
 
 export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarProps) {
+	const { t } = useLocaleCtx();
 	const isMobile = useIsMobile();
 	const [collapsed, setCollapsed] = useState(false);
 
@@ -139,7 +141,7 @@ export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarPro
 	return (
 		<div className="bg-card fixed inset-y-2 left-2 z-40 flex h-auto w-[calc(100vw-1rem)] max-w-72 shrink-0 flex-col rounded-md border shadow-xl md:static md:h-full md:w-64 md:max-w-none md:rounded-md md:shadow-none">
 			<div className="flex h-11 items-center justify-between border-b pr-2 pl-5">
-				<span className="text-sm font-semibold">Filters</span>
+				<span className="text-sm font-semibold">{t("Filters")}</span>
 				<div className="flex items-center gap-1">
 					{activeFilterCount > 0 && (
 						<Button
@@ -150,7 +152,7 @@ export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarPro
 							data-testid="mcpClientsFilterSidebar-reset-button"
 						>
 							<RotateCcw className="size-3" />
-							Reset
+							{t("Reset")}
 						</Button>
 					)}
 					<Button
@@ -158,8 +160,8 @@ export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarPro
 						size="icon"
 						className="size-7"
 						onClick={toggleCollapsed}
-						title="Hide filters"
-						aria-label="Hide filters"
+						title={t("Hide filters")}
+						aria-label={t("Hide filters")}
 						data-testid="mcpClientsFilterSidebar-toggle-hide"
 					>
 						<PanelLeftClose className="size-4" />
@@ -170,7 +172,7 @@ export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarPro
 			<ScrollArea className="flex flex-1 overflow-y-auto p-2 pb-0" viewportClassName="no-table">
 				<div className="flex grow flex-col gap-1">
 					<CheckboxFilterSection
-						title="Connection Type"
+						title={t("Connection Type")}
 						options={CONNECTION_TYPE_OPTIONS}
 						selected={filters.connection_types}
 						defaultOpen
@@ -178,28 +180,28 @@ export function MCPClientsFilterSidebar({ filters, onFiltersChange }: SidebarPro
 						testIdPrefix="mcp-clients-filter-connection-type"
 					/>
 					<CheckboxFilterSection
-						title="Auth Type"
+						title={t("Auth Type")}
 						options={AUTH_TYPE_OPTIONS}
 						selected={filters.auth_types}
 						onChange={(auth_types) => onFiltersChange({ ...filters, auth_types })}
 						testIdPrefix="mcp-clients-filter-auth-type"
 					/>
 					<CheckboxFilterSection
-						title="State"
+						title={t("State")}
 						options={STATE_OPTIONS}
 						selected={filters.states}
 						onChange={(states) => onFiltersChange({ ...filters, states })}
 						testIdPrefix="mcp-clients-filter-state"
 					/>
 					<CheckboxFilterSection
-						title="Code Mode"
+						title={t("Code Mode")}
 						options={CODE_MODE_OPTIONS}
 						selected={filters.code_mode}
 						onChange={(code_mode) => onFiltersChange({ ...filters, code_mode })}
 						testIdPrefix="mcp-clients-filter-code-mode"
 					/>
 					<CheckboxFilterSection
-						title="Status"
+						title={t("Status")}
 						options={STATUS_OPTIONS}
 						selected={filters.status}
 						onChange={(status) => onFiltersChange({ ...filters, status })}
@@ -305,6 +307,7 @@ function CheckboxFilterSection({
 	onChange: (selected: string[]) => void;
 	testIdPrefix?: string;
 }) {
+	const { t } = useLocaleCtx();
 	const hasActive = selected.length > 0;
 
 	const toggle = (value: string) => {
@@ -320,7 +323,7 @@ function CheckboxFilterSection({
 			{options.map((option) => (
 				<CheckboxFilterItem
 					key={option.value}
-					label={option.label}
+					label={t(option.label)}
 					checked={selected.includes(option.value)}
 					onCheckedChange={() => toggle(option.value)}
 					testId={testIdPrefix ? `${testIdPrefix}-checkbox-${option.value}` : undefined}
@@ -356,6 +359,7 @@ function SearchableCheckboxList({
 	onSearch?: (query: string) => void;
 	fetching?: boolean;
 }) {
+	const { t } = useLocaleCtx();
 	const [query, setQuery] = useState("");
 	const normalized = query.trim().toLowerCase();
 	const filtered = normalized ? items.filter((item) => item.label.toLowerCase().includes(normalized)) : items;
@@ -401,7 +405,7 @@ function SearchableCheckboxList({
 					testId={testIdPrefix ? `${testIdPrefix}-checkbox-${item.key}` : undefined}
 				/>
 			))}
-			{filtered.length === 0 && <div className="text-muted-foreground flex h-9 items-center px-3 text-xs">No results</div>}
+			{filtered.length === 0 && <div className="text-muted-foreground flex h-9 items-center px-3 text-xs">{t("No results")}</div>}
 		</>
 	);
 }
@@ -418,6 +422,7 @@ function SearchableCheckboxList({
 const ALLOWED_BY_DEFAULT_KEY = "__allowed_by_default__";
 
 function VKAccessFilterSection({ filters, onFiltersChange }: SidebarProps) {
+	const { t } = useLocaleCtx();
 	const hasActive = filters.only_allowed_by_default || filters.virtual_keys.length > 0;
 	const [opened, setOpened] = useState(hasActive);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -443,11 +448,11 @@ function VKAccessFilterSection({ filters, onFiltersChange }: SidebarProps) {
 	};
 
 	return (
-		<FilterSection title="Access" defaultOpen={hasActive} onOpenChange={setOpened} testId="mcp-clients-filter-vk-access-toggle">
+		<FilterSection title={t("Access")} defaultOpen={hasActive} onOpenChange={setOpened} testId="mcp-clients-filter-vk-access-toggle">
 			<SearchableCheckboxList
 				inputRef={searchInputRef}
-				placeholder="Search virtual keys"
-				pinnedItems={[{ key: ALLOWED_BY_DEFAULT_KEY, label: "Allowed by default" }]}
+				placeholder={t("Search virtual keys")}
+				pinnedItems={[{ key: ALLOWED_BY_DEFAULT_KEY, label: t("Allowed by default") }]}
 				items={virtualKeys.map((vk) => ({ key: vk.id, label: vk.name }))}
 				isSelected={isSelected}
 				onToggle={toggle}

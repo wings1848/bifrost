@@ -9,6 +9,7 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alertDialog";
 import type { MCPLibraryEntry } from "@/lib/types/mcp";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface MCPLibraryDeleteDialogProps {
 	/** The entry being removed; when null the dialog is closed. */
@@ -24,22 +25,23 @@ interface MCPLibraryDeleteDialogProps {
 // card and table views. Copy is sync-aware: custom entries simply disappear,
 // while remote entries are tombstoned so they don't reappear on the next sync.
 export function MCPLibraryDeleteDialog({ server, open, isDeleting, onOpenChange, onConfirm, confirmTestId }: MCPLibraryDeleteDialogProps) {
+	const { t } = useLocaleCtx();
 	const isCustom = server?.source === "custom";
 
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Remove "{server?.name}" from library?</AlertDialogTitle>
+					<AlertDialogTitle>{t("Remove {name} from library?", { name: server?.name ?? "" })}</AlertDialogTitle>
 					<AlertDialogDescription>
 						{isCustom
 							? "This custom server will no longer be available for members to install."
 							: "This server will be hidden from the library and will not reappear on the next catalog sync."}{" "}
-						Existing installations are not affected.
+						{t("Existing installations are not affected.")}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel disabled={isDeleting}>{t("Cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={(event) => {
 							event.preventDefault();

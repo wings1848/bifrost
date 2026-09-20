@@ -16,6 +16,7 @@ import { HARNESSES } from "./harnesses";
 import { PlatformSelect } from "./platformSelect";
 import type { AuthMethod, HarnessID, HarnessPlatform, ServerScope, VirtualKeyOption } from "./types";
 import { buildMCPHeaders, isClientAllowedForVirtualKey, maskSecret } from "./utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 // Literal value sets driving the URL-persisted enums.
 const HARNESS_IDS = HARNESSES.map((h) => h.id);
@@ -44,6 +45,7 @@ const AUTH_METHOD_COPY: Record<AuthMethod, { label: string; icon: typeof KeyRoun
 };
 
 export function MCPUsageGuideSheet() {
+	const { t } = useLocaleCtx();
 	// ── URL-persisted settings (survive refresh) ─────────────────────────
 	// All user-facing selections live in query params so the install wizard
 	// can be reconstructed exactly after a reload or shared via the URL.
@@ -203,7 +205,7 @@ export function MCPUsageGuideSheet() {
 		<>
 			<Button type="button" onClick={() => setOpen(true)} data-testid="mcp-usage-guide-trigger" variant="outline" className="h-8">
 				<SquareTerminal />
-				<span className="hidden sm:inline">Connect agent</span>
+				<span className="hidden sm:inline">{t("Connect agent")}</span>
 			</Button>
 
 			<Sheet open={open} onOpenChange={setOpen}>
@@ -211,8 +213,8 @@ export function MCPUsageGuideSheet() {
 					<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky px-4 md:px-8 -top-4 bg-card z-10">
 						<div className="flex items-center gap-2">
 							<div>
-								<SheetTitle>Install Bifrost MCP</SheetTitle>
-								<SheetDescription>Build a copy-ready command or config for your agent harness.</SheetDescription>
+								<SheetTitle>{t("Install Bifrost MCP")}</SheetTitle>
+								<SheetDescription>{t("Build a copy-ready command or config for your agent harness.")}</SheetDescription>
 							</div>
 						</div>
 					</SheetHeader>
@@ -221,7 +223,7 @@ export function MCPUsageGuideSheet() {
 						{/* ── Harness selector tabs ───────────────────────── */}
 						<section className="flex flex-col gap-2 transition-[border-color,background-color] duration-150 ease-out">
 							<div className="flex items-center gap-2 text-sm font-medium">
-								<span>Harness</span>
+								<span>{t("Harness")}</span>
 							</div>
 							<Tabs value={harness} onValueChange={(value) => setUrlState({ harness: value as HarnessID })}>
 								{/* No overflow-x-auto: TabsList now collapses whatever does not fit
@@ -231,7 +233,7 @@ export function MCPUsageGuideSheet() {
 										<TabsTrigger key={h.id} value={h.id} className="flex flex-none shrink-0 gap-2">
 											<div className="flex items-center gap-2">
 												{h.icon}
-												{h.label}
+												{t(h.label)}
 											</div>
 										</TabsTrigger>
 									))}
@@ -242,7 +244,7 @@ export function MCPUsageGuideSheet() {
 						{/* ── Authentication method ──────────────────────── */}
 						<section className="flex flex-col gap-2 transition-[border-color,background-color] duration-150 ease-out">
 							<div className="flex items-center gap-2 text-sm font-medium">
-								<span>Authentication</span>
+								<span>{t("Authentication")}</span>
 							</div>
 							<div className={cn("grid gap-2", visibleAuthMethods.length > 2 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
 								{visibleAuthMethods.map((method) => {
@@ -262,25 +264,24 @@ export function MCPUsageGuideSheet() {
 											data-testid={`mcp-usage-guide-auth-${method}`}
 										>
 											<Icon className="text-muted-foreground size-4 shrink-0" />
-											<span className="truncate font-medium">{label}</span>
+											<span className="truncate font-medium">{t(label)}</span>
 											{authMethod === method && <Check className="ml-auto size-4 shrink-0 text-green-600" />}
 										</button>
 									);
 								})}
 							</div>
-							<p className="text-muted-foreground text-xs">{AUTH_METHOD_COPY[authMethod].description}</p>
+							<p className="text-muted-foreground text-xs">{t(AUTH_METHOD_COPY[authMethod].description)}</p>
 							{!availableAuthMethods.includes("oauth") && (
 								<p className="text-muted-foreground text-xs">
-									OAuth is off for this gateway. Switch the MCP server auth mode to <span className="font-medium">both</span> or{" "}
-									<span className="font-medium">oauth</span> under{" "}
-									<Link to="/workspace/config/mcp-gateway" className="text-primary underline">
-										MCP settings
-									</Link>{" "}
-									to offer it.
+									{t("OAuth is off for this gateway. Switch the MCP server auth mode to {both} or {oauth} under {settings} to offer it.", {
+										both: t("both"),
+										oauth: t("oauth"),
+										settings: t("MCP settings"),
+									})}
 								</p>
 							)}
 							{IS_ENTERPRISE && !idpConfigured && (
-								<p className="text-muted-foreground text-xs">Identity provider login needs an enabled SSO/SCIM provider.</p>
+								<p className="text-muted-foreground text-xs">{t("Identity provider login needs an enabled SSO/SCIM provider.")}</p>
 							)}
 						</section>
 
@@ -288,7 +289,7 @@ export function MCPUsageGuideSheet() {
 						{usesVirtualKey && (
 							<section className="flex flex-col gap-2 transition-[border-color,background-color] duration-150 ease-out">
 								<div className="flex items-center gap-2 text-sm font-medium">
-									<span>Virtual key</span>
+									<span>{t("Virtual key")}</span>
 								</div>
 								<SearchSelect<VirtualKeyOption>
 									async
@@ -323,14 +324,14 @@ export function MCPUsageGuideSheet() {
 									entryView={(option) => (
 										<div className="flex min-w-0 flex-1 items-center gap-2">
 											<div className="flex min-w-0 flex-col">
-												<span className="truncate font-medium">{option.label}</span>
+												<span className="truncate font-medium">{t(option.label)}</span>
 												<span className="text-muted-foreground text-xs">{maskSecret(option.virtualKey.value)}</span>
 											</div>
 											{selectedVirtualKey?.id === option.virtualKey.id && <Check className="ml-auto size-4 text-green-600" />}
 										</div>
 									)}
 									searchPlaceholder="Search virtual keys..."
-									emptyMessage="No active virtual keys found."
+									emptyMessage={t("No active virtual keys found.")}
 									align="start"
 									className="w-full"
 									contentClassName="w-[var(--radix-popover-trigger-width)]"
@@ -342,7 +343,7 @@ export function MCPUsageGuideSheet() {
 						{usesVirtualKey && selectedVirtualKey && (
 							<section className="flex flex-col gap-2 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none">
 								<div className="flex items-center gap-2 text-sm font-medium">
-									<span>Server access</span>
+									<span>{t("Server access")}</span>
 								</div>
 								<div className="grid gap-2 sm:grid-cols-2">
 									<button
@@ -355,7 +356,7 @@ export function MCPUsageGuideSheet() {
 										data-testid="mcp-usage-guide-server-scope-all"
 									>
 										<Globe2 className="text-muted-foreground size-4" />
-										<span className="font-medium">All servers</span>
+										<span className="font-medium">{t("All servers")}</span>
 										{serverScope === "all" && <Check className="ml-auto size-4 text-green-600" />}
 									</button>
 									<button
@@ -368,7 +369,7 @@ export function MCPUsageGuideSheet() {
 										data-testid="mcp-usage-guide-server-scope-selected"
 									>
 										<Server className="text-muted-foreground size-4" />
-										<span className="font-medium">Selected servers</span>
+										<span className="font-medium">{t("Selected servers")}</span>
 										{serverScope === "selected" && <Check className="ml-auto size-4 text-green-600" />}
 									</button>
 								</div>
@@ -396,7 +397,7 @@ export function MCPUsageGuideSheet() {
 						{canGenerateCommand && activeHarness.usesPlatform && (
 							<section className="flex flex-col gap-2 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none">
 								<div className="flex items-center gap-2 text-sm font-medium">
-									<span>Platform</span>
+									<span>{t("Platform")}</span>
 								</div>
 								<PlatformSelect platform={platform} onPlatformChange={(value) => setUrlState({ platform: value })} />
 							</section>

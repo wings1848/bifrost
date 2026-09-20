@@ -10,6 +10,7 @@ import { BookIcon, Globe, Radio, Terminal, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MCPLibraryDeleteDialog } from "./mcpLibraryDeleteDialog";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const MAX_VISIBLE_TAGS = 3;
 export const MCP_ICON_FALLBACK = "/images/mcp.svg";
@@ -64,6 +65,7 @@ interface MCPLibraryServerCardProps {
 }
 
 export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, canDelete, onInstall }: MCPLibraryServerCardProps) {
+	const { t } = useLocaleCtx();
 	const [deleteEntry, { isLoading: isDeleting }] = useDeleteMCPLibraryEntryMutation();
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const isCustom = server.source === "custom";
@@ -106,8 +108,8 @@ export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, 
 								<span className="block truncate">{server.name}</span>
 							</CardTitle>
 							<div className="flex shrink-0 items-center gap-1.5">
-								{isCustom && <Badge variant="outline">Custom</Badge>}
-								{isInstalled && <Badge variant="success">Installed</Badge>}
+								{isCustom && <Badge variant="outline">{t("Custom")}</Badge>}
+								{isInstalled && <Badge variant="success">{t("Installed")}</Badge>}
 							</div>
 						</div>
 						<div className="flex min-w-0 flex-wrap items-center gap-1.5">
@@ -116,7 +118,11 @@ export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, 
 									{server.category}
 								</Badge>
 							)}
-							{server.publisher && <span className="text-muted-foreground min-w-0 truncate text-xs">by {server.publisher}</span>}
+							{server.publisher && (
+								<span className="text-muted-foreground min-w-0 truncate text-xs">
+									{t("by")} {server.publisher}
+								</span>
+							)}
 						</div>
 					</div>
 				</div>
@@ -173,7 +179,7 @@ export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, 
 										<Trash2 className="h-4 w-4" />
 									</Button>
 								</TooltipTrigger>
-								<TooltipContent>Remove from library</TooltipContent>
+								<TooltipContent>{t("Remove from library")}</TooltipContent>
 							</Tooltip>
 						</div>
 					)}
@@ -192,12 +198,12 @@ export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, 
 									</a>
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent>Documentation</TooltipContent>
+							<TooltipContent>{t("Documentation")}</TooltipContent>
 						</Tooltip>
 					)}
 					{isInstalled ? (
 						<Button asChild size="sm" data-testid={`mcp-library-open-${server.slug}`}>
-							<Link to="/workspace/mcp-registry">Open</Link>
+							<Link to="/workspace/mcp-registry">{t("Open")}</Link>
 						</Button>
 					) : (
 						<Button
@@ -206,7 +212,7 @@ export function MCPLibraryServerCard({ server, isInstalled, canCreateMCPClient, 
 							disabled={!canCreateMCPClient}
 							data-testid={`mcp-library-install-${server.slug}`}
 						>
-							Install
+							{t("Install")}
 						</Button>
 					)}
 				</div>

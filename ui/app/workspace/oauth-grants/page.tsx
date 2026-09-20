@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import GrantsTable from "./views/grantsTable";
 import { OAuthGrantFilters, OAuthGrantsFilterSidebar } from "./views/oauthGrantsFilterSidebar";
 import RevokeGrantDialog from "./views/revokeGrantDialog";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const PAGE_SIZE = 50;
 
 export default function OAuthGrantsPage() {
+	const { t } = useLocaleCtx();
 	const [urlState, setUrlState] = useQueryStates(
 		{
 			q: parseAsString.withDefault(""),
@@ -76,15 +78,16 @@ export default function OAuthGrantsPage() {
 	const handleOffsetChange = (offset: number) => setUrlState({ offset });
 
 	const confirmRevoke = async () => {
+		const { t } = useLocaleCtx();
 		if (!pendingDelete) return;
 		const row = pendingDelete;
 		setPendingDelete(null);
 		setPendingActionRowId(row.id);
 		try {
 			await revokeGrant(row.id).unwrap();
-			toast.success("Grant revoked");
+			toast.success(t("Grant revoked"));
 		} catch (err) {
-			toast.error("Failed to revoke grant", { description: getErrorMessage(err) });
+			toast.error(t("Failed to revoke grant"), { description: getErrorMessage(err) });
 		} finally {
 			setPendingActionRowId(null);
 		}
@@ -94,8 +97,8 @@ export default function OAuthGrantsPage() {
 		<div className="flex h-full flex-col">
 			<RevokeGrantDialog open={pendingDelete !== null} onOpenChange={(open) => !open && setPendingDelete(null)} onConfirm={confirmRevoke} />
 
-			<PageTitle title="OAuth Grants">
-				Active downstream OAuth grants issued to MCP clients that connected via the OAuth consent flow.
+			<PageTitle title={t("OAuth Grants")}>
+				{t("Active downstream OAuth grants issued to MCP clients that connected via the OAuth consent flow.")}
 			</PageTitle>
 
 			<div className="mb-4 flex items-center gap-3">
@@ -103,8 +106,8 @@ export default function OAuthGrantsPage() {
 					<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 					<Input
 						data-testid="oauth-grants-search-input"
-						aria-label="Search grants"
-						placeholder="Search client, identity..."
+						aria-label={t("Search grants")}
+						placeholder={t("Search client, identity...")}
 						value={urlState.q}
 						onChange={(e) => handleSearchChange(e.target.value)}
 						className="pl-9"
@@ -118,7 +121,7 @@ export default function OAuthGrantsPage() {
 				</div>
 			) : isError ? (
 				<div className="border-destructive bg-destructive/10 text-destructive rounded-lg border p-6 text-sm">
-					Failed to load OAuth grants: {getErrorMessage(error)}
+					{t("Failed to load OAuth grants:")} {getErrorMessage(error)}
 				</div>
 			) : (
 				<GrantsTable

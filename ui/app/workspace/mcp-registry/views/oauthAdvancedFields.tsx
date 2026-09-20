@@ -4,6 +4,7 @@ import { SecretVarInput } from "@/components/ui/secretVarInput";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 import type { Control } from "react-hook-form";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface OAuthAdvancedFieldsProps {
 	// Loosely typed on purpose: shared between the create form (CreateMCPClientRequest)
@@ -77,6 +78,7 @@ export function OAuthAdvancedFields({
 	registrationUrlTestId,
 	onFieldTouched,
 }: OAuthAdvancedFieldsProps) {
+	const { t } = useLocaleCtx();
 	return (
 		<>
 			{beforeFields}
@@ -213,11 +215,11 @@ export function OAuthAdvancedFields({
 							value={scopesRaw}
 							disabled={disabled}
 							onChange={(e) => onScopesRawChange(e.target.value)}
-							placeholder="read, write, admin"
+							placeholder={t("read, write, admin")}
 							data-testid={scopesTestId}
 						/>
 					</FormControl>
-					<p className="text-muted-foreground text-xs">Comma-separated.</p>
+					<p className="text-muted-foreground text-xs">{t("Comma-separated.")}</p>
 				</FormItem>
 				{resource.mode === "field" ? (
 					<FormField

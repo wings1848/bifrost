@@ -4,6 +4,7 @@ import { buildVSCodeConfig, buildVSCodeDeeplink } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { HarnessInstallProps, VSCodeConfigScope } from "../types";
 import { getRegistrationLabel } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function VSCodeHarnessInstall({
 	canGenerateCommand,
@@ -14,6 +15,7 @@ export function VSCodeHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const [configScope, setConfigScope] = useState<VSCodeConfigScope>("workspace");
 
 	const serverArgs = useMemo(
@@ -46,8 +48,8 @@ export function VSCodeHarnessInstall({
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="workspace">Workspace</SelectItem>
-						<SelectItem value="user">User</SelectItem>
+						<SelectItem value="workspace">{t("Workspace")}</SelectItem>
+						<SelectItem value="user">{t("User")}</SelectItem>
 					</SelectContent>
 				</Select>
 			}

@@ -19,6 +19,7 @@ import {
 } from "./mcpClientFormFields";
 import { MCPHeadersAuthorizer } from "./mcpHeadersAuthorizer";
 import { OAuth2Authorizer } from "./oauth2Authorizer";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface ClientFormProps {
 	open: boolean;
@@ -46,6 +47,7 @@ const emptyForm: CreateMCPClientRequest = {
 };
 
 const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
+	const { t } = useLocaleCtx();
 	const hasCreateMCPClientAccess = useRbac(RbacResource.MCPGateway, RbacOperation.Create);
 	const { toast } = useToast();
 	const [createMCPClient] = useCreateMCPClientMutation();
@@ -89,6 +91,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 	}, [open, reset, resetSatellites]);
 
 	const onSubmit = async (data: CreateMCPClientRequest) => {
+		const { t } = useLocaleCtx();
 		const isValid = validateMCPClientForm({
 			data,
 			satellites,
@@ -123,7 +126,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 				});
 			} else {
 				setIsLoading(false);
-				toast({ title: "Success", description: "Server created" });
+				toast({ title: t("Success"), description: t("Server created") });
 				onSaved();
 				onClose();
 			}
@@ -133,7 +136,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 				setError("name", { message: getErrorMessage(error) });
 				return;
 			}
-			toast({ title: "Error", description: getErrorMessage(error), variant: "destructive" });
+			toast({ title: t("Error"), description: getErrorMessage(error), variant: "destructive" });
 		}
 	};
 
@@ -141,8 +144,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 		<Sheet open={open} onOpenChange={(open) => !open && !oauthFlow && onClose()}>
 			<SheetContent className="flex w-full flex-col gap-4 overflow-x-hidden p-0 pt-4">
 				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-4 md:px-8">
-					<SheetTitle>New MCP Server</SheetTitle>
-					<SheetDescription>Configure and connect to a new Model Context Protocol server.</SheetDescription>
+					<SheetTitle>{t("New MCP Server")}</SheetTitle>
+					<SheetDescription>{t("Configure and connect to a new Model Context Protocol server.")}</SheetDescription>
 				</SheetHeader>
 
 				<Form {...methods}>
@@ -163,9 +166,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 								}}
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Name</FormLabel>
+										<FormLabel>{t("Name")}</FormLabel>
 										<FormControl>
-											<Input id="client-name" data-testid="client-name-input" placeholder="Server name" maxLength={50} {...field} />
+											<Input id="client-name" data-testid="client-name-input" placeholder={t("Server name")} maxLength={50} {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -178,12 +181,12 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 								name="endpoint_slug"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Endpoint slug</FormLabel>
+										<FormLabel>{t("Endpoint slug")}</FormLabel>
 										<FormControl>
 											<Input
 												id="client-endpoint-slug"
 												data-testid="client-endpoint-slug-input"
-												placeholder="Leave blank to derive from the name"
+												placeholder={t("Leave blank to derive from the name")}
 												{...field}
 												value={field.value ?? ""}
 											/>
@@ -202,7 +205,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						{/* Form Footer */}
 						<div className="bg-card sticky bottom-0 z-10 flex justify-end gap-2 border-t px-4 py-4 md:px-8">
 							<Button type="button" variant="outline" onClick={onClose} disabled={isLoading} data-testid="cancel-client-btn">
-								Cancel
+								{t("Cancel")}
 							</Button>
 							<TooltipProvider>
 								<Tooltip>
@@ -214,13 +217,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 												isLoading={isLoading}
 												data-testid="save-client-btn"
 											>
-												Create
+												{t("Create")}
 											</Button>
 										</span>
 									</TooltipTrigger>
 									{!hasCreateMCPClientAccess && (
 										<TooltipContent>
-											<p>You don&apos;t have permission to perform this action</p>
+											<p>{t("You don&apos;t have permission to perform this action")}</p>
 										</TooltipContent>
 									)}
 								</Tooltip>
@@ -238,13 +241,15 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						setOauthFlow(null);
 					}}
 					onSuccess={() => {
-						toast({ title: "Success", description: "MCP server connected with OAuth" });
+						const { t } = useLocaleCtx();
+						toast({ title: t("Success"), description: t("MCP server connected with OAuth") });
 						setOauthFlow(null);
 						onClose();
 						onSaved();
 					}}
 					onError={(error) => {
-						toast({ title: "OAuth Error", description: error, variant: "destructive" });
+						const { t } = useLocaleCtx();
+						toast({ title: t("OAuth Error"), description: error, variant: "destructive" });
 					}}
 					onConflict={(error) => {
 						setOauthFlow(null);
@@ -269,8 +274,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ open, onClose, onSaved }) => {
 						setHeadersFlow(null);
 					}}
 					onSuccess={() => {
+						const { t } = useLocaleCtx();
 						setHeadersFlow(null);
-						toast({ title: "Success", description: "MCP server connected with per-user headers" });
+						toast({ title: t("Success"), description: t("MCP server connected with per-user headers") });
 						onSaved();
 						onClose();
 					}}

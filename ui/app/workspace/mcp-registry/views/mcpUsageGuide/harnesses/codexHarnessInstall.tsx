@@ -4,6 +4,7 @@ import { buildCodexConfig } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { CodexConfigScope, HarnessInstallProps } from "../types";
 import { getRegistrationLabel, getUserHomePrefix } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function CodexHarnessInstall({
 	canGenerateCommand,
@@ -14,6 +15,7 @@ export function CodexHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const [configScope, setConfigScope] = useState<CodexConfigScope>("user");
 
 	const config = useMemo(
@@ -39,8 +41,8 @@ export function CodexHarnessInstall({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="user">User</SelectItem>
-							<SelectItem value="project">Project</SelectItem>
+							<SelectItem value="user">{t("User")}</SelectItem>
+							<SelectItem value="project">{t("Project")}</SelectItem>
 						</SelectContent>
 					</Select>
 				}

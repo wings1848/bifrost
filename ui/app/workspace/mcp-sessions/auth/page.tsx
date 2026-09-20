@@ -41,6 +41,7 @@ import { CheckCircle2, ExternalLink, Fingerprint, KeyRound, Loader2, LogIn, Shie
 import { useQueryState } from "nuqs";
 import React from "react";
 import { useMemo, useState } from "react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export default function MCPSessionsAuthPage() {
 	const [flowId] = useQueryState("flow");
@@ -56,6 +57,7 @@ export default function MCPSessionsAuthPage() {
 }
 
 function OAuthAuthView() {
+	const { t } = useLocaleCtx();
 	const { toast } = useToast();
 	const [flowId] = useQueryState("flow");
 	const skip = !flowId;
@@ -79,10 +81,11 @@ function OAuthAuthView() {
 	if (!flowId) {
 		return (
 			<CenteredCard>
-				<h1 className="text-xl font-semibold">Missing flow identifier</h1>
+				<h1 className="text-xl font-semibold">{t("Missing flow identifier")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">
-					This URL is missing the <code className="bg-muted rounded px-1 py-0.5">flow</code> query parameter. Open the link from your
-					inference response or the sessions tab.
+					{t("This URL is missing the {param} query parameter. Open the link from your inference response or the sessions tab.", {
+						param: "flow",
+					})}
 				</p>
 				<div className="mt-6">
 					<SessionsTabLink />
@@ -103,10 +106,11 @@ function OAuthAuthView() {
 		if (status === 403) {
 			return (
 				<CenteredCard>
-					<h1 className="text-xl font-semibold">This authentication flow isn't yours</h1>
+					<h1 className="text-xl font-semibold">{t("This authentication flow isn't yours")}</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
-						The pending flow belongs to a different identity. Ask the teammate whose VK or user identity triggered the original request to
-						complete it, or trigger a new request yourself.
+						{t(
+							"The pending flow belongs to a different identity. Ask the teammate whose VK or user identity triggered the original request to complete it, or trigger a new request yourself.",
+						)}
 					</p>
 					<div className="mt-6">
 						<SessionsTabLink />
@@ -117,10 +121,11 @@ function OAuthAuthView() {
 		if (status === 404) {
 			return (
 				<CenteredCard>
-					<h1 className="text-xl font-semibold">This authentication flow has expired or been completed</h1>
+					<h1 className="text-xl font-semibold">{t("This authentication flow has expired or been completed")}</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
-						Pending flows expire after a short window. If you still need to authenticate, trigger the original action again so a fresh flow
-						is created.
+						{t(
+							"Pending flows expire after a short window. If you still need to authenticate, trigger the original action again so a fresh flow is created.",
+						)}
 					</p>
 					<div className="mt-6">
 						<SessionsTabLink />
@@ -130,7 +135,7 @@ function OAuthAuthView() {
 		}
 		return (
 			<CenteredCard>
-				<h1 className="text-xl font-semibold">Could not load this authentication flow</h1>
+				<h1 className="text-xl font-semibold">{t("Could not load this authentication flow")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">{getErrorMessage(error)}</p>
 			</CenteredCard>
 		);
@@ -144,12 +149,13 @@ function OAuthAuthView() {
 	}
 
 	const handleAuthenticate = async () => {
+		const { t } = useLocaleCtx();
 		try {
 			const res = await startFlow(flowId).unwrap();
 			window.location.href = res.authorize_url;
 		} catch (err) {
 			toast({
-				title: "Failed to start authentication",
+				title: t("Failed to start authentication"),
 				description: getErrorMessage(err),
 				variant: "destructive",
 			});
@@ -170,13 +176,14 @@ function OAuthAuthView() {
 			<p className="text-muted-foreground mt-2 text-sm">
 				{isReauth ? (
 					<>
-						An active credential already exists for the binding below. Completing this flow will <strong>replace</strong> it with a fresh
-						credential. You can also close this tab to keep using the existing one.
+						{t("An active credential already exists for the binding below. Completing this flow will")} <strong>{t("replace")}</strong>{" "}
+						{t("it with a fresh credential. You can also close this tab to keep using the existing one.")}
 					</>
 				) : (
 					<>
-						You'll be redirected to the provider to sign in and grant access. Bifrost stores the resulting credential against the binding
-						below so this request and future ones can proceed automatically.
+						{t(
+							"You'll be redirected to the provider to sign in and grant access. Bifrost stores the resulting credential against the binding below so this request and future ones can proceed automatically.",
+						)}
 					</>
 				)}
 			</p>
@@ -196,7 +203,7 @@ function OAuthAuthView() {
 					<Button asChild variant="outline" data-testid="mcp-auth-login-instead-inline-button">
 						<a href={loginHref}>
 							<LogIn className="size-4" />
-							Log in instead
+							{t("Log in instead")}
 						</a>
 					</Button>
 				) : null}
@@ -212,6 +219,7 @@ function OAuthAuthView() {
 // endpoint. On success the backend verifies upstream, upserts the credential
 // row, deletes the flow row + temp token, and we show a success card.
 function HeadersAuthView({ flowId }: { flowId: string }) {
+	const { t } = useLocaleCtx();
 	const { toast } = useToast();
 	const [submitted, setSubmitted] = useQueryState("submitted");
 	// Skip the GET once the submit has completed — the backend deletes the
@@ -226,9 +234,9 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 				<div className="mb-5 flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
 					<CheckCircle2 className="size-6 text-emerald-600" />
 				</div>
-				<h1 className="text-xl font-semibold tracking-tight">Headers saved</h1>
+				<h1 className="text-xl font-semibold tracking-tight">{t("Headers saved")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">
-					Bifrost verified the connection and stored your credentials. You can close this tab and retry the original action.
+					{t("Bifrost verified the connection and stored your credentials. You can close this tab and retry the original action.")}
 				</p>
 				<div className="mt-6 flex gap-3">
 					<SessionsTabLink />
@@ -253,10 +261,11 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 		if (status === 403) {
 			return (
 				<CenteredCard>
-					<h1 className="text-xl font-semibold">This submission flow isn't yours</h1>
+					<h1 className="text-xl font-semibold">{t("This submission flow isn't yours")}</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
-						The pending flow belongs to a different identity. Ask the teammate whose VK or user identity triggered the original request to
-						complete it, or trigger a new request yourself.
+						{t(
+							"The pending flow belongs to a different identity. Ask the teammate whose VK or user identity triggered the original request to complete it, or trigger a new request yourself.",
+						)}
 					</p>
 					<div className="mt-6">
 						<SessionsTabLink />
@@ -267,9 +276,9 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 		if (status === 404 || status === 410) {
 			return (
 				<CenteredCard>
-					<h1 className="text-xl font-semibold">This submission link has expired or been used</h1>
+					<h1 className="text-xl font-semibold">{t("This submission link has expired or been used")}</h1>
 					<p className="text-muted-foreground mt-2 text-sm">
-						Submission flows expire after a short window. Trigger the original request again to get a fresh link.
+						{t("Submission flows expire after a short window. Trigger the original request again to get a fresh link.")}
 					</p>
 					<div className="mt-6">
 						<SessionsTabLink />
@@ -279,19 +288,20 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 		}
 		return (
 			<CenteredCard>
-				<h1 className="text-xl font-semibold">Could not load this submission link</h1>
+				<h1 className="text-xl font-semibold">{t("Could not load this submission link")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">{getErrorMessage(error)}</p>
 			</CenteredCard>
 		);
 	}
 
 	const handleSubmit = async (values: Record<string, string>) => {
+		const { t } = useLocaleCtx();
 		try {
 			await submit({ flowId, body: { headers: values } }).unwrap();
 			void setSubmitted("true");
 		} catch (err) {
 			toast({
-				title: "Submission failed",
+				title: t("Submission failed"),
 				description: getErrorMessage(err),
 				variant: "destructive",
 			});
@@ -311,13 +321,14 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 			<p className="text-muted-foreground mt-2 text-sm">
 				{isEdit ? (
 					<>
-						This server already has stored credentials for you. Submitting new values <strong>replaces</strong> the existing entry; the
-						server will be re-verified before saving.
+						{t("This server already has stored credentials for you. Submitting new values")} <strong>{t("replaces")}</strong>{" "}
+						{t("the existing entry; the server will be re-verified before saving.")}
 					</>
 				) : (
 					<>
-						This server requires you to supply your own API keys / tokens. The values you submit are stored encrypted and only used to
-						authenticate your own requests.
+						{t(
+							"This server requires you to supply your own API keys / tokens. The values you submit are stored encrypted and only used to authenticate your own requests.",
+						)}
 					</>
 				)}
 			</p>
@@ -344,13 +355,14 @@ function HeadersAuthView({ flowId }: { flowId: string }) {
 }
 
 function HeadersBindingValue({ flow }: { flow: MCPHeadersFlowDetail }) {
+	const { t } = useLocaleCtx();
 	if (flow.flow_mode === "user") {
 		const userID = flow.user_id;
 		if (!userID) {
 			return (
 				<span className="inline-flex items-center gap-2">
 					<UserRound className="text-muted-foreground size-3.5" />
-					<Badge variant="secondary">First signed-in user</Badge>
+					<Badge variant="secondary">{t("First signed-in user")}</Badge>
 				</span>
 			);
 		}
@@ -378,7 +390,7 @@ function HeadersBindingValue({ flow }: { flow: MCPHeadersFlowDetail }) {
 			</span>
 		);
 	}
-	return <span className="text-muted-foreground italic">Unknown</span>;
+	return <span className="text-muted-foreground italic">{t("Unknown")}</span>;
 }
 
 function CompletedFlowView({ flow }: { flow: MCPFlowDetail }) {
@@ -419,13 +431,14 @@ function DetailRow({ label, value, mono = false }: { label: string; value: React
 }
 
 function BindingValue({ flow }: { flow: MCPFlowDetail }) {
+	const { t } = useLocaleCtx();
 	if (flow.flow_mode === "user") {
 		const userID = flow.user_id;
 		if (!userID) {
 			return (
 				<span className="inline-flex items-center gap-2">
 					<UserRound className="text-muted-foreground size-3.5" />
-					<Badge variant="secondary">First signed-in user</Badge>
+					<Badge variant="secondary">{t("First signed-in user")}</Badge>
 				</span>
 			);
 		}
@@ -453,7 +466,7 @@ function BindingValue({ flow }: { flow: MCPFlowDetail }) {
 			</span>
 		);
 	}
-	return <span className="text-muted-foreground italic">Unknown</span>;
+	return <span className="text-muted-foreground italic">{t("Unknown")}</span>;
 }
 
 function formatExpiry(iso: string): string {
@@ -480,6 +493,7 @@ function CenteredCard({ children }: { children: React.ReactNode }) {
 }
 
 function SessionsTabLink({ variant = "outline" }: { variant?: "outline" | "ghost" }) {
+	const { t } = useLocaleCtx();
 	// Hide the link only when the visitor has no dashboard session — for them,
 	// /workspace/mcp-sessions would 401 and bounce to /login. Admins (cookie
 	// present) still see it. ClientLayout already cached this query for the
@@ -490,7 +504,7 @@ function SessionsTabLink({ variant = "outline" }: { variant?: "outline" | "ghost
 	}
 	return (
 		<Button asChild variant={variant} data-testid="mcp-auth-sessions-tab-link">
-			<Link to="/workspace/mcp-sessions">Open sessions tab</Link>
+			<Link to="/workspace/mcp-sessions">{t("Open sessions tab")}</Link>
 		</Button>
 	);
 }
@@ -502,12 +516,14 @@ function SessionsTabLink({ variant = "outline" }: { variant?: "outline" | "ghost
 // fragment was dropped along the way. Trigger the original action again to
 // get a fresh URL.
 function InvalidLinkView() {
+	const { t } = useLocaleCtx();
 	return (
 		<CenteredCard>
-			<h1 className="text-xl font-semibold tracking-tight">This authentication link is no longer valid</h1>
+			<h1 className="text-xl font-semibold tracking-tight">{t("This authentication link is no longer valid")}</h1>
 			<p className="text-muted-foreground mt-2 text-sm">
-				The link may have expired, been used already, invalid, or had its short-lived token stripped. Trigger the original action again so a
-				fresh authentication link is created.
+				{t(
+					"The link may have expired, been used already, invalid, or had its short-lived token stripped. Trigger the original action again so a fresh authentication link is created.",
+				)}
 			</p>
 		</CenteredCard>
 	);

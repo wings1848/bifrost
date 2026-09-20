@@ -4,6 +4,7 @@ import { buildCursorConfig, buildCursorDeeplink } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { CursorConfigScope, HarnessInstallProps } from "../types";
 import { getRegistrationLabel, getUserHomePrefix } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function CursorHarnessInstall({
 	canGenerateCommand,
@@ -14,6 +15,7 @@ export function CursorHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const [configScope, setConfigScope] = useState<CursorConfigScope>("global");
 
 	const serverArgs = useMemo(
@@ -41,8 +43,8 @@ export function CursorHarnessInstall({
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="global">Global</SelectItem>
-						<SelectItem value="project">Project</SelectItem>
+						<SelectItem value="global">{t("Global")}</SelectItem>
+						<SelectItem value="project">{t("Project")}</SelectItem>
 					</SelectContent>
 				</Select>
 			}

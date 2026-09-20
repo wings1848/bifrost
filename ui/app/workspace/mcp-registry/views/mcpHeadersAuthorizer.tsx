@@ -15,6 +15,7 @@ import { getErrorMessage } from "@/lib/store";
 import { CheckCircle2, KeyRound, Loader2, RefreshCw, ShieldCheck, XCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { IconWrap, InfoBox, StepDots, UiVariant } from "./authorizerUi";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface MCPHeadersAuthorizerProps {
 	open: boolean;
@@ -66,6 +67,7 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 	perUserHeaderKeys,
 	submitHandler,
 }) => {
+	const { t } = useLocaleCtx();
 	const [status, setStatus] = useState<Status>("confirm");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	// Set to true when the user cancels so in-flight async callbacks do not
@@ -155,20 +157,22 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 						<>
 							<InfoBox icon={<KeyRound className="size-4" />}>
 								<p>
-									To set up this MCP server, we need to verify that your header configuration is correct and discover the available tools.
+									{t(
+										"To set up this MCP server, we need to verify that your header configuration is correct and discover the available tools.",
+									)}
 								</p>
 								<p className="text-muted-foreground/80 text-xs">
-									You will be asked to provide sample values for the required headers. Bifrost keeps these values on file to periodically
-									refresh the available tool list; they are never used for real end-user requests. Once verified, each user will submit
-									their own header values when they use this MCP server.
+									{t(
+										"You will be asked to provide sample values for the required headers. Bifrost keeps these values on file to periodically refresh the available tool list; they are never used for real end-user requests. Once verified, each user will submit their own header values when they use this MCP server.",
+									)}
 								</p>
 							</InfoBox>
 							<div className="flex justify-end gap-2">
 								<Button size="sm" variant="outline" onClick={handleCancel} data-testid="per-user-headers-cancel">
-									Cancel
+									{t("Cancel")}
 								</Button>
 								<Button size="sm" onClick={handleConfirm} data-testid="per-user-headers-confirm">
-									Continue
+									{t("Continue")}
 								</Button>
 							</div>
 						</>
@@ -179,8 +183,9 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 						<>
 							<InfoBox icon={<KeyRound className="size-4" />}>
 								<p>
-									These values verify the connection now and are kept on file so Bifrost can periodically refresh the available tool list.
-									Each user still submits their own values when they use this server.
+									{t(
+										"These values verify the connection now and are kept on file so Bifrost can periodically refresh the available tool list. Each user still submits their own values when they use this server.",
+									)}
 								</p>
 							</InfoBox>
 							<HeadersForm
@@ -197,8 +202,8 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 					{status === "testing" && (
 						<>
 							<InfoBox icon={<Loader2 className="size-4 animate-spin" />}>
-								<p>Checking your headers against the server and discovering available tools.</p>
-								<p className="text-muted-foreground/80 text-xs">This only takes a moment.</p>
+								<p>{t("Checking your headers against the server and discovering available tools.")}</p>
+								<p className="text-muted-foreground/80 text-xs">{t("This only takes a moment.")}</p>
 							</InfoBox>
 							<div className="flex items-center justify-end">
 								<StepDots active={2} total={3} />
@@ -209,8 +214,8 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 					{/* Success */}
 					{status === "success" && (
 						<InfoBox variant="success" icon={<CheckCircle2 className="size-4" />}>
-							<p className="font-medium">Header configuration verified.</p>
-							<p className="text-xs opacity-80">You can close this dialog.</p>
+							<p className="font-medium">{t("Header configuration verified.")}</p>
+							<p className="text-xs opacity-80">{t("You can close this dialog.")}</p>
 						</InfoBox>
 					)}
 
@@ -218,16 +223,16 @@ export const MCPHeadersAuthorizer: React.FC<MCPHeadersAuthorizerProps> = ({
 					{status === "failed" && (
 						<>
 							<InfoBox variant="danger" icon={<XCircle className="size-4" />}>
-								<p className="font-medium">Verification did not complete.</p>
+								<p className="font-medium">{t("Verification did not complete.")}</p>
 								<p className="text-xs opacity-80">{errorMessage ?? "Check your header values and try again."}</p>
 							</InfoBox>
 							<div className="flex justify-end gap-2">
 								<Button size="sm" variant="outline" onClick={handleCancel} data-testid="mcp-headers-authorizer-close-btn">
-									Close
+									{t("Close")}
 								</Button>
 								<Button size="sm" onClick={handleRetry} data-testid="mcp-headers-authorizer-retry-btn">
 									<RefreshCw className="size-3.5" />
-									Retry
+									{t("Retry")}
 								</Button>
 							</div>
 						</>

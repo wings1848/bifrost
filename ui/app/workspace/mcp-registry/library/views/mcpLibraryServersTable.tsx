@@ -11,6 +11,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { MCPLibraryDeleteDialog } from "./mcpLibraryDeleteDialog";
 import { authLabel, MCP_ICON_FALLBACK, transportIcon, transportLabel } from "./mcpLibraryServerCard";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface MCPLibraryServersTableProps {
 	servers: MCPLibraryEntry[];
@@ -27,6 +28,7 @@ export function MCPLibraryServersTable({
 	canDelete,
 	onInstall,
 }: MCPLibraryServersTableProps) {
+	const { t } = useLocaleCtx();
 	const [deleteEntry, { isLoading: isDeleting }] = useDeleteMCPLibraryEntryMutation();
 	const [serverToDelete, setServerToDelete] = useState<MCPLibraryEntry | null>(null);
 
@@ -46,14 +48,15 @@ export function MCPLibraryServersTable({
 			<Table className="min-w-[32rem] md:min-w-0" containerClassName="overflow-x-auto md:overflow-x-clip">
 				<TableHeader className="bg-muted sticky top-0 z-10">
 					<TableRow>
-						<TableHead className="w-16">Icon</TableHead>
-						<TableHead>Server</TableHead>
-						<TableHead className="hidden w-10 lg:table-cell">Details</TableHead>
-						<TableHead className="w-32 text-right">Actions</TableHead>
+						<TableHead className="w-16">{t("Icon")}</TableHead>
+						<TableHead>{t("Server")}</TableHead>
+						<TableHead className="hidden w-10 lg:table-cell">{t("Details")}</TableHead>
+						<TableHead className="w-32 text-right">{t("Actions")}</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{servers.map((server) => {
+						const { t } = useLocaleCtx();
 						const isInstalled = installedServerSlugs.has(server.slug);
 						return (
 							<TableRow key={server.slug} className="group" data-testid={`mcp-library-table-row-${server.slug}`}>
@@ -81,10 +84,10 @@ export function MCPLibraryServersTable({
 											{isInstalled && (
 												<Badge variant="success" className="gap-1">
 													<Check className="size-3" />
-													Installed
+													{t("Installed")}
 												</Badge>
 											)}
-											{server.source === "custom" && <Badge variant="outline">Custom</Badge>}
+											{server.source === "custom" && <Badge variant="outline">{t("Custom")}</Badge>}
 										</div>
 										<p className="text-muted-foreground line-clamp-1 max-w-4xl text-sm leading-5">
 											{server.description || "No description available."}
@@ -117,7 +120,7 @@ export function MCPLibraryServersTable({
 															<Trash2 className="h-4 w-4" />
 														</Button>
 													</TooltipTrigger>
-													<TooltipContent>Remove from library</TooltipContent>
+													<TooltipContent>{t("Remove from library")}</TooltipContent>
 												</Tooltip>
 											</div>
 										)}
@@ -136,7 +139,7 @@ export function MCPLibraryServersTable({
 														</a>
 													</Button>
 												</TooltipTrigger>
-												<TooltipContent>Documentation</TooltipContent>
+												<TooltipContent>{t("Documentation")}</TooltipContent>
 											</Tooltip>
 										)}
 										{isInstalled ? (
@@ -148,7 +151,7 @@ export function MCPLibraryServersTable({
 														</Link>
 													</Button>
 												</TooltipTrigger>
-												<TooltipContent>Open installed server</TooltipContent>
+												<TooltipContent>{t("Open installed server")}</TooltipContent>
 											</Tooltip>
 										) : (
 											<Tooltip>
@@ -163,7 +166,7 @@ export function MCPLibraryServersTable({
 														<Download className="h-4 w-4" />
 													</Button>
 												</TooltipTrigger>
-												<TooltipContent>Install</TooltipContent>
+												<TooltipContent>{t("Install")}</TooltipContent>
 											</Tooltip>
 										)}
 									</div>
@@ -188,15 +191,16 @@ export function MCPLibraryServersTable({
 
 /** Skeleton placeholder mirroring the table layout while the library catalog loads. */
 export function MCPLibraryServersTableSkeleton({ rows = 8 }: { rows?: number }) {
+	const { t } = useLocaleCtx();
 	return (
 		<div className="mb-2 overflow-visible rounded-md border md:overflow-y-auto" data-testid="mcp-library-table-skeleton">
 			<Table className="min-w-[32rem] md:min-w-0" containerClassName="overflow-x-auto md:overflow-x-clip">
 				<TableHeader className="bg-muted sticky top-0 z-10">
 					<TableRow>
-						<TableHead className="w-16">Icon</TableHead>
-						<TableHead>Server</TableHead>
-						<TableHead className="hidden w-10 lg:table-cell">Details</TableHead>
-						<TableHead className="w-32 text-right">Actions</TableHead>
+						<TableHead className="w-16">{t("Icon")}</TableHead>
+						<TableHead>{t("Server")}</TableHead>
+						<TableHead className="hidden w-10 lg:table-cell">{t("Details")}</TableHead>
+						<TableHead className="w-32 text-right">{t("Actions")}</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>

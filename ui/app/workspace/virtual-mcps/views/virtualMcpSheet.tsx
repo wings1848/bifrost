@@ -29,6 +29,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import VirtualMCPAccessTab from "./virtualMcpAccessTab";
 import VirtualMCPGeneralTab from "./virtualMcpGeneralTab";
 import VirtualMcpToolsEditor from "./virtualMcpToolsEditor";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export type VirtualMCPSheetTarget = { mode: "create" } | { mode: "edit"; id: number };
 
@@ -47,6 +48,7 @@ function normalizeTools(tools: VirtualMCPToolSpec[]) {
 }
 
 export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasNext = false, onNavigate }: VirtualMCPSheetProps) {
+	const { t } = useLocaleCtx();
 	const { toast } = useToast();
 	const editId = target.mode === "edit" ? target.id : null;
 	const isCreate = target.mode === "create";
@@ -125,6 +127,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 	const canSave = name.trim().length > 0 && !saving && isDirty && hasSavePermission;
 
 	const handleSave = async () => {
+		const { t } = useLocaleCtx();
 		if (!canSave) return;
 		const body: VirtualMCPRequest = {
 			name: name.trim(),
@@ -136,7 +139,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 			if (isCreate) {
 				body.endpoint_slug = endpointSlug.trim() || undefined;
 				await createVirtualMCP(body).unwrap();
-				toast({ title: "Virtual MCP created" });
+				toast({ title: t("Virtual MCP created") });
 			} else {
 				await updateVirtualMCP({ id: target.id, data: body }).unwrap();
 				// Commit staged VK assignment changes (attach/detach are separate endpoints).
@@ -149,7 +152,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 				for (const vkId of original.filter((id) => !stagedSet.has(id))) {
 					await detachVk({ id: target.id, vkId }).unwrap();
 				}
-				toast({ title: "Virtual MCP updated" });
+				toast({ title: t("Virtual MCP updated") });
 			}
 			onClose();
 		} catch (err) {
@@ -179,9 +182,11 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 						<div className="space-y-2">
 							<SheetTitle className="flex w-fit items-center gap-2 font-medium">
 								{isCreate ? "New Virtual MCP" : "Edit Virtual MCP"}
-								{enabled ? <Badge>Enabled</Badge> : <Badge variant="secondary">Disabled</Badge>}
+								{enabled ? <Badge>{t("Enabled")}</Badge> : <Badge variant="secondary">{t("Disabled")}</Badge>}
 							</SheetTitle>
-							<SheetDescription>Bundle tools from your MCP servers into a single endpoint served at /mcp/&lt;slug&gt;.</SheetDescription>
+							<SheetDescription>
+								{t("Bundle tools from your MCP servers into a single endpoint served at /mcp/&lt;slug&gt;.")}
+							</SheetDescription>
 						</div>
 						{!isCreate && onNavigate && (
 							<SheetNavigationButtons hasPrev={hasPrev} hasNext={hasNext} onNavigate={handleNavigate} entityLabel="Virtual MCP" />
@@ -197,13 +202,13 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 					<Tabs value={tab} onValueChange={setTab} className="flex grow flex-col overflow-hidden">
 						<TabsList className="mx-4 mt-4 flex justify-start md:mx-8">
 							<TabsTrigger value="general" data-testid="virtual-mcp-tab-general">
-								General
+								{t("General")}
 							</TabsTrigger>
 							<TabsTrigger value="tools" data-testid="virtual-mcp-tab-tools">
-								Tools
+								{t("Tools")}
 							</TabsTrigger>
 							<TabsTrigger value="access" data-testid="virtual-mcp-tab-access">
-								Access
+								{t("Access")}
 							</TabsTrigger>
 						</TabsList>
 
@@ -243,7 +248,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 					</span>
 					<div className="flex items-center gap-2">
 						<Button variant="outline" onClick={onClose} disabled={saving}>
-							Cancel
+							{t("Cancel")}
 						</Button>
 						<Button onClick={handleSave} disabled={!canSave} data-testid="virtual-mcp-save-btn">
 							{saving && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -256,11 +261,13 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 			<AlertDialog open={pendingNav !== null} onOpenChange={(open) => !open && setPendingNav(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
-						<AlertDialogDescription>You have unsaved changes to this Virtual MCP. Leaving now will discard them.</AlertDialogDescription>
+						<AlertDialogTitle>{t("Discard unsaved changes?")}</AlertDialogTitle>
+						<AlertDialogDescription>
+							{t("You have unsaved changes to this Virtual MCP. Leaving now will discard them.")}
+						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel onClick={() => setPendingNav(null)}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel onClick={() => setPendingNav(null)}>{t("Cancel")}</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => {
 								const dir = pendingNav;
@@ -268,7 +275,7 @@ export default function VirtualMCPSheet({ target, onClose, hasPrev = false, hasN
 								if (dir) onNavigate?.(dir);
 							}}
 						>
-							Discard changes
+							{t("Discard changes")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

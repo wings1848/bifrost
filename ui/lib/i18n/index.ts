@@ -42,8 +42,13 @@ export function useLocale() {
 	}, []);
 
 	const t = useCallback(
-		(key: string): string => {
-			return dicts[locale][key] ?? dicts.en[key] ?? key;
+		(key: string, params?: Record<string, string | number>): string => {
+			const template = dicts[locale][key] ?? dicts.en[key] ?? key;
+			if (!params) return template;
+			// {name} 形式的插值，让「一句里夹着变量」的文案能整句翻译
+			return template.replace(/\{(\w+)\}/g, (whole, name) =>
+				Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : whole,
+			);
 		},
 		[locale],
 	);

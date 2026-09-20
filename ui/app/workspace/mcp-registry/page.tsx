@@ -6,6 +6,7 @@ import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, useQuery
 import { useCallback, useEffect, useMemo } from "react";
 import { MCPClientsFilterSidebar, type MCPClientFilters } from "./views/mcpClientsFilterSidebar";
 import MCPClientsTable from "./views/mcpClientsTable";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const POLLING_INTERVAL = 5000;
 const PAGE_SIZE = 25;
@@ -117,11 +118,12 @@ export default function MCPServersPage() {
 	const { toast } = useToast();
 
 	useEffect(() => {
+		const { t } = useLocaleCtx();
 		if (error) {
 			const message = getErrorMessage(error);
 			if (message.toLowerCase().includes("mcp is not configured in this bifrost instance")) return;
 			toast({
-				title: "Error",
+				title: t("Error"),
 				description: message,
 				variant: "destructive",
 			});

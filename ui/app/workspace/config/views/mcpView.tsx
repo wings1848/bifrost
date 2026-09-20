@@ -15,11 +15,13 @@ import { IS_ENTERPRISE } from "@/lib/constants/config";
 import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const secretVarEquals = (a?: SecretVar, b?: SecretVar) =>
 	(a?.value ?? "") === (b?.value ?? "") && (a?.ref ?? "") === (b?.ref ?? "") && (a?.type ?? "plain_text") === (b?.type ?? "plain_text");
 
 export default function MCPView() {
+	const { t } = useLocaleCtx();
 	const hasSettingsUpdateAccess = useRbac(RbacResource.Settings, RbacOperation.Update);
 	const { data: bifrostConfig } = useGetCoreConfigQuery({ fromDB: true });
 	const config = bifrostConfig?.client_config;
@@ -190,17 +192,18 @@ export default function MCPView() {
 	}, []);
 
 	const handleSave = useCallback(async () => {
+		const { t } = useLocaleCtx();
 		try {
 			const agentDepth = Number.parseInt(localValues.mcp_agent_depth);
 			const toolTimeout = Number.parseInt(localValues.mcp_tool_execution_timeout);
 
 			if (isNaN(agentDepth) || agentDepth <= 0) {
-				toast.error("Max agent depth must be a positive number.");
+				toast.error(t("Max agent depth must be a positive number."));
 				return;
 			}
 
 			if (isNaN(toolTimeout) || toolTimeout <= 0) {
-				toast.error("Tool execution timeout must be a positive number.");
+				toast.error(t("Tool execution timeout must be a positive number."));
 				return;
 			}
 
@@ -214,17 +217,17 @@ export default function MCPView() {
 			const accessTokenTTL = Number.parseInt(localValues.oauth2_access_token_ttl);
 
 			if (oauthModeActive && (isNaN(authCodeTTL) || authCodeTTL < 1 || authCodeTTL > 900)) {
-				toast.error("Authorization code TTL must be between 1 and 900 seconds (15 minutes).");
+				toast.error(t("Authorization code TTL must be between 1 and 900 seconds (15 minutes)."));
 				return;
 			}
 
 			if (oauthModeActive && (isNaN(accessTokenTTL) || accessTokenTTL < 60)) {
-				toast.error("Access token TTL must be at least 60 seconds.");
+				toast.error(t("Access token TTL must be at least 60 seconds."));
 				return;
 			}
 
 			if (!bifrostConfig) {
-				toast.error("Configuration not loaded. Please refresh and try again.");
+				toast.error(t("Configuration not loaded. Please refresh and try again."));
 				return;
 			}
 
@@ -249,7 +252,7 @@ export default function MCPView() {
 				...bifrostConfig,
 				client_config: clientConfigToSave,
 			}).unwrap();
-			toast.success("MCP settings updated successfully.");
+			toast.success(t("MCP settings updated successfully."));
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		}
@@ -257,15 +260,15 @@ export default function MCPView() {
 
 	return (
 		<div className="mx-auto w-full max-w-4xl space-y-4 px-4 py-6 md:px-0" data-testid="mcp-settings-view">
-			<PageTitle title="MCP Settings">Configure MCP (Model Context Protocol) agent and tool settings.</PageTitle>
+			<PageTitle title={t("MCP Settings")}>{t("Configure MCP (Model Context Protocol) agent and tool settings.")}</PageTitle>
 			<div className="space-y-4">
 				{/* Max Agent Depth */}
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-agent-depth" className="text-sm font-medium">
-							Max Agent Depth
+							{t("Max Agent Depth")}
 						</label>
-						<p className="text-muted-foreground text-sm">Maximum depth for MCP agent execution.</p>
+						<p className="text-muted-foreground text-sm">{t("Maximum depth for MCP agent execution.")}</p>
 					</div>
 					<Input
 						id="mcp-agent-depth"
@@ -282,9 +285,9 @@ export default function MCPView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-tool-execution-timeout" className="text-sm font-medium">
-							Tool Execution Timeout (seconds)
+							{t("Tool Execution Timeout (seconds)")}
 						</label>
-						<p className="text-muted-foreground text-sm">Maximum time in seconds for tool execution.</p>
+						<p className="text-muted-foreground text-sm">{t("Maximum time in seconds for tool execution.")}</p>
 					</div>
 					<Input
 						id="mcp-tool-execution-timeout"
@@ -301,10 +304,10 @@ export default function MCPView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-tool-sync-interval" className="text-sm font-medium">
-							Tool Sync Interval (minutes)
+							{t("Tool Sync Interval (minutes)")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							How often to refresh tool lists from MCP servers. Set to 0 to use the default of 10 minutes.
+							{t("How often to refresh tool lists from MCP servers. Set to 0 to use the default of 10 minutes.")}
 						</p>
 					</div>
 					<Input
@@ -322,12 +325,13 @@ export default function MCPView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-disable-auto-tool-inject" className="text-sm font-medium">
-							Disable Auto Tool Injection
+							{t("Disable Auto Tool Injection")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							When enabled, MCP tools are not automatically included in every request. Tools are only injected when explicitly specified via
-							request headers (<code className="text-xs">x-bf-mcp-include-tools</code>) and still must be allowed by the virtual key MCP
-							configuration.
+							{t(
+								"When enabled, MCP tools are not automatically included in every request. Tools are only injected when explicitly specified via request headers ({header}) and still must be allowed by the virtual key MCP configuration.",
+								{ header: "x-bf-mcp-include-tools" },
+							)}
 						</p>
 					</div>
 					<Switch
@@ -343,11 +347,12 @@ export default function MCPView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-enable-temp-token-auth" className="text-sm font-medium">
-							Allow Temp Token Auth Links
+							{t("Allow Temp Token Auth Links")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							When enabled, per-user MCP OAuth links can include a short-lived scoped token so someone without an active Bifrost dashboard
-							session can complete the flow. Keep disabled to require normal dashboard authentication.
+							{t(
+								"When enabled, per-user MCP OAuth links can include a short-lived scoped token so someone without an active Bifrost dashboard session can complete the flow. Keep disabled to require normal dashboard authentication.",
+							)}
 						</p>
 					</div>
 					<Switch
@@ -363,50 +368,50 @@ export default function MCPView() {
 				<div className="space-y-4 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="mcp-binding-level" className="text-sm font-medium">
-							Code Mode Binding Level
+							{t("Code Mode Binding Level")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							How tools are exposed in the VFS: server-level (all tools per server) or tool-level (individual tools).
+							{t("How tools are exposed in the VFS: server-level (all tools per server) or tool-level (individual tools).")}
 						</p>
 					</div>
 					<Select value={localValues.mcp_code_mode_binding_level} onValueChange={handleCodeModeBindingLevelChange}>
 						<SelectTrigger id="mcp-binding-level" data-testid="mcp-binding-level" className="w-56">
-							<SelectValue placeholder="Select binding level" />
+							<SelectValue placeholder={t("Select binding level")} />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="server">Server-Level</SelectItem>
-							<SelectItem value="tool">Tool-Level</SelectItem>
+							<SelectItem value="server">{t("Server-Level")}</SelectItem>
+							<SelectItem value="tool">{t("Tool-Level")}</SelectItem>
 						</SelectContent>
 					</Select>
 
 					{/* Visual Example */}
 					<div className="mt-6 space-y-2">
-						<p className="text-foreground text-xs font-semibold tracking-wide uppercase">VFS Structure:</p>
+						<p className="text-foreground text-xs font-semibold tracking-wide uppercase">{t("VFS Structure:")}</p>
 
 						{localValues.mcp_code_mode_binding_level === "server" ? (
 							<div className="bg-muted border-border rounded-sm border p-4">
 								<div className="text-foreground space-y-1 font-mono text-xs">
-									<div>servers/</div>
-									<div className="pl-3">├─ calculator.py</div>
-									<div className="pl-3">├─ youtube.py</div>
-									<div className="pl-3">└─ weather.py</div>
+									<div>{t("servers/")}</div>
+									<div className="pl-3">{t("├─ calculator.py")}</div>
+									<div className="pl-3">{t("├─ youtube.py")}</div>
+									<div className="pl-3">{t("└─ weather.py")}</div>
 								</div>
-								<p className="text-muted-foreground mt-3 text-xs">All tools per server in a single .py file</p>
+								<p className="text-muted-foreground mt-3 text-xs">{t("All tools per server in a single .py file")}</p>
 							</div>
 						) : (
 							<div className="bg-muted border-border rounded-sm border p-4">
 								<div className="text-foreground space-y-1 font-mono text-xs">
-									<div>servers/</div>
-									<div className="pl-3">├─ calculator/</div>
-									<div className="pl-6">├─ add.py</div>
-									<div className="pl-6">└─ subtract.py</div>
-									<div className="pl-3">├─ youtube/</div>
-									<div className="pl-6">├─ GET_CHANNELS.py</div>
-									<div className="pl-6">└─ SEARCH_VIDEOS.py</div>
-									<div className="pl-3">└─ weather/</div>
-									<div className="pl-6">└─ get_forecast.py</div>
+									<div>{t("servers/")}</div>
+									<div className="pl-3">{t("├─ calculator/")}</div>
+									<div className="pl-6">{t("├─ add.py")}</div>
+									<div className="pl-6">{t("└─ subtract.py")}</div>
+									<div className="pl-3">{t("├─ youtube/")}</div>
+									<div className="pl-6">{t("├─ GET_CHANNELS.py")}</div>
+									<div className="pl-6">{t("└─ SEARCH_VIDEOS.py")}</div>
+									<div className="pl-3">{t("└─ weather/")}</div>
+									<div className="pl-6">{t("└─ get_forecast.py")}</div>
 								</div>
-								<p className="text-muted-foreground mt-3 text-xs">Individual .py file for each tool</p>
+								<p className="text-muted-foreground mt-3 text-xs">{t("Individual .py file for each tool")}</p>
 							</div>
 						)}
 					</div>
@@ -416,18 +421,22 @@ export default function MCPView() {
 				<Accordion type="single" collapsible className="rounded-sm border px-4">
 					<AccordionItem value="advanced-settings" className="border-b-0">
 						<AccordionTrigger data-testid="mcp-settings-advanced-trigger">
-							<span className="text-sm font-medium">Advanced Settings</span>
+							<span className="text-sm font-medium">{t("Advanced Settings")}</span>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-2 pt-2">
 							<label htmlFor="external-client-url" className="text-sm font-medium">
-								External Client URL
+								{t("External Client URL")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								Override Bifrost's public base URL when it runs behind a reverse proxy. <b>Leave blank to derive the URL</b> from the
-								incoming <code className="text-xs">Host</code> header. Used as the <code className="text-xs">redirect_uri</code> Bifrost
-								registers with upstream OAuth providers when it acts as a client to an MCP server (e.g. Notion or Jira redirect the browser
-								to <code className="text-xs">{"<URL>/api/oauth/callback"}</code> after login). Supports env var syntax (e.g.{" "}
-								<code className="text-xs">env.BIFROST_EXTERNAL_URL</code>).
+								{t(
+									"Override Bifrost's public base URL when it runs behind a reverse proxy. Leave blank to derive the URL from the incoming {hostHeader} header. Used as the {redirectUri} Bifrost registers with upstream OAuth providers when it acts as a client to an MCP server (e.g. Notion or Jira redirect the browser to {callbackUrl} after login). Supports env var syntax (e.g. {envVar}).",
+									{
+										hostHeader: "Host",
+										redirectUri: "redirect_uri",
+										callbackUrl: "<URL>/api/oauth/callback",
+										envVar: "env.BIFROST_EXTERNAL_URL",
+									},
+								)}
 							</p>
 							<SecretVarInput
 								id="external-client-url"
@@ -439,26 +448,26 @@ export default function MCPView() {
 							/>
 							<Alert variant="warning">
 								<AlertTriangle className="size-4" />
-								<AlertTitle>Changing this URL can break existing MCP clients</AlertTitle>
+								<AlertTitle>{t("Changing this URL can break existing MCP clients")}</AlertTitle>
 								<AlertDescription>
 									<p>
-										Upstream OAuth providers lock the <code className="text-xs">redirect_uri</code> to whatever was registered initially, so
-										MCP clients that already completed OAuth will fail with <em>&quot;Invalid redirect URI&quot;</em>. To recover, clear the
-										stored OAuth client credentials for the affected MCP servers and re-authorize so Bifrost re-runs Dynamic Client
-										Registration with the new URL.
+										{t(
+											"Upstream OAuth providers lock the {redirectUri} to whatever was registered initially, so MCP clients that already completed OAuth will fail with {invalidUri}. To recover, clear the stored OAuth client credentials for the affected MCP servers and re-authorize so Bifrost re-runs Dynamic Client Registration with the new URL.",
+											{ redirectUri: "redirect_uri", invalidUri: '"Invalid redirect URI"' },
+										)}
 									</p>
 								</AlertDescription>
 							</Alert>
 							{/* MCP Server Auth Mode */}
 							<div className="mt-4 space-y-2 border-t pt-4">
 								<label htmlFor="mcp-server-auth-mode" className="text-sm font-medium">
-									MCP Server Authentication Mode
+									{t("MCP Server Authentication Mode")}
 								</label>
 								<p className="text-muted-foreground text-sm">
-									Controls how inbound MCP clients (e.g. Claude Code, Cursor) authenticate to the <code className="text-xs">/mcp</code>{" "}
-									endpoint. <b>headers</b> (default) - VK / api-key / session headers only, OAuth discovery disabled. <b>both</b> - accepts
-									header credentials and Bifrost-issued JWTs; existing integrations are unaffected. <b>oauth</b> - JWTs only; VK and header
-									access is disabled.
+									{t(
+										"Controls how inbound MCP clients (e.g. Claude Code, Cursor) authenticate to the {endpoint} endpoint. {headers} (default) - VK / api-key / session headers only, OAuth discovery disabled. {both} - accepts header credentials and Bifrost-issued JWTs; existing integrations are unaffected. {oauth} - JWTs only; VK and header access is disabled.",
+										{ endpoint: "/mcp", headers: "headers", both: "both", oauth: "oauth" },
+									)}
 								</p>
 								<Select
 									value={localConfig.mcp_server_auth_mode ?? "headers"}
@@ -469,19 +478,20 @@ export default function MCPView() {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="headers">Headers</SelectItem>
-										<SelectItem value="both">Both</SelectItem>
-										<SelectItem value="oauth">OAuth</SelectItem>
+										<SelectItem value="headers">{t("Headers")}</SelectItem>
+										<SelectItem value="both">{t("Both")}</SelectItem>
+										<SelectItem value="oauth">{t("OAuth")}</SelectItem>
 									</SelectContent>
 								</Select>
 								{/* oauth: VK/header access disabled */}
 								{localConfig.mcp_server_auth_mode === "oauth" && (
 									<Alert variant="warning">
 										<AlertTriangle className="size-4" />
-										<AlertTitle>VK / header MCP access will be disabled</AlertTitle>
+										<AlertTitle>{t("VK / header MCP access will be disabled")}</AlertTitle>
 										<AlertDescription>
-											All existing MCP integrations that use a virtual key, api-key, or session header will stop working immediately.
-											Clients must re-authenticate via the OAuth consent flow to obtain a JWT before they can connect.
+											{t(
+												"All existing MCP integrations that use a virtual key, api-key, or session header will stop working immediately. Clients must re-authenticate via the OAuth consent flow to obtain a JWT before they can connect.",
+											)}
 										</AlertDescription>
 									</Alert>
 								)}
@@ -491,10 +501,11 @@ export default function MCPView() {
 									(config?.mcp_server_auth_mode === "both" || config?.mcp_server_auth_mode === "oauth") && (
 										<Alert variant="warning">
 											<AlertTriangle className="size-4" />
-											<AlertTitle>OAuth discovery will be disabled</AlertTitle>
+											<AlertTitle>{t("OAuth discovery will be disabled")}</AlertTitle>
 											<AlertDescription>
-												All MCP clients that authenticated via the OAuth consent flow will lose access; their JWTs will be rejected and
-												their refresh tokens will become unusable. They will need to reconfigure using a virtual key or api-key header.
+												{t(
+													"All MCP clients that authenticated via the OAuth consent flow will lose access; their JWTs will be rejected and their refresh tokens will become unusable. They will need to reconfigure using a virtual key or api-key header.",
+												)}
 											</AlertDescription>
 										</Alert>
 									)}
@@ -503,8 +514,9 @@ export default function MCPView() {
 								{localConfig.mcp_server_auth_mode === "both" && (config?.mcp_server_auth_mode ?? "headers") !== "both" && (
 									<Alert>
 										<AlertDescription>
-											Existing VK / header integrations continue to work unchanged. New MCP clients can connect via OAuth - they'll be
-											redirected to the consent page to pick an identity.
+											{t(
+												"Existing VK / header integrations continue to work unchanged. New MCP clients can connect via OAuth - they'll be redirected to the consent page to pick an identity.",
+											)}
 										</AlertDescription>
 									</Alert>
 								)}
@@ -513,18 +525,18 @@ export default function MCPView() {
 							{/* OAuth2 AS Settings — only shown when auth mode is not headers */}
 							{(localConfig.mcp_server_auth_mode === "both" || localConfig.mcp_server_auth_mode === "oauth") && (
 								<div className="mt-4 space-y-4 border-t pt-4">
-									<p className="text-sm font-medium">OAuth2 Server Settings</p>
+									<p className="text-sm font-medium">{t("OAuth2 Server Settings")}</p>
 
 									{/* Issuer URL */}
 									<div className="space-y-1.5">
 										<label htmlFor="oauth2-issuer-url" className="text-sm font-medium">
-											Issuer URL
+											{t("Issuer URL")}
 										</label>
 										<p className="text-muted-foreground text-sm">
-											Stable public URL advertised in discovery documents and embedded as the <code className="text-xs">iss</code> claim in
-											every JWT. Leave blank to derive it from the request <code className="text-xs">Host</code> header (sufficient for most
-											deployments). Multi-host or reverse-proxy deployments might need this. Supports env var syntax (e.g.{" "}
-											<code className="text-xs">env.BIFROST_ISSUER_URL</code>).
+											{t(
+												"Stable public URL advertised in discovery documents and embedded as the {issClaim} claim in every JWT. Leave blank to derive it from the request {hostHeader} header (sufficient for most deployments). Multi-host or reverse-proxy deployments might need this. Supports env var syntax (e.g. {envVar}).",
+												{ issClaim: "iss", hostHeader: "Host", envVar: "env.BIFROST_ISSUER_URL" },
+											)}
 										</p>
 										<SecretVarInput
 											id="oauth2-issuer-url"
@@ -540,11 +552,12 @@ export default function MCPView() {
 									<div className="flex gap-6">
 										<div className="space-y-1.5">
 											<label htmlFor="oauth2-auth-code-ttl" className="text-sm font-medium">
-												Authorization code TTL (seconds)
+												{t("Authorization code TTL (seconds)")}
 											</label>
 											<p className="text-muted-foreground text-xs">
-												How long the one-time code is valid after the consent page redirects back to the MCP client (default: 300, max 900 =
-												15 min).
+												{t(
+													"How long the one-time code is valid after the consent page redirects back to the MCP client (default: 300, max 900 = 15 min).",
+												)}
 											</p>
 											<Input
 												id="oauth2-auth-code-ttl"
@@ -560,11 +573,12 @@ export default function MCPView() {
 										</div>
 										<div className="space-y-1.5">
 											<label htmlFor="oauth2-access-token-ttl" className="text-sm font-medium">
-												Access token TTL (seconds)
+												{t("Access token TTL (seconds)")}
 											</label>
 											<p className="text-muted-foreground text-xs">
-												Lifetime of issued JWT Bearer tokens. Clients silently refresh when expired (default: 600 = 10 min). Also bounds how
-												long a revoked grant keeps working before it is cut off.
+												{t(
+													"Lifetime of issued JWT Bearer tokens. Clients silently refresh when expired (default: 600 = 10 min). Also bounds how long a revoked grant keeps working before it is cut off.",
+												)}
 											</p>
 											<Input
 												id="oauth2-access-token-ttl"
@@ -588,12 +602,12 @@ export default function MCPView() {
 												<div className="flex items-center justify-between space-x-2">
 													<div className="space-y-0.5">
 														<label htmlFor="oauth2-disable-vk-identity" className="text-sm font-medium">
-															Require identity-provider login
+															{t("Require identity-provider login")}
 														</label>
 														<p className="text-muted-foreground text-sm">
-															When enabled, the OAuth consent flow only offers identity-provider login. Virtual keys can no longer be used
-															to obtain an MCP token, and existing virtual-key OAuth sessions lose access immediately. Anonymous session
-															access is unaffected (controlled by Enforce Authentication on Inference).
+															{t(
+																"When enabled, the OAuth consent flow only offers identity-provider login. Virtual keys can no longer be used to obtain an MCP token, and existing virtual-key OAuth sessions lose access immediately. Anonymous session access is unaffected (controlled by Enforce Authentication on Inference).",
+															)}
 														</p>
 													</div>
 													<Switch
@@ -608,10 +622,11 @@ export default function MCPView() {
 												{localConfig.oauth2_server_config?.disable_vk_identity && (
 													<Alert variant="warning">
 														<AlertTriangle className="size-4" />
-														<AlertTitle>Virtual-key MCP access via OAuth will stop</AlertTitle>
+														<AlertTitle>{t("Virtual-key MCP access via OAuth will stop")}</AlertTitle>
 														<AlertDescription>
-															MCP clients that authenticated with a virtual key will lose access immediately and must sign in through your
-															identity provider to reconnect.
+															{t(
+																"MCP clients that authenticated with a virtual key will lose access immediately and must sign in through your identity provider to reconnect.",
+															)}
 														</AlertDescription>
 													</Alert>
 												)}

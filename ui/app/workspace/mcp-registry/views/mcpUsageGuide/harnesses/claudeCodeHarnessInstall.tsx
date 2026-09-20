@@ -4,6 +4,7 @@ import { buildClaudeCodeCommand } from "../commandBuilders";
 import { HarnessCommandSection } from "../harnessCommandSection";
 import type { ClaudeScope, HarnessInstallProps } from "../types";
 import { getRegistrationLabel } from "../utils";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export function ClaudeCodeHarnessInstall({
 	canGenerateCommand,
@@ -13,6 +14,7 @@ export function ClaudeCodeHarnessInstall({
 	selectedServers,
 	serverScope,
 }: HarnessInstallProps) {
+	const { t } = useLocaleCtx();
 	const [scope, setScope] = useState<ClaudeScope>("local");
 
 	const command = useMemo(
@@ -36,9 +38,9 @@ export function ClaudeCodeHarnessInstall({
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="local">Local</SelectItem>
-						<SelectItem value="project">Project</SelectItem>
-						<SelectItem value="user">User</SelectItem>
+						<SelectItem value="local">{t("Local")}</SelectItem>
+						<SelectItem value="project">{t("Project")}</SelectItem>
+						<SelectItem value="user">{t("User")}</SelectItem>
 					</SelectContent>
 				</Select>
 			}

@@ -19,6 +19,7 @@ import { useMemo, useState } from "react";
 import VirtualMCPAccessTab from "./virtualMcpAccessTab";
 import VirtualMCPGeneralTab, { slugify } from "./virtualMcpGeneralTab";
 import VirtualMcpToolsEditor from "./virtualMcpToolsEditor";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const DOCS_URL = "https://docs.getbifrost.ai/mcp/connections";
 
@@ -36,6 +37,7 @@ interface VirtualMCPWizardProps {
 }
 
 export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardProps) {
+	const { t } = useLocaleCtx();
 	const { toast } = useToast();
 	const [createVirtualMCP, { isLoading: creating }] = useCreateVirtualMCPMutation();
 	const [attachVk] = useAttachVirtualMCPVirtualKeyMutation();
@@ -63,6 +65,7 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 	const goBack = () => setStepIdx((i) => Math.max(0, i - 1));
 
 	const handleCreate = async () => {
+		const { t } = useLocaleCtx();
 		setSubmitting(true);
 		try {
 			// Create only once; a retry after a partial failure reuses the existing record.
@@ -86,10 +89,10 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 				attached.add(vkId);
 				setAttachedVkIds([...attached]);
 			}
-			toast({ title: "Virtual MCP created" });
+			toast({ title: t("Virtual MCP created") });
 			onDone();
 		} catch (err) {
-			toast({ title: "Failed to create Virtual MCP", description: getErrorMessage(err), variant: "destructive" });
+			toast({ title: t("Failed to create Virtual MCP"), description: getErrorMessage(err), variant: "destructive" });
 		} finally {
 			setSubmitting(false);
 		}
@@ -106,7 +109,9 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 	return (
 		<div className="flex min-h-full min-w-0 flex-col gap-2 overflow-visible md:h-full md:flex-row md:overflow-hidden">
 			{/* Keep the topbar title stable, matching the list view (else it falls back to a route-derived label). */}
-			<PageTitle title="Virtual MCPs">Bundle tools from your MCP servers into a single endpoint, then assign it to virtual keys.</PageTitle>
+			<PageTitle title={t("Virtual MCPs")}>
+				{t("Bundle tools from your MCP servers into a single endpoint, then assign it to virtual keys.")}
+			</PageTitle>
 			{/* Step rail */}
 			<div className="bg-card flex h-auto w-full shrink-0 flex-row gap-2 overflow-x-auto rounded-b-md px-1 py-3 md:h-full md:w-[240px] md:flex-col md:overflow-x-visible md:rounded-r-md md:rounded-b-none">
 				{STEPS.map((s, i) => (
@@ -132,7 +137,7 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 						>
 							{i < stepIdx ? <Check className="h-4 w-4" /> : i + 1}
 						</span>
-						<span className={`text-sm font-medium ${i === stepIdx ? "text-foreground" : "text-muted-foreground"}`}>{s.title}</span>
+						<span className={`text-sm font-medium ${i === stepIdx ? "text-foreground" : "text-muted-foreground"}`}>{t(s.title)}</span>
 					</button>
 				))}
 			</div>
@@ -144,8 +149,8 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 			>
 				<div className="mx-auto flex min-h-full w-full flex-col gap-6">
 					<div className="bg-card z-10 mx-auto w-full max-w-4xl px-4 pt-4">
-						<h2 className="text-lg font-semibold">{step.title}</h2>
-						<p className="text-muted-foreground text-sm">{step.description}</p>
+						<h2 className="text-lg font-semibold">{t(step.title)}</h2>
+						<p className="text-muted-foreground text-sm">{t(step.description)}</p>
 					</div>
 
 					<div className="mx-auto w-full max-w-4xl grow px-4">
@@ -183,7 +188,7 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 						<div className="mx-auto flex w-full max-w-4xl flex-wrap items-center justify-between gap-3 px-4 py-3">
 							<Button type="button" variant="ghost" onClick={isFirst ? onCancel : goBack} disabled={submitting}>
 								<ArrowLeft className="h-4 w-4" />
-								Back
+								{t("Back")}
 							</Button>
 							<Button
 								type="button"
@@ -194,13 +199,13 @@ export default function VirtualMCPWizard({ onCancel, onDone }: VirtualMCPWizardP
 								{submitting ? (
 									<>
 										<Loader2 className="h-4 w-4 animate-spin" />
-										Creating...
+										{t("Creating...")}
 									</>
 								) : isLast ? (
-									<>Create Virtual MCP</>
+									<>{t("Create Virtual MCP")}</>
 								) : (
 									<>
-										Next
+										{t("Next")}
 										<ArrowRight className="h-4 w-4" />
 									</>
 								)}
@@ -223,6 +228,7 @@ interface ReviewStepProps {
 }
 
 function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedVkIds }: ReviewStepProps) {
+	const { t } = useLocaleCtx();
 	// The endpoint the server will serve; when the slug field is blank it is derived from the name.
 	const previewSlug = slugify(endpointSlug.trim() || name);
 	const { data: coreConfig } = useGetCoreConfigQuery({ fromDB: true });
@@ -231,24 +237,24 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 	const nameById = new Map((clientsData?.clients ?? []).map((c) => [c.config.client_id, c.config.name]));
 	const { copy, copied } = useCopyToClipboard({ successMessage: "Endpoint copied" });
 	const rows: { label: string; value: React.ReactNode }[] = [
-		{ label: "Name", value: name.trim() || <span className="text-muted-foreground">—</span> },
-		{ label: "Endpoint", value: <span className="font-mono text-sm">/mcp/{previewSlug || "—"}</span> },
+		{ label: t("Name"), value: name.trim() || <span className="text-muted-foreground">—</span> },
+		{ label: t("Endpoint"), value: <span className="font-mono text-sm">/mcp/{previewSlug || "—"}</span> },
 		{
-			label: "Description",
+			label: t("Description"),
 			value: description.trim() ? (
 				<ExpandableText text={description.trim()} toggleAlign="right" />
 			) : (
 				<span className="text-muted-foreground">—</span>
 			),
 		},
-		{ label: "Status", value: enabled ? "Enabled" : "Disabled" },
+		{ label: t("Status"), value: enabled ? "Enabled" : "Disabled" },
 		{
-			label: "Servers",
-			value: tools.length === 0 ? <span className="text-muted-foreground">None</span> : `${tools.length} configured`,
+			label: t("Servers"),
+			value: tools.length === 0 ? <span className="text-muted-foreground">{t("None")}</span> : `${tools.length} configured`,
 		},
 		{
-			label: "Virtual keys",
-			value: assignedVkIds.length === 0 ? <span className="text-muted-foreground">None</span> : `${assignedVkIds.length} assigned`,
+			label: t("Virtual keys"),
+			value: assignedVkIds.length === 0 ? <span className="text-muted-foreground">{t("None")}</span> : `${assignedVkIds.length} assigned`,
 		},
 	];
 
@@ -264,7 +270,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 			</div>
 			{tools.length > 0 && (
 				<div className="flex flex-col gap-2">
-					<span className="text-muted-foreground text-xs font-medium uppercase">Tools</span>
+					<span className="text-muted-foreground text-xs font-medium uppercase">{t("Tools")}</span>
 					<div className="overflow-hidden rounded-md border">
 						{tools.map((spec, i) => {
 							const all = spec.tool_names.includes("*");
@@ -286,7 +292,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 			<InfoBox
 				className="mt-2"
 				icon={<Link2 className="size-4" />}
-				title="Endpoint URL"
+				title={t("Endpoint URL")}
 				subcontent={
 					<a
 						href={DOCS_URL}
@@ -295,12 +301,12 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 						className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs"
 					>
 						<ExternalLink className="size-3.5" />
-						Connect Claude Code, Cursor, Codex and more
+						{t("Connect Claude Code, Cursor, Codex and more")}
 					</a>
 				}
 			>
 				<div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-					<span className="text-muted-foreground">Once created, this Virtual MCP will be available at:</span>
+					<span className="text-muted-foreground">{t("Once created, this Virtual MCP will be available at:")}</span>
 					<code className="text-foreground font-mono break-all" data-testid="virtual-mcp-review-endpoint">
 						{endpoint}
 					</code>
@@ -309,7 +315,7 @@ function ReviewStep({ name, endpointSlug, description, enabled, tools, assignedV
 						variant="ghost"
 						size="icon"
 						className="text-muted-foreground h-5 w-5 shrink-0"
-						aria-label="Copy endpoint URL"
+						aria-label={t("Copy endpoint URL")}
 						onClick={() => copy(endpoint)}
 					>
 						{copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
