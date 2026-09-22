@@ -1716,5 +1716,11 @@
 	"and": "and",
 	"for": "for",
 	"prefix": "prefix",
-	"header.": "header."
+	"header.": "header.",
+	"Interface": "Interface",
+	"Preferences for this browser. They are stored locally and do not change server configuration.": "Preferences for this browser. They are stored locally and do not change server configuration.",
+	"Hide enterprise-only navigation": "Hide enterprise-only navigation",
+	"Hide sidebar entries whose pages only show an upgrade notice in this build.": "Hide sidebar entries whose pages only show an upgrade notice in this build.",
+	"Affects {count} sidebar entries. Hiding stops them appearing in the menu; visiting their URLs directly still works.": "Affects {count} sidebar entries. Hiding stops them appearing in the menu; visiting their URLs directly still works.",
+	"Browser-local interface preferences": "Browser-local interface preferences"
 }

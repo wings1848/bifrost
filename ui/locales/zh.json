@@ -1716,5 +1716,11 @@
 	"and": "和",
 	"for": "适用于",
 	"prefix": "前缀",
-	"header.": "请求头。"
+	"header.": "请求头。",
+	"Interface": "界面",
+	"Preferences for this browser. They are stored locally and do not change server configuration.": "仅对当前浏览器生效的偏好设置，保存在本地，不会修改服务端配置。",
+	"Hide enterprise-only navigation": "隐藏企业版专属导航",
+	"Hide sidebar entries whose pages only show an upgrade notice in this build.": "隐藏那些在当前版本中只显示升级提示的侧边栏入口。",
+	"Affects {count} sidebar entries. Hiding stops them appearing in the menu; visiting their URLs directly still works.": "影响 {count} 个侧边栏入口。隐藏后它们不再出现在菜单中，但仍可直接访问其网址。",
+	"Browser-local interface preferences": "浏览器本地界面偏好"
 }

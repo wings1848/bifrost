@@ -72,7 +72,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { HIDDEN_UNTIL_NAV_COOKIE, REMIND_LATER_COOKIE, useOnboardingChecklist } from "@/hooks/useOnboardingChecklist";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { IS_ENTERPRISE } from "@/lib/constants/config";
+import { filterHiddenNavItems } from "@/lib/enterpriseNav";
 import { useBranding } from "@/lib/hooks/useBranding";
+import { useHideEnterpriseNav } from "@/lib/hooks/useHideEnterpriseNav";
 import { useGetCoreConfigQuery, useGetLatestReleaseQuery, useGetVersionQuery } from "@/lib/store";
 import PoweredByBifrost from "@enterprise/components/branding/poweredByBifrost";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -527,6 +529,8 @@ export default function AppSidebar() {
 	]);
 	const isProductionSetupDismissed = !!cookies[PRODUCTION_SETUP_DISMISSED_COOKIE];
 	const isOnboardingCardDismissed = !!cookies[ONBOARDING_CARD_DISMISSED_COOKIE];
+	// 本地偏好（设置页可切换，存 localStorage）：隐藏 OSS 下点进去只有企业版提示的入口。
+	const [hideEnterpriseNav] = useHideEnterpriseNav();
 	const { data: latestRelease } = useGetLatestReleaseQuery(undefined, {
 		skip: !mounted, // Only fetch after component is mounted
 	});
@@ -1007,6 +1011,13 @@ export default function AppSidebar() {
 						hasAccess: hasSettingsAccess,
 					},
 					{
+						title: "Interface",
+						url: "/workspace/config/interface",
+						icon: SlidersHorizontal,
+						description: "Browser-local interface preferences",
+						hasAccess: hasSettingsAccess,
+					},
+					{
 						title: "Compatibility",
 						url: "/workspace/config/compatibility",
 						icon: Plug,
@@ -1122,7 +1133,7 @@ export default function AppSidebar() {
 	);
 
 	const accessibleItems: SidebarItem[] = useMemo(() => {
-		return items
+		const visible = items
 			.map((item) => {
 				const hadSubItems = !!item.subItems?.length;
 				if (hadSubItems) {
@@ -1134,7 +1145,10 @@ export default function AppSidebar() {
 				return item;
 			})
 			.filter(Boolean) as SidebarItem[];
-	}, [items]);
+		// 本地偏好：隐藏 OSS 构建下点进去只有企业版升级提示的入口。
+		// 默认关闭，关闭时 return 同一个引用，行为与改动前完全一致。
+		return filterHiddenNavItems(visible, hideEnterpriseNav);
+	}, [items, hideEnterpriseNav]);
 
 	const filteredItems: SidebarItem[] = useMemo(() => {
 		const query = searchQuery.trim().toLowerCase();
