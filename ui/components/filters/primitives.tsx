@@ -6,6 +6,7 @@ import { TruncatedLabel } from "@/components/ui/truncatedLabel";
 import { cn } from "@/lib/utils";
 import { ChevronDown, LoaderCircle, Plus, Search } from "lucide-react";
 import { Ref, useEffect, useRef, useState } from "react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 // Building blocks shared by the filter sidebars (logs, MCP logs, webhook
 // deliveries). Lifted verbatim out of mcpFilterSidebar.tsx, where they had been
@@ -44,6 +45,7 @@ export function FilterSection({
 	onOpenChange?: (open: boolean) => void;
 	testId?: string;
 }) {
+	const { t } = useLocaleCtx();
 	const [open, setOpen] = useState(defaultOpen);
 
 	useEffect(() => {
@@ -135,6 +137,7 @@ export function SearchableCheckboxList({
 	onSearch?: (query: string) => void;
 	fetching?: boolean;
 }) {
+	const { t } = useLocaleCtx();
 	const [query, setQuery] = useState("");
 	const normalized = query.trim().toLowerCase();
 	const filtered = normalized ? items.filter((item) => item.label.toLowerCase().includes(normalized)) : items;
@@ -200,7 +203,7 @@ export function SearchableCheckboxList({
 				/>
 			))}
 			{filtered.length === 0 && !showAddCustom && (
-				<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">No results</div>
+				<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">{t("No results")}</div>
 			)}
 			{showAddCustom && (
 				<button
@@ -211,7 +214,7 @@ export function SearchableCheckboxList({
 				>
 					<Plus className="text-muted-foreground size-3.5 shrink-0" />
 					<span className="truncate">
-						Use <span className="font-medium">&quot;{trimmed}&quot;</span>
+						{t("Use")} <span className="font-medium">&quot;{trimmed}&quot;</span>
 					</span>
 				</button>
 			)}

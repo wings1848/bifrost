@@ -15,6 +15,7 @@ import { Info, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import UserAgentMappingsView from "./userAgentMappingsView";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 // Security headers that cannot be configured in allowlist/denylist
 // These headers are always blocked for security reasons regardless of configuration
@@ -66,6 +67,7 @@ function largePayloadConfigEqual(a: LargePayloadConfig, b: LargePayloadConfig): 
 }
 
 export default function ClientSettingsView() {
+	const { t } = useLocaleCtx();
 	const hasSettingsUpdateAccess = useRbac(RbacResource.Settings, RbacOperation.Update);
 	const [droppedRequests, setDroppedRequests] = useState<number>(0);
 	const { data: droppedRequestsData } = useGetDroppedRequestsQuery();
@@ -156,15 +158,15 @@ export default function ClientSettingsView() {
 				localLargePayloadConfig.max_payload_bytes < minBytes ||
 				localLargePayloadConfig.truncated_log_bytes < minBytes
 			) {
-				toast.error("All byte values must be at least 1024 (1 KB).");
+				toast.error(t("All byte values must be at least 1024 (1 KB)."));
 				return;
 			}
 			if (localLargePayloadConfig.max_payload_bytes < localLargePayloadConfig.request_threshold_bytes) {
-				toast.error("Max payload size must be greater than or equal to the request threshold.");
+				toast.error(t("Max payload size must be greater than or equal to the request threshold."));
 				return;
 			}
 			if (localLargePayloadConfig.max_payload_bytes < localLargePayloadConfig.response_threshold_bytes) {
-				toast.error("Max payload size must be greater than or equal to the response threshold.");
+				toast.error(t("Max payload size must be greater than or equal to the response threshold."));
 				return;
 			}
 		}
@@ -175,7 +177,7 @@ export default function ClientSettingsView() {
 		// Save core config if changed
 		if (hasCoreConfigChanges) {
 			if (!bifrostConfig) {
-				toast.error("Configuration not loaded. Please refresh and try again.");
+				toast.error(t("Configuration not loaded. Please refresh and try again."));
 				return;
 			}
 			// Clean up empty strings from header filter config
@@ -207,9 +209,9 @@ export default function ClientSettingsView() {
 
 		if (coreConfigSaved || largePayloadSaved) {
 			if (largePayloadSaved) {
-				toast.success("Settings updated. Large payload changes require a restart to apply.");
+				toast.success(t("Settings updated. Large payload changes require a restart to apply."));
 			} else {
-				toast.success("Client settings updated successfully.");
+				toast.success(t("Client settings updated successfully."));
 			}
 		}
 	}, [
@@ -288,20 +290,24 @@ export default function ClientSettingsView() {
 
 	return (
 		<div className="mx-auto w-full max-w-4xl space-y-6">
-			<PageTitle title="Client Settings">Configure client behavior and request handling.</PageTitle>
+			<PageTitle title={t("Client Settings")}>{t("Configure client behavior and request handling.")}</PageTitle>
 
 			<div className="space-y-4">
 				{/* Drop Excess Requests */}
 				<div className="flex items-center justify-between space-x-2">
 					<div className="space-y-0.5">
 						<label htmlFor="drop-excess-requests" className="text-sm font-medium">
-							Drop Excess Requests
+							{t("Drop Excess Requests")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							If enabled, Bifrost will drop requests that exceed pool capacity.{" "}
+							{t("If enabled, Bifrost will drop requests that exceed pool capacity.")}{" "}
 							{localConfig.drop_excess_requests && droppedRequests > 0 ? (
 								<span>
-									Have dropped <b>{droppedRequests} requests</b> since last restart.
+									{t("Have dropped")}{" "}
+									<b>
+										{droppedRequests} {t("requests")}
+									</b>{" "}
+									{t("since last restart.")}
 								</span>
 							) : (
 								<></>
@@ -321,10 +327,10 @@ export default function ClientSettingsView() {
 				<div className="flex items-center justify-between space-x-2">
 					<div className="space-y-0.5">
 						<label htmlFor="disable-db-pings-in-health" className="text-sm font-medium">
-							Disable DB Pings in Health Check
+							{t("Disable DB Pings in Health Check")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							If enabled, the /health endpoint will skip database connectivity checks and return OK immediately.
+							{t("If enabled, the /health endpoint will skip database connectivity checks and return OK immediately.")}
 						</p>
 					</div>
 					<Switch
@@ -340,10 +346,12 @@ export default function ClientSettingsView() {
 				<div className="flex items-center justify-between space-x-2">
 					<div className="space-y-0.5">
 						<label htmlFor="dump-errors-in-console-logs" className="text-sm font-medium">
-							Dump Errors in Console Logs
+							{t("Dump Errors in Console Logs")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							If enabled, full error details are written to the server console logs. Useful for debugging, but may be noisy in production.
+							{t(
+								"If enabled, full error details are written to the server console logs. Useful for debugging, but may be noisy in production.",
+							)}
 						</p>
 					</div>
 					<Switch
@@ -359,10 +367,10 @@ export default function ClientSettingsView() {
 				<div className="flex items-center justify-between space-x-2">
 					<div className="space-y-0.5">
 						<label htmlFor="async-job-result-ttl" className="text-sm font-medium">
-							Async Job Result TTL (seconds)
+							{t("Async Job Result TTL (seconds)")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							Default time-to-live for async job results in seconds. Results are automatically cleaned up after expiry.
+							{t("Default time-to-live for async job results in seconds. Results are automatically cleaned up after expiry.")}
 						</p>
 					</div>
 					<Input
@@ -383,8 +391,8 @@ export default function ClientSettingsView() {
 			{/* Header Filter Section */}
 			<div className="space-y-4">
 				<div>
-					<h3 className="text-lg font-semibold tracking-tight">Header Forwarding</h3>
-					<p className="text-muted-foreground text-sm">Control which extra headers are forwarded to LLM providers.</p>
+					<h3 className="text-lg font-semibold tracking-tight">{t("Header Forwarding")}</h3>
+					<p className="text-muted-foreground text-sm">{t("Control which extra headers are forwarded to LLM providers.")}</p>
 				</div>
 
 				<Accordion type="multiple" className="w-full rounded-sm border px-4">
@@ -392,61 +400,65 @@ export default function ClientSettingsView() {
 						<AccordionTrigger>
 							<span className="flex items-center gap-2">
 								<Info className="h-4 w-4" />
-								About Header Forwarding
+								{t("About Header Forwarding")}
 							</span>
 						</AccordionTrigger>
 						<AccordionContent className="space-y-3">
 							<div>
-								<p className="mb-2 font-medium">Two ways to forward headers:</p>
+								<p className="mb-2 font-medium">{t("Two ways to forward headers:")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										<span className="font-medium">Prefixed headers:</span> Use{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-*</code> prefix. For example,{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-custom-id</code> is forwarded as{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>.
+										<span className="font-medium">{t("Prefixed headers:")}</span> {t("Use")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"x-bf-eh-*"}</code> {t("prefix. For example,")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"x-bf-eh-custom-id"}</code> {t("is forwarded as")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"custom-id"}</code>.
 									</li>
 									<li>
-										<span className="font-medium">Direct headers:</span> Any header explicitly added to the allowlist can be forwarded
-										directly without the prefix (e.g.,{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-beta</code>).
+										<span className="font-medium">{t("Direct headers:")}</span>{" "}
+										{t("Any header explicitly added to the allowlist can be forwarded directly without the prefix (e.g.,")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"anthropic-beta"}</code>).
 									</li>
 								</ul>
 							</div>
 							<div>
-								<p className="mb-2 font-medium">How allowlist and denylist work:</p>
+								<p className="mb-2 font-medium">{t("How allowlist and denylist work:")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										<span className="font-medium">Allowlist empty:</span> Only{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-*</code> prefixed headers are forwarded
-										(default behavior)
+										<span className="font-medium">{t("Allowlist empty:")}</span> {t("Only")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"x-bf-eh-*"}</code>{" "}
+										{t("prefixed headers are forwarded (default behavior)")}
 									</li>
 									<li>
-										<span className="font-medium">Allowlist configured:</span> Prefixed headers filtered by allowlist, plus any direct
-										header in the allowlist is forwarded
+										<span className="font-medium">{t("Allowlist configured:")}</span>{" "}
+										{t("Prefixed headers filtered by allowlist, plus any direct header in the allowlist is forwarded")}
 									</li>
 									<li>
-										<span className="font-medium">Denylist:</span> Headers in the denylist are always blocked from forwarding
+										<span className="font-medium">{t("Denylist:")}</span> {t("Headers in the denylist are always blocked from forwarding")}
 									</li>
 									<li>
-										<span className="font-medium">Wildcards:</span> Use{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code> at the end of a pattern to match prefixes
-										(e.g., <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-*</code> matches all headers starting
-										with <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-</code>). Use{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code> alone to match all headers.
+										<span className="font-medium">{t("Wildcards:")}</span> {t("Use")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code>{" "}
+										{t("at the end of a pattern to match prefixes (e.g.,")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"anthropic-*"}</code>{" "}
+										{t("matches all headers starting with")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"anthropic-"}</code>
+										{t("). Use")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code>{" "}
+										{t("alone to match all headers.")}
 									</li>
 								</ul>
 							</div>
 							<div>
-								<p className="mb-2 font-medium">Important:</p>
+								<p className="mb-2 font-medium">{t("Important:")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										Allowlist/denylist entries should be the header name <span className="font-medium">without</span> the{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-</code> prefix
+										{t("Allowlist/denylist entries should be the header name")} <span className="font-medium">{t("without")}</span>{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"x-bf-eh-"}</code> {t("prefix")}
 									</li>
 									<li>
-										Example: To allow <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-custom-id</code> or direct{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>, add{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code> to the allowlist
+										{t("Example: To allow")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"x-bf-eh-custom-id"}</code>{" "}
+										{t("or direct")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"custom-id"}</code>
+										{t(", add")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">{"custom-id"}</code>{" "}
+										{t("to the allowlist")}
 									</li>
 								</ul>
 							</div>
@@ -457,17 +469,19 @@ export default function ClientSettingsView() {
 						<AccordionTrigger>
 							<span className="flex items-center gap-2">
 								<Info className="h-4 w-4" />
-								Security Note
+								{t("Security Note")}
 							</span>
 						</AccordionTrigger>
 						<AccordionContent>
 							<p className="text-sm">
-								Some headers are always blocked for security reasons regardless of configuration. These headers cannot be added to the
-								allowlist or denylist:
+								{t(
+									"Some headers are always blocked for security reasons regardless of configuration. These headers cannot be added to the allowlist or denylist:",
+								)}
 							</p>
 							<p className="text-muted-foreground mt-1 font-mono text-xs">
-								proxy-authorization, cookie, host, content-length, connection, transfer-encoding, x-api-key, x-goog-api-key, x-bf-api-key,
-								x-bf-vk
+								{
+									"proxy-authorization, cookie, host, content-length, connection, transfer-encoding, x-api-key, x-goog-api-key, x-bf-api-key, x-bf-vk"
+								}
 							</p>
 						</AccordionContent>
 					</AccordionItem>
@@ -476,10 +490,10 @@ export default function ClientSettingsView() {
 				{/* Allowlist Section */}
 				<div className="space-y-3">
 					<div className="space-y-1">
-						<h4 className="text-sm font-medium">Allowlist</h4>
+						<h4 className="text-sm font-medium">{t("Allowlist")}</h4>
 						<p className="text-muted-foreground text-xs">
-							Headers to allow. Enter names without the <code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code> prefix. Any header
-							in this list can also be sent directly without the prefix.
+							{t("Headers to allow. Enter names without the")} <code className="bg-muted rounded px-1 font-mono">{"x-bf-eh-"}</code>{" "}
+							{t("prefix. Any header in this list can also be sent directly without the prefix.")}
 						</p>
 					</div>
 
@@ -487,7 +501,7 @@ export default function ClientSettingsView() {
 						{(localConfig.header_filter_config?.allowlist || []).map((header, index) => (
 							<div key={index} className="flex items-center gap-2">
 								<Input
-									placeholder="e.g. anthropic-*, custom-id"
+									placeholder={t("e.g. anthropic-*, custom-id")}
 									data-testid="header-filter-allowlist-input"
 									className={cn(
 										"font-mono lowercase",
@@ -512,7 +526,7 @@ export default function ClientSettingsView() {
 						))}
 						<Button type="button" variant="outline" size="sm" onClick={handleAddAllowlistHeader} disabled={!hasSettingsUpdateAccess}>
 							<Plus className="mr-2 h-4 w-4" />
-							Add Header
+							{t("Add Header")}
 						</Button>
 					</div>
 				</div>
@@ -520,10 +534,10 @@ export default function ClientSettingsView() {
 				{/* Denylist Section */}
 				<div className="space-y-3">
 					<div className="space-y-1">
-						<h4 className="text-sm font-medium">Denylist</h4>
+						<h4 className="text-sm font-medium">{t("Denylist")}</h4>
 						<p className="text-muted-foreground text-xs">
-							Headers to block. Enter names without the <code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code> prefix. Applies to
-							both prefixed and direct header forwarding.
+							{t("Headers to block. Enter names without the")} <code className="bg-muted rounded px-1 font-mono">{"x-bf-eh-"}</code>{" "}
+							{t("prefix. Applies to both prefixed and direct header forwarding.")}
 						</p>
 					</div>
 
@@ -531,7 +545,7 @@ export default function ClientSettingsView() {
 						{(localConfig.header_filter_config?.denylist || []).map((header, index) => (
 							<div key={index} className="flex items-center gap-2">
 								<Input
-									placeholder="e.g. x-internal-*"
+									placeholder={t("e.g. x-internal-*")}
 									data-testid="header-filter-denylist-input"
 									className={cn(
 										"font-mono lowercase",
@@ -556,7 +570,7 @@ export default function ClientSettingsView() {
 						))}
 						<Button type="button" variant="outline" size="sm" onClick={handleAddDenylistHeader} disabled={!hasSettingsUpdateAccess}>
 							<Plus className="mr-2 h-4 w-4" />
-							Add Header
+							{t("Add Header")}
 						</Button>
 					</div>
 				</div>
@@ -574,16 +588,17 @@ export default function ClientSettingsView() {
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<span>
-								<Button disabled>{isLoading ? "Saving..." : "Save Changes"}</Button>
+								<Button disabled>{isLoading ? t("Saving...") : t("Save Changes")}</Button>
 							</span>
 						</TooltipTrigger>
 						<TooltipContent>
-							Remove security header{invalidSecurityHeaders.length > 1 ? "s" : ""}: {invalidSecurityHeaders.join(", ")}
+							{t("Remove security header")}
+							{invalidSecurityHeaders.length > 1 ? "s" : ""}: {invalidSecurityHeaders.join(", ")}
 						</TooltipContent>
 					</Tooltip>
 				) : (
 					<Button onClick={handleSave} disabled={!hasChanges || isLoading || isQueriesLoading || !hasSettingsUpdateAccess}>
-						{isLoading ? "Saving..." : "Save Changes"}
+						{isLoading ? t("Saving...") : t("Save Changes")}
 					</Button>
 				)}
 			</div>

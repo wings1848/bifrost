@@ -9,8 +9,10 @@ import type { FeatureFlagStatus } from "@/lib/types/featureFlag";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { Crown, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 export default function FeatureFlagsView() {
+	const { t } = useLocaleCtx();
 	const hasUpdateAccess = useRbac(RbacResource.FeatureFlags, RbacOperation.Update);
 	const { data, isLoading, isError, error } = useListFeatureFlagsQuery();
 	const [updateFeatureFlag] = useUpdateFeatureFlagMutation();
@@ -20,7 +22,7 @@ export default function FeatureFlagsView() {
 	async function handleToggle(flag: FeatureFlagStatus, checked: boolean) {
 		try {
 			await updateFeatureFlag({ id: flag.id, enabled: checked }).unwrap();
-			toast.success(`${flag.display_name || flag.id} ${checked ? "enabled" : "disabled"}`);
+			toast.success(`${flag.display_name || flag.id} ${checked ? t("enabled") : t("disabled")}`);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		}
@@ -28,28 +30,32 @@ export default function FeatureFlagsView() {
 
 	return (
 		<div className="w-full space-y-4">
-			<PageTitle title="Feature Flags">
-				Toggle in-process feature flags. Flags are declared in code; values can also be set via <code className="text-xs">config.json</code>{" "}
-				or Helm, in which case they appear here as locked.
+			<PageTitle title={t("Feature Flags")}>
+				{t("Toggle in-process feature flags. Flags are declared in code; values can also be set via")}{" "}
+				<code className="text-xs">{"config.json"}</code> {t("or Helm, in which case they appear here as locked.")}
 			</PageTitle>
 
-			{isLoading && <p className="text-muted-foreground text-sm">Loading feature flags...</p>}
-			{isError && <p className="text-sm text-red-500">Failed to load feature flags: {getErrorMessage(error)}</p>}
+			{isLoading && <p className="text-muted-foreground text-sm">{t("Loading feature flags...")}</p>}
+			{isError && (
+				<p className="text-sm text-red-500">
+					{t("Failed to load feature flags:")} {getErrorMessage(error)}
+				</p>
+			)}
 
 			{!isLoading && !isError && (
 				<div className="overflow-auto rounded-sm border">
 					<Table data-testid="feature-flags-table">
 						<TableHeader>
 							<TableRow className="bg-muted/50">
-								<TableHead className="font-semibold">Flag</TableHead>
-								<TableHead className="w-px text-right font-semibold">Enabled</TableHead>
+								<TableHead className="font-semibold">{t("Flag")}</TableHead>
+								<TableHead className="w-px text-right font-semibold">{t("Enabled")}</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{flags.length === 0 ? (
 								<TableRow data-testid="feature-flags-table-empty-state">
 									<TableCell colSpan={2} className="h-24 text-center">
-										<span className="text-muted-foreground text-sm">No feature flags found.</span>
+										<span className="text-muted-foreground text-sm">{t("No feature flags found.")}</span>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -70,6 +76,7 @@ interface FeatureFlagRowProps {
 }
 
 function FeatureFlagRow({ flag, canUpdate, onToggle }: FeatureFlagRowProps) {
+	const { t } = useLocaleCtx();
 	const disabled = flag.locked || !flag.registered || !canUpdate;
 	// Fall back to id when display_name is empty so unregistered orphans
 	// still render something readable in the primary slot.
@@ -90,7 +97,7 @@ function FeatureFlagRow({ flag, canUpdate, onToggle }: FeatureFlagRowProps) {
 					{flag.description && <p className="text-muted-foreground text-sm">{flag.description}</p>}
 					{!flag.registered && (
 						<p className="text-muted-foreground text-xs">
-							No code currently reads this flag. The override is stored but inert until a Register() call is added.
+							{t("No code currently reads this flag. The override is stored but inert until a Register() call is added.")}
 						</p>
 					)}
 				</div>
@@ -117,42 +124,45 @@ function SourceBadge({ source }: { source: FeatureFlagStatus["source"] }) {
 }
 
 function LockedBadge() {
+	const { t } = useLocaleCtx();
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Badge variant="secondary" className="flex items-center gap-1 text-xs">
 					<Lock className="size-3" />
-					Locked
+					{t("Locked")}
 				</Badge>
 			</TooltipTrigger>
-			<TooltipContent>Value is pinned by config.json or Helm; edit your config to change it.</TooltipContent>
+			<TooltipContent>{t("Value is pinned by config.json or Helm; edit your config to change it.")}</TooltipContent>
 		</Tooltip>
 	);
 }
 
 function EnterpriseBadge() {
+	const { t } = useLocaleCtx();
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Badge variant="secondary" className="flex items-center gap-1 text-xs">
 					<Crown className="size-3" />
-					Enterprise
+					{t("Enterprise")}
 				</Badge>
 			</TooltipTrigger>
-			<TooltipContent>This flag gates an enterprise-only feature. Upgrade to enable it.</TooltipContent>
+			<TooltipContent>{t("This flag gates an enterprise-only feature. Upgrade to enable it.")}</TooltipContent>
 		</Tooltip>
 	);
 }
 
 function UnregisteredBadge() {
+	const { t } = useLocaleCtx();
 	return (
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Badge variant="destructive" className="text-xs">
-					Unregistered
+					{t("Unregistered")}
 				</Badge>
 			</TooltipTrigger>
-			<TooltipContent>This id has no code registration. Restore the Register() call or clean up the stale value.</TooltipContent>
+			<TooltipContent>{t("This id has no code registration. Restore the Register() call or clean up the stale value.")}</TooltipContent>
 		</Tooltip>
 	);
 }

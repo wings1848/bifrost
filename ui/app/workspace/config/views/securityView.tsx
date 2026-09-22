@@ -21,11 +21,13 @@ import { useGetAuthTypeQuery } from "@enterprise/lib/store/apis/scimApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 // Go duration string: one or more <number><unit> segments, e.g. "5m", "1h30m".
 const COOLDOWN_PATTERN = /^(\d+(\.\d+)?(ns|us|µs|ms|s|m|h))+$/;
 
 export default function SecurityView() {
+	const { t } = useLocaleCtx();
 	const hasSettingsUpdateAccess = useRbac(RbacResource.Settings, RbacOperation.Update);
 	const { data: bifrostConfig } = useGetCoreConfigQuery({ fromDB: true });
 	const { data: authType, isLoading: authTypeLoading, error: authTypeError } = useGetAuthTypeQuery(undefined, { skip: !IS_ENTERPRISE });
@@ -201,7 +203,7 @@ export default function SecurityView() {
 			}
 			const cooldownInput = localValues.vk_rotation_cooldown.trim();
 			if (cooldownInput !== "" && cooldownInput !== "0" && !COOLDOWN_PATTERN.test(cooldownInput)) {
-				toast.error('Rotation cooldown must be a duration like "30s", "5m", or "1h30m" (leave empty to disable).');
+				toast.error(t('Rotation cooldown must be a duration like "30s", "5m", or "1h30m" (leave empty to disable).'));
 				return;
 			}
 			const hasUsername = authConfig.admin_username?.value || authConfig.admin_username?.ref;
@@ -238,7 +240,7 @@ export default function SecurityView() {
 					: {}),
 			}).unwrap();
 			setSetupToken("");
-			toast.success("Security settings updated successfully.");
+			toast.success(t("Security settings updated successfully."));
 		} catch (error) {
 			const message = getErrorMessage(error);
 			if (isFirstTimeSetup && message.toLowerCase().includes("setup token")) {
@@ -247,25 +249,34 @@ export default function SecurityView() {
 				toast.error(message);
 			}
 		}
-	}, [bifrostConfig, localConfig, localValues.vk_rotation_cooldown, authConfig, showPasswordSection, updateCoreConfig, isFirstTimeSetup, setupToken]);
+	}, [
+		bifrostConfig,
+		localConfig,
+		localValues.vk_rotation_cooldown,
+		authConfig,
+		showPasswordSection,
+		updateCoreConfig,
+		isFirstTimeSetup,
+		setupToken,
+	]);
 
 	return (
 		<div className="mx-auto w-full max-w-4xl space-y-4">
-			<PageTitle title="Security Settings">Configure security and access control settings.</PageTitle>
+			<PageTitle title={t("Security Settings")}>{t("Configure security and access control settings.")}</PageTitle>
 
 			<div className="space-y-4">
 				{/* Password Protect the Dashboard */}
 				{IS_ENTERPRISE && authTypeLoading ? (
 					<div className="flex items-center justify-center rounded-sm border p-8" data-testid="security-auth-type-loading">
 						<Loader2 className="text-muted-foreground h-5 w-5 animate-spin" aria-hidden />
-						<span className="sr-only">Loading authentication settings</span>
+						<span className="sr-only">{t("Loading authentication settings")}</span>
 					</div>
 				) : null}
 				{IS_ENTERPRISE && !authTypeLoading && authTypeError ? (
 					<Alert variant="destructive" data-testid="security-auth-type-error">
 						<AlertTriangle className="h-4 w-4" />
 						<AlertDescription>
-							Could not load authentication type. Dashboard password settings are hidden until this request succeeds.{" "}
+							{t("Could not load authentication type. Dashboard password settings are hidden until this request succeeds.")}{" "}
 							{getErrorMessage(authTypeError)}
 						</AlertDescription>
 					</Alert>
@@ -276,42 +287,45 @@ export default function SecurityView() {
 							<div className="flex items-center justify-between">
 								<div className="space-y-0.5">
 									<Label htmlFor="auth-enabled" className="text-sm font-medium">
-										Password protect the dashboard <Badge variant="secondary">BETA</Badge>
+										{t("Password protect the dashboard")} <Badge variant="secondary">BETA</Badge>
 									</Label>
 									<p className="text-muted-foreground text-sm">
-										Set up authentication credentials to protect your Bifrost dashboard. Once configured, use the generated token for all
-										admin API calls.
+										{t(
+											"Set up authentication credentials to protect your Bifrost dashboard. Once configured, use the generated token for all admin API calls.",
+										)}
 									</p>
 								</div>
 								<Switch id="auth-enabled" checked={authConfig.is_enabled} onCheckedChange={handleAuthToggle} />
 							</div>
 							<div className="space-y-4">
 								<div className="space-y-2">
-									<Label htmlFor="admin-username">Username</Label>
+									<Label htmlFor="admin-username">{t("Username")}</Label>
 									<SecretVarInput
 										id="admin-username"
 										type="text"
-										placeholder="Enter admin username or env.VAR_NAME"
+										placeholder={t("Enter admin username or env.VAR_NAME")}
 										value={authConfig.admin_username}
 										disabled={!authConfig.is_enabled}
 										onChange={(value) => handleAuthFieldChange("admin_username", value)}
 									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="admin-password">Password</Label>
+									<Label htmlFor="admin-password">{t("Password")}</Label>
 									<SecretVarInput
 										ref={passwordInputRef}
 										id="admin-password"
 										aria-invalid={!!passwordError}
 										aria-describedby={passwordError ? "admin-password-error" : undefined}
 										type="password"
-										placeholder="Enter admin password or env.VAR_NAME"
+										placeholder={t("Enter admin password or env.VAR_NAME")}
 										value={authConfig.admin_password}
 										disabled={!authConfig.is_enabled}
 										onChange={(value) => handleAuthFieldChange("admin_password", value)}
 									/>
 									<p className="text-muted-foreground text-xs">
-										Use at least 12 characters with uppercase, lowercase, number, and special character. Env var references are accepted.
+										{t(
+											"Use at least 12 characters with uppercase, lowercase, number, and special character. Env var references are accepted.",
+										)}
 									</p>
 									{passwordError ? (
 										<p id="admin-password-error" className="text-destructive text-xs" role="alert">
@@ -321,20 +335,22 @@ export default function SecurityView() {
 								</div>
 								{isFirstTimeSetup && authConfig.is_enabled ? (
 									<div className="space-y-2">
-										<Label htmlFor="setup-token">Setup token</Label>
+										<Label htmlFor="setup-token">{t("Setup token")}</Label>
 										<Input
 											id="setup-token"
 											data-testid="security-setup-token-input"
 											type="password"
 											autoComplete="off"
-											placeholder="Paste the setup token configured by your operator"
+											placeholder={t("Paste the setup token configured by your operator")}
 											value={setupToken}
 											onChange={(e) => setSetupToken(e.target.value)}
 										/>
 										<p className="text-muted-foreground text-xs">
-											No admin account exists yet, so this instance is reachable without a password. To finish setup, ask your operator for
-											the setup token configured via <code>setup_token</code> in <code>config.json</code> (or the{" "}
-											<code>BIFROST_SETUP_TOKEN</code> environment variable) and paste it here.
+											{t(
+												"No admin account exists yet, so this instance is reachable without a password. To finish setup, ask your operator for the setup token configured via",
+											)}{" "}
+											<code>{"setup_token"}</code> in <code>{"config.json"}</code> {t("(or the")} <code>BIFROST_SETUP_TOKEN</code>{" "}
+											{t("environment variable) and paste it here.")}
 										</p>
 									</div>
 								) : null}
@@ -346,13 +362,13 @@ export default function SecurityView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="enforce-auth-on-inference" className="text-sm font-medium">
-							{IS_ENTERPRISE ? "Enable Auth on Inference" : "Enforce Virtual Keys on Inference"}
+							{IS_ENTERPRISE ? t("Enable Auth on Inference") : t("Enforce Virtual Keys on Inference")}
 						</label>
 						<p className="text-muted-foreground text-sm">
 							{IS_ENTERPRISE
-								? "Require authentication (virtual key, API key, or user token) for all inference endpoints."
-								: "Require a virtual key for all inference requests."}{" "}
-							See{" "}
+								? t("Require authentication (virtual key, API key, or user token) for all inference endpoints.")
+								: t("Require a virtual key for all inference requests.")}{" "}
+							{t("See")}{" "}
 							<a
 								href="https://docs.getbifrost.ai/features/governance/virtual-keys"
 								target="_blank"
@@ -360,9 +376,9 @@ export default function SecurityView() {
 								className="text-primary underline"
 								data-testid="security-virtual-keys-docs-link"
 							>
-								documentation
+								{t("documentation")}
 							</a>{" "}
-							for details.
+							{t("for details.")}
 						</p>
 					</div>
 					<Switch
@@ -377,12 +393,15 @@ export default function SecurityView() {
 					<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<label htmlFor="dual-credential-conflict-behavior" className="text-sm font-medium">
-								Dual Credential Conflict Behavior
+								{t("Dual Credential Conflict Behavior")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								How to handle inference requests that present both an identity provider access token (<b>Authorization: Bearer</b>) and a
-								virtual key (<b>x-bf-vk</b>). <b>Prefer IDP token</b> uses the user token for identity, <b>Prefer virtual key</b> drops the
-								IDP token and authenticates via the virtual key, and <b>Reject request</b> returns a 400 error.
+								{t("How to handle inference requests that present both an identity provider access token (")}
+								<b>{t("Authorization: Bearer")}</b>
+								{t(") and a virtual key (")}
+								<b>{"x-bf-vk"}</b>). <b>{t("Prefer IDP token")}</b> {t("uses the user token for identity,")}{" "}
+								<b>{t("Prefer virtual key")}</b> {t("drops the IDP token and authenticates via the virtual key, and")}{" "}
+								<b>{t("Reject request")}</b> {t("returns a 400 error.")}
 							</p>
 						</div>
 						<Select
@@ -402,9 +421,9 @@ export default function SecurityView() {
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="prefer_idp">Prefer IDP token</SelectItem>
-								<SelectItem value="prefer_vk">Prefer virtual key</SelectItem>
-								<SelectItem value="error">Reject request</SelectItem>
+								<SelectItem value="prefer_idp">{t("Prefer IDP token")}</SelectItem>
+								<SelectItem value="prefer_vk">{t("Prefer virtual key")}</SelectItem>
+								<SelectItem value="error">{t("Reject request")}</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -413,12 +432,12 @@ export default function SecurityView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="allow-direct-keys" className="text-sm font-medium">
-							Allow Direct API Keys
+							{t("Allow Direct API Keys")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							When enabled, callers can pass a provider API key directly in the <b>Authorization</b>, <b>x-api-key</b>, or{" "}
-							<b>x-goog-api-key</b> header alongside <b>x-bf-direct-key: true</b>. Bifrost will use that key directly, bypassing the
-							registered key pool.
+							{t("When enabled, callers can pass a provider API key directly in the")} <b>{t("Authorization")}</b>, <b>{"x-api-key"}</b>, or{" "}
+							<b>{"x-goog-api-key"}</b> {t("header alongside")} <b>{"x-bf-direct-key: true"}</b>
+							{t(". Bifrost will use that key directly, bypassing the registered key pool.")}
 						</p>
 					</div>
 					<Switch
@@ -432,12 +451,14 @@ export default function SecurityView() {
 				<div className="flex items-center justify-between space-x-2 rounded-sm border p-4">
 					<div className="space-y-0.5">
 						<label htmlFor="vk-rotation-cooldown" className="text-sm font-medium">
-							Cooldown After Virtual Key Rotation
+							{t("Cooldown After Virtual Key Rotation")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							After rotating a virtual key, the previous value keeps authenticating for this long, giving callers time to switch to the new
-							key. Use a duration like <b>30s</b>, <b>5m</b>, or <b>1h</b>. Leave empty (or 0) to have the old value stop working
-							immediately. Maximum 30 days.
+							{t(
+								"After rotating a virtual key, the previous value keeps authenticating for this long, giving callers time to switch to the new key. Use a duration like",
+							)}{" "}
+							<b>30s</b>, <b>5m</b>, or <b>1h</b>
+							{t(". Leave empty (or 0) to have the old value stop working immediately. Maximum 30 days.")}
 						</p>
 					</div>
 					<Input
@@ -455,12 +476,12 @@ export default function SecurityView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<label htmlFor="allowed-origins" className="text-sm font-medium">
-								Allowed Origins
+								{t("Allowed Origins")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								Comma-separated list of allowed origins for CORS and WebSocket connections. Localhost origins are always allowed. Each
-								origin must be a complete URL with protocol (e.g., https://app.example.com, http://10.0.0.100:3000). Wildcards are supported
-								for subdomains (e.g., https://*.example.com) or use "*" to allow all origins.
+								{t(
+									'Comma-separated list of allowed origins for CORS and WebSocket connections. Localhost origins are always allowed. Each origin must be a complete URL with protocol (e.g., https://app.example.com, http://10.0.0.100:3000). Wildcards are supported for subdomains (e.g., https://*.example.com) or use "*" to allow all origins.',
+								)}
 							</p>
 						</div>
 						<Textarea
@@ -477,14 +498,14 @@ export default function SecurityView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<label htmlFor="allowed-headers" className="text-sm font-medium">
-								Allowed Headers
+								{t("Allowed Headers")}
 							</label>
-							<p className="text-muted-foreground text-sm">Comma-separated list of allowed headers for CORS.</p>
+							<p className="text-muted-foreground text-sm">{t("Comma-separated list of allowed headers for CORS.")}</p>
 						</div>
 						<Textarea
 							id="allowed-headers"
 							className="h-24"
-							placeholder="X-Stainless-Timeout"
+							placeholder={t("X-Stainless-Timeout")}
 							value={localValues.allowed_headers}
 							onChange={(e) => handleAllowedHeadersChange(e.target.value)}
 						/>
@@ -495,18 +516,19 @@ export default function SecurityView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<label htmlFor="required-headers" className="text-sm font-medium">
-								Required Headers
+								{t("Required Headers")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								Comma-separated list of headers that must be present on every request. Requests missing any of these headers will be
-								rejected with a 400 error. Header names are case-insensitive.
+								{t(
+									"Comma-separated list of headers that must be present on every request. Requests missing any of these headers will be rejected with a 400 error. Header names are case-insensitive.",
+								)}
 							</p>
 						</div>
 						<Textarea
 							id="required-headers"
 							data-testid="required-headers-textarea"
 							className="h-24"
-							placeholder="X-Tenant-ID, X-Custom-Header"
+							placeholder={t("X-Tenant-ID, X-Custom-Header")}
 							value={localValues.required_headers}
 							onChange={(e) => handleRequiredHeadersChange(e.target.value)}
 						/>
@@ -517,12 +539,14 @@ export default function SecurityView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<label htmlFor="whitelisted-routes" className="text-sm font-medium">
-								Whitelisted Routes
+								{t("Whitelisted Routes")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								Comma-separated list of routes that bypass the auth middleware. Requests to these routes will not require authentication.
-								System routes like <b>/health</b>, <b>/api/session/login</b>, and <b>/api/session/is-auth-enabled</b> are always whitelisted
-								regardless of this setting.
+								{t(
+									"Comma-separated list of routes that bypass the auth middleware. Requests to these routes will not require authentication. System routes like",
+								)}{" "}
+								<b>/health</b>, <b>/api/session/login</b>
+								{t(", and")} <b>/api/session/is-auth-enabled</b> {t("are always whitelisted regardless of this setting.")}
 							</p>
 						</div>
 						<Textarea
@@ -538,22 +562,22 @@ export default function SecurityView() {
 			</div>
 			<div className="bg-card sticky bottom-0 flex justify-end py-2">
 				<Button onClick={handleSave} disabled={!hasChanges || isLoading || !hasSettingsUpdateAccess}>
-					{isLoading ? "Saving..." : "Save Changes"}
+					{isLoading ? t("Saving...") : t("Save Changes")}
 				</Button>
 			</div>
 			<Dialog open={!!setupTokenErrorMessage} onOpenChange={(open) => !open && setSetupTokenErrorMessage(null)}>
 				<DialogContent data-testid="setup-token-error-dialog">
 					<DialogHeader>
-						<DialogTitle>Setup token required</DialogTitle>
+						<DialogTitle>{t("Setup token required")}</DialogTitle>
 						<DialogDescription>{setupTokenErrorMessage}</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setSetupTokenErrorMessage(null)} data-testid="setup-token-error-close">
-							Close
+							{t("Close")}
 						</Button>
 						<Button asChild data-testid="setup-token-error-view-docs">
 							<a href="https://docs.getbifrost.ai/quickstart/gateway/setting-up-auth" target="_blank" rel="noopener noreferrer">
-								View docs
+								{t("View docs")}
 							</a>
 						</Button>
 					</DialogFooter>
@@ -564,10 +588,11 @@ export default function SecurityView() {
 }
 
 const RestartWarning = () => {
+	const { t } = useLocaleCtx();
 	return (
 		<Alert variant="destructive" className="mt-2">
 			<AlertTriangle className="h-4 w-4" />
-			<AlertDescription>Need to restart Bifrost to apply changes.</AlertDescription>
+			<AlertDescription>{t("Need to restart Bifrost to apply changes.")}</AlertDescription>
 		</Alert>
 	);
 };

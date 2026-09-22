@@ -7,6 +7,7 @@ import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 interface PricingFormData {
 	pricing_datasheet_url: string;
@@ -15,6 +16,7 @@ interface PricingFormData {
 }
 
 export default function PricingConfigView() {
+	const { t } = useLocaleCtx();
 	const hasSettingsUpdateAccess = useRbac(RbacResource.Settings, RbacOperation.Update);
 	const { data: bifrostConfig } = useGetCoreConfigQuery({ fromDB: true });
 	const config = bifrostConfig?.framework_config;
@@ -71,7 +73,7 @@ export default function PricingConfigView() {
 					model_parameters_url: data.model_parameters_url,
 				},
 			}).unwrap();
-			toast.success("Pricing configuration updated successfully.");
+			toast.success(t("Pricing configuration updated successfully."));
 			reset(data);
 		} catch (error) {
 			toast.error(getErrorMessage(error));
@@ -81,7 +83,7 @@ export default function PricingConfigView() {
 	const handleForceSync = async () => {
 		try {
 			await forcePricingSync().unwrap();
-			toast.success("Pricing synced successfully.");
+			toast.success(t("Pricing synced successfully."));
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		}
@@ -90,14 +92,14 @@ export default function PricingConfigView() {
 	return (
 		<div className="mx-auto w-full max-w-7xl space-y-4" data-testid="pricing-config-view">
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-				<PageTitle title="Pricing Configuration">Configure custom pricing datasheet and sync intervals.</PageTitle>
+				<PageTitle title={t("Pricing Configuration")}>{t("Configure custom pricing datasheet and sync intervals.")}</PageTitle>
 
 				<div className="space-y-4">
 					{/* Pricing Datasheet URL */}
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
-							<Label htmlFor="pricing-datasheet-url">Pricing Datasheet URL</Label>
-							<p className="text-muted-foreground text-sm">URL to a custom pricing datasheet. Leave empty to use default pricing.</p>
+							<Label htmlFor="pricing-datasheet-url">{t("Pricing Datasheet URL")}</Label>
+							<p className="text-muted-foreground text-sm">{t("URL to a custom pricing datasheet. Leave empty to use default pricing.")}</p>
 						</div>
 						<Input
 							id="pricing-datasheet-url"
@@ -107,7 +109,7 @@ export default function PricingConfigView() {
 							{...register("pricing_datasheet_url", {
 								pattern: {
 									value: /^(https?:\/\/)?((localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?|([\da-z\.-]+)\.([a-z\.]{2,6}))([\/\w \.-]*)*\/?$/,
-									message: "Please enter a valid URL.",
+									message: t("Please enter a valid URL."),
 								},
 								validate: {
 									checkIfHttp: (value) => {
@@ -124,8 +126,10 @@ export default function PricingConfigView() {
 					{/* Model Parameters URL */}
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
-							<Label htmlFor="model-parameters-url">Model Parameters URL</Label>
-							<p className="text-muted-foreground text-sm">URL to a custom model parameters datasheet. Leave empty to use default.</p>
+							<Label htmlFor="model-parameters-url">{t("Model Parameters URL")}</Label>
+							<p className="text-muted-foreground text-sm">
+								{t("URL to a custom model parameters datasheet. Leave empty to use default.")}
+							</p>
 						</div>
 						<Input
 							id="model-parameters-url"
@@ -135,7 +139,7 @@ export default function PricingConfigView() {
 							{...register("model_parameters_url", {
 								pattern: {
 									value: /^(https?:\/\/)?((localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?|([\da-z\.-]+)\.([a-z\.]{2,6}))([\/\w \.-]*)*\/?$/,
-									message: "Please enter a valid URL.",
+									message: t("Please enter a valid URL."),
 								},
 								validate: {
 									checkIfHttp: (value) => {
@@ -153,22 +157,22 @@ export default function PricingConfigView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-2">
 							<div className="space-y-0.5">
-								<Label htmlFor="pricing-sync-interval">Pricing Sync Interval (hours)</Label>
-								<p className="text-muted-foreground text-sm">How often to sync pricing data from the datasheet URL.</p>
+								<Label htmlFor="pricing-sync-interval">{t("Pricing Sync Interval (hours)")}</Label>
+								<p className="text-muted-foreground text-sm">{t("How often to sync pricing data from the datasheet URL.")}</p>
 							</div>
 							<Input
 								id="pricing-sync-interval"
 								type="number"
 								className={errors.pricing_sync_interval_hours ? "border-destructive" : ""}
 								{...register("pricing_sync_interval_hours", {
-									required: "Pricing sync interval is required",
+									required: t("Pricing sync interval is required"),
 									min: {
 										value: 1,
-										message: "Sync interval must be at least 1 hour",
+										message: t("Sync interval must be at least 1 hour"),
 									},
 									max: {
 										value: 8760,
-										message: "Sync interval cannot exceed 8760 hours (1 year)",
+										message: t("Sync interval cannot exceed 8760 hours (1 year)"),
 									},
 									valueAsNumber: true,
 								})}
@@ -187,10 +191,10 @@ export default function PricingConfigView() {
 						disabled={isForceSyncing || !hasSettingsUpdateAccess}
 						data-testid="pricing-force-sync-btn"
 					>
-						{isForceSyncing ? "Syncing..." : "Force Sync Now"}
+						{isForceSyncing ? t("Syncing...") : t("Force Sync Now")}
 					</Button>
 					<Button type="submit" disabled={!hasChanges || isLoading || !hasSettingsUpdateAccess} data-testid="pricing-save-btn">
-						{isLoading ? "Saving..." : "Save Changes"}
+						{isLoading ? t("Saving...") : t("Save Changes")}
 					</Button>
 				</div>
 			</form>

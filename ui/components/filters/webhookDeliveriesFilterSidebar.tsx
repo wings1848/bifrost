@@ -15,6 +15,7 @@ import {
 } from "@/lib/types/webhooks";
 import { PanelLeftClose, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocaleCtx } from "@/lib/i18n/context";
 
 const COLLAPSE_STORAGE_KEY = "webhook-deliveries-filter-sidebar-collapsed";
 
@@ -24,6 +25,7 @@ interface WebhookDeliveriesFilterSidebarProps {
 }
 
 export function WebhookDeliveriesFilterSidebar({ filters, onFiltersChange }: WebhookDeliveriesFilterSidebarProps) {
+	const { t } = useLocaleCtx();
 	const isMobile = useIsMobile();
 	const [collapsed, setCollapsed] = useState(false);
 
@@ -81,7 +83,7 @@ export function WebhookDeliveriesFilterSidebar({ filters, onFiltersChange }: Web
 	return (
 		<div className="bg-card fixed inset-y-2 left-2 z-40 flex h-auto w-[calc(100vw-1rem)] max-w-72 shrink-0 flex-col rounded-md border shadow-xl md:static md:h-full md:w-64 md:max-w-none md:rounded-md md:shadow-none">
 			<div className="flex h-11 items-center justify-between border-b pr-2 pl-5">
-				<span className="text-sm font-semibold">Filters</span>
+				<span className="text-sm font-semibold">{t("Filters")}</span>
 				<div className="flex items-center gap-1">
 					{activeFilterCount > 0 && (
 						<Button
@@ -92,10 +94,17 @@ export function WebhookDeliveriesFilterSidebar({ filters, onFiltersChange }: Web
 							data-testid="webhook-deliveries-filter-reset"
 						>
 							<RotateCcw className="size-3" />
-							Reset
+							{t("Reset")}
 						</Button>
 					)}
-					<Button variant="ghost" size="icon" className="size-7" onClick={toggleCollapsed} title="Hide filters" aria-label="Hide filters">
+					<Button
+						variant="ghost"
+						size="icon"
+						className="size-7"
+						onClick={toggleCollapsed}
+						title={t("Hide filters")}
+						aria-label={t("Hide filters")}
+					>
 						<PanelLeftClose className="size-4" />
 					</Button>
 				</div>
@@ -128,9 +137,10 @@ function toggleValue<T extends string>(selected: T[] | undefined, value: T): T[]
 }
 
 function OutcomeFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentProps) {
+	const { t } = useLocaleCtx();
 	const selected = filters.outcomes ?? [];
 	return (
-		<FilterSection title="Outcome" defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-outcome">
+		<FilterSection title={t("Outcome")} defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-outcome">
 			{WEBHOOK_DELIVERY_OUTCOMES.map((outcome) => (
 				<CheckboxFilterItem
 					key={outcome.value}
@@ -147,9 +157,10 @@ function OutcomeFilter({ filters, onFiltersChange, defaultOpen }: FilterComponen
 }
 
 function EventFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentProps) {
+	const { t } = useLocaleCtx();
 	const selected = filters.events ?? [];
 	return (
-		<FilterSection title="Event" defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-event">
+		<FilterSection title={t("Event")} defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-event">
 			{WEBHOOK_EVENTS.map((event) => (
 				<CheckboxFilterItem
 					key={event.value}
@@ -164,9 +175,10 @@ function EventFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentP
 }
 
 function StatusClassFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentProps) {
+	const { t } = useLocaleCtx();
 	const selected = filters.status_class ?? [];
 	return (
-		<FilterSection title="Response status" defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-status">
+		<FilterSection title={t("Response status")} defaultOpen={defaultOpen || selected.length > 0} testId="webhook-deliveries-filter-status">
 			{WEBHOOK_DELIVERY_STATUS_CLASSES.map((statusClass) => (
 				<CheckboxFilterItem
 					key={statusClass.value}
@@ -186,6 +198,7 @@ function StatusClassFilter({ filters, onFiltersChange, defaultOpen }: FilterComp
 }
 
 function WebhooksFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentProps) {
+	const { t } = useLocaleCtx();
 	const selected = filters.endpoint_ids ?? [];
 	const [opened, setOpened] = useState(false);
 	const hasActive = selected.length > 0;
@@ -202,7 +215,7 @@ function WebhooksFilter({ filters, onFiltersChange, defaultOpen }: FilterCompone
 
 	return (
 		<FilterSection
-			title="Webhooks"
+			title={t("Webhooks")}
 			defaultOpen={defaultOpen || hasActive}
 			loading={isLoading}
 			onOpenChange={(open) => open && setOpened(true)}
@@ -212,7 +225,7 @@ function WebhooksFilter({ filters, onFiltersChange, defaultOpen }: FilterCompone
 				items={items}
 				isSelected={(key) => selected.includes(key)}
 				onToggle={(key) => onFiltersChange({ ...filters, endpoint_ids: toggleValue(filters.endpoint_ids, key) })}
-				placeholder="Search webhooks..."
+				placeholder={t("Search webhooks...")}
 				inputRef={inputRef}
 				testIdPrefix="webhook-deliveries-filter-webhooks"
 				fetching={isFetching}

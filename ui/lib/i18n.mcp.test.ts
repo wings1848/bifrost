@@ -15,6 +15,11 @@ const I18N_TARGETS = [
 	"app/workspace/oauth-grants",
 	"app/workspace/config/views/mcpView.tsx",
 	"app/_fallbacks/enterprise/components/mcp-auth-config",
+	// 第三期：共享筛选组件（一处改动覆盖 7+ 页面）与 config 设置页
+	"components/filters",
+	"app/workspace/config",
+	"app/_fallbacks/enterprise/components/branding",
+	"app/_fallbacks/enterprise/components/large-payload",
 ];
 
 /** 这些属性承载用户可见文案，只要写成字符串字面量就必须走 t()。 */
@@ -35,9 +40,16 @@ const TEXT_ATTRS = [
 	"emptyText",
 ];
 
-/** 不翻的东西：代码、URL、标识符、纯大写缩写、已经是中文的。 */
+/**
+ * 不翻的东西：代码、URL、标识符、纯大写缩写、已经是中文的。
+ *
+ * HTML 实体（`&quot;` `&apos;` `&amp;` 等）是 JSX 里的标点，不是文案：
+ * 先把实体折叠成对应字符再判定，否则 `{t("Use")} <span>&quot;{x}&quot;</span>`
+ * 这行会因为 `&quot;` 含 `quot` 而被当成硬编码英文（实测误报）。
+ * 折叠后若已不含长度 ≥3 的字母串（只剩标点/符号），自然被排除。
+ */
 const looksEnglish = (s: string) =>
-	/[A-Za-z]{3}/.test(s) &&
+	/[A-Za-z]{3}/.test(s.replace(/&(?:quot|apos|amp|lt|gt|nbsp|#\d+);/g, "")) &&
 	!/[\u4e00-\u9fff]/.test(s) &&
 	!/^(?:https?:|\/|\.\/|--|npx |curl |docker |git )/.test(s) &&
 	!/^[A-Z0-9_]+$/.test(s) &&
