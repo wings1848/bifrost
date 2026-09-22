@@ -38,6 +38,3 @@ export function useHideEnterpriseNav(): [boolean, (next: boolean) => void] {
 
 	return [hidden, setHidden];
 }
-
-/** 供设置页和测试复用，避免字符串散落两处。 */
-export const HIDE_ENTERPRISE_NAV_STORAGE_KEY = STORAGE_KEY;

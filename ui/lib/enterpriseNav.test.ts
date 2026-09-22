@@ -21,22 +21,56 @@ const ENTERPRISE_REAL = path.join(APP, "enterprise");
 const ENTERPRISE_FALLBACK = path.join(APP, "_fallbacks", "enterprise");
 const ENTERPRISE_ROOT = existsSync(ENTERPRISE_REAL) ? ENTERPRISE_REAL : ENTERPRISE_FALLBACK;
 
+/**
+ * 这个仓库是否带企业源码（`app/enterprise` 软链接存在）。
+ *
+ * 企业构建里 `@enterprise/...` 解析到真实实现，占位页一个都不剩，
+ * 死路清单**本来就该是空的**。所以源码比对只在 OSS 构建下有意义。
+ */
+const IS_ENTERPRISE_CHECKOUT = existsSync(ENTERPRISE_REAL);
+
+/**
+ * OSS 下**已被 `IS_ENTERPRISE` 门控**的入口：它们 import 了企业占位组件，但
+ * `page.tsx` 自己拦了一层（OSS 下 `navigate()` 重定向走 + 返回 null），
+ * 所以永远不会显示占位页。上游也已把它们从侧边栏排除。
+ *
+ * 这里**显式列出**而不是用正则猜。早期版本用「同一文件里出现 `IS_ENTERPRISE`
+ * 且出现 `navigate(`」来判断，两个正则彼此无关：随便给一个真死路页加一句
+ * 装饰性的 `IS_ENTERPRISE` 引用和一个 `useNavigate()`，它就会被静默当成例外、
+ * 从死路清单里消失（实测 21 → 20）。改成白名单后，那两个 URL 必须在下面
+ * 的测试里证明自己**真的**有门控，而其他页面再也无法靠巧合逃逸。
+ */
+const OSS_GATED_ENTRIES = ["/workspace/config/branding", "/workspace/config/license"];
+
 const readIf = (p: string): string | null => (existsSync(p) ? readFileSync(p, "utf8") : null);
 
-/** 把 `@enterprise/x/y` 或相对路径解析成磁盘绝对路径（不带扩展名）。 */
+/** 把 `@enterprise/x/y`、`@/x`、相对路径解析成磁盘绝对路径。 */
 function resolveModule(fromFile: string, spec: string): string | null {
 	let base: string;
 	if (spec.startsWith("@enterprise/")) {
 		base = path.join(ENTERPRISE_ROOT, spec.slice("@enterprise/".length));
+	} else if (spec.startsWith("@/")) {
+		base = path.join(UI_ROOT, spec.slice("@/".length));
 	} else if (spec.startsWith(".")) {
 		base = path.resolve(path.dirname(fromFile), spec);
 	} else {
-		return null; // 第三方包 / 别名，与 fallback 无关
+		return null; // 第三方包，与 fallback 无关
 	}
 	for (const cand of [base, `${base}.tsx`, `${base}.ts`, path.join(base, "index.tsx"), path.join(base, "index.ts")]) {
 		if (existsSync(cand) && statSync(cand).isFile()) return cand;
 	}
 	return null;
+}
+
+/**
+ * 这个文件是 `ContactUsView` **本身的定义**，还是**渲染它**的组件？
+ *
+ * 两者都要算命中。早期版本只找 `<ContactUsView` JSX，于是 `contactUsView.tsx`
+ * 自己（它只定义、不使用）被判为"不是占位"——凡是直接 import 这个定义文件并
+ * 渲染它的页面都会被漏掉。
+ */
+function definesContactUs(src: string): boolean {
+	return /export\s+default\s+function\s+ContactUsView\b/.test(src);
 }
 
 /** 组件（含 re-export 链）最终是否渲染 ContactUsView。 */
@@ -45,8 +79,9 @@ function rendersContactUs(file: string, seen = new Set<string>()): boolean {
 	seen.add(file);
 	const src = readIf(file);
 	if (src === null) return false;
-	if (/<ContactUsView\b/.test(src)) return true;
-	for (const m of src.matchAll(/from\s+"([^"]+)"/g)) {
+	if (/<ContactUsView\b/.test(src) || definesContactUs(src)) return true;
+	// 静态 import 与动态 import() 都要跟——`lazy(() => import(...))` 一样能渲染占位页。
+	for (const m of src.matchAll(/(?:from|import)\s*\(?\s*"([^"]+)"/g)) {
 		const target = resolveModule(file, m[1]);
 		if (target && rendersContactUs(target, seen)) return true;
 	}
@@ -76,26 +111,24 @@ function followRedirect(url: string, hops = 0): string {
 /**
  * 真·死路判据：入口 import 的企业组件**只渲染 ContactUsView，不请求任何数据**。
  *
- * 两个必须排除的例外，都是"看着像占位、其实不是"：
+ * 一个必须排除的例外，是"看着像占位、其实不是"：
  *
  * - `config/api-keys`：`apiKeysIndexView` 会读 core config 并渲染真实使用说明，
  *   底部才挂一块 Scope Based API Keys 的升级广告。页面是能用的，不能隐藏。
- * - `config/branding` / `config/license`：`page.tsx` 自己用 `IS_ENTERPRISE` 包了
- *   一层，OSS 下 `navigate()` 重定向到 client-settings 并返回 null。
- *   它们**根本不会显示占位页**，上游也已用 `...(IS_ENTERPRISE ? [...] : [])`
- *   把它们从侧边栏排除了。
+ *   它靠 `fetchesData` 自然排除（有 query），不需要特判。
+ *
+ * `config/branding` / `config/license` 走 `OSS_GATED_ENTRIES` 白名单。
  *
  * 判据是「组件里有没有数据请求」：占位组件清一色 15~33 行、0 个 query。
  */
 function isDeadEnd(url: string): boolean {
+	if (OSS_GATED_ENTRIES.includes(url)) return false;
 	const resolved = followRedirect(url);
 	const dir = routeEntryDir(resolved);
 	for (const entry of ["page.tsx", "layout.tsx"]) {
 		const file = path.join(dir, entry);
 		const src = readIf(file);
 		if (src === null) continue;
-		// 入口自己用 IS_ENTERPRISE 门控并重定向 → 不会渲染占位页
-		if (/IS_ENTERPRISE/.test(src) && /navigate\(/.test(src)) continue;
 		// 只认这个入口自己 import 的企业组件，避免把同目录无关文件算进来。
 		for (const m of src.matchAll(/from\s+"(@enterprise\/[^"]+)"/g)) {
 			const target = resolveModule(file, m[1]);
@@ -103,6 +136,26 @@ function isDeadEnd(url: string): boolean {
 		}
 	}
 	return false;
+}
+
+/**
+ * 这个入口是否**真的**用 `IS_ENTERPRISE` 把自己挡住了。
+ *
+ * 光看"文件里有没有 `IS_ENTERPRISE` 字样"不够——那可能只是一句无关的引用。
+ * 这里要求三件事同时成立：确实引了 `IS_ENTERPRISE`、确实有 `navigate(` 调用、
+ * 且两者处在同一个 `if (!IS_ENTERPRISE)` 判断里（或等价的提前返回）。
+ */
+function hasEnterpriseGate(url: string): boolean {
+	const dir = routeEntryDir(url);
+	const src = readIf(path.join(dir, "page.tsx")) ?? "";
+	const importsFlag = /import\s*\{[^}]*\bIS_ENTERPRISE\b[^}]*\}/.test(src);
+	// `if (!IS_ENTERPRISE) { ... navigate(...) }` 允许中间有别的语句，
+	// 但不能跨出这个大括号。
+	const gatedBlock = /if\s*\(\s*!IS_ENTERPRISE\s*\)\s*\{([\s\S]*?)\}/.exec(src);
+	const navigatesInsideGate = !!gatedBlock && /navigate\(/.test(gatedBlock[1]);
+	// 门控后还要真的不渲染任何东西（`return null`），否则只是跳走、页面仍在。
+	const returnsNull = /if\s*\(\s*!IS_ENTERPRISE\s*\)\s*\{\s*return\s+null\s*;?\s*\}/.test(src);
+	return importsFlag && navigatesInsideGate && returnsNull;
 }
 
 /** 组件（含 re-export 链）是否会发起数据请求——有数据请求说明不是纯占位。 */
@@ -127,7 +180,9 @@ function sidebarUrls(): string[] {
 }
 
 describe("企业死路入口清单", () => {
-	it("侧边栏声明的死路 URL 与源码实测一致", async () => {
+	// 企业构建里 `@enterprise/...` 是真实实现，一个占位页都没有，
+	// 死路清单本就该为空——那条断言只对 OSS 构建成立。
+	it.skipIf(IS_ENTERPRISE_CHECKOUT)("侧边栏声明的死路 URL 与源码实测一致", async () => {
 		const { ENTERPRISE_DEAD_END_NAV_URLS } = await import("./enterpriseNav");
 		const declared = [...ENTERPRISE_DEAD_END_NAV_URLS].sort();
 
@@ -139,12 +194,26 @@ describe("企业死路入口清单", () => {
 		expect(actual, "源码实测的死路入口变了：企业功能可能已实现（请从清单里删掉），或上游新增了死路入口（请补进清单）").toEqual(declared);
 	});
 
+	// 白名单不能是"免检通道"：这两个 URL 必须自己证明真的被 IS_ENTERPRISE 挡住了。
+	// 上游哪天去掉门控，这条会红，而不是让占位页悄悄留在侧边栏里。
+	it("白名单里的入口确实被 IS_ENTERPRISE 门控", () => {
+		const ungated = OSS_GATED_ENTRIES.filter((u) => !hasEnterpriseGate(u));
+		expect(ungated, "这些入口已不再被 IS_ENTERPRISE 门控，必须从 OSS_GATED_ENTRIES 移除并加进死路清单: " + ungated.join(" / ")).toEqual([]);
+	});
+
 	it("清单里的每个 URL 在侧边栏里确实用得到", async () => {
 		const { ENTERPRISE_DEAD_END_NAV_URLS } = await import("./enterpriseNav");
 		const declared = [...ENTERPRISE_DEAD_END_NAV_URLS];
 		const inSidebar = new Set(sidebarUrls());
 		const orphan = declared.filter((u) => !inSidebar.has(u));
 		expect(orphan, "清单里有侧边栏已经不再声明的 URL（死代码）: " + orphan.join(" / ")).toEqual([]);
+	});
+
+	// 反向保护：白名单条目不得同时出现在死路清单里（自相矛盾）。
+	it("白名单与死路清单互斥", async () => {
+		const { ENTERPRISE_DEAD_END_NAV_URLS } = await import("./enterpriseNav");
+		const both = OSS_GATED_ENTRIES.filter((u) => ENTERPRISE_DEAD_END_NAV_URLS.has(u));
+		expect(both, "同一个 URL 不能既被门控又被当作死路: " + both.join(" / ")).toEqual([]);
 	});
 });
 
