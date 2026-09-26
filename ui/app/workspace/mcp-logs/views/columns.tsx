@@ -175,7 +175,12 @@ export const createMCPColumns = (
 			return <div className="max-w-[180px] truncate font-mono text-xs">{value || "-"}</div>;
 		},
 	},
-	{ id: "user", header: t("User"), size: 150, cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} /> },
+	{
+		id: "user",
+		header: t("User"),
+		size: 150,
+		cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} />,
+	},
 	{
 		id: "team",
 		header: t("Team"),

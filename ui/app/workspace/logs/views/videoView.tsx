@@ -91,7 +91,9 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 										</div>
 									)}
 								</div>
-								<p className="text-muted-foreground text-xs">{t("Video content was successfully downloaded (content is not stored in logs)")}</p>
+								<p className="text-muted-foreground text-xs">
+									{t("Video content was successfully downloaded (content is not stored in logs)")}
+								</p>
 							</>
 						) : deleteOutput ? (
 							<div className="grid grid-cols-1 gap-3 md:grid-cols-3">

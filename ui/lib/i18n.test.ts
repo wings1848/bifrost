@@ -32,7 +32,9 @@ describe("第一期中文验收", () => {
 			'rg -o \'t\\("([^"]+)"\\)\' -N app/workspace/dashboard app/workspace/providers app/workspace/virtual-keys app/workspace/logs app/workspace/mcp-logs components/topbar.tsx components/sidebar.tsx 2>/dev/null || true',
 			{ encoding: "utf8" },
 		) as string;
-		const keys = [...out.matchAll(/t\("([^"]+)"\)/g)].map((m) => m[1]).filter((k) => k.length > 2 && !/^[a-z_/【\[@]/.test(k) && !/Hello/.test(k));
+		const keys = [...out.matchAll(/t\("([^"]+)"\)/g)]
+			.map((m) => m[1])
+			.filter((k) => k.length > 2 && !/^[a-z_/【\[@]/.test(k) && !/Hello/.test(k));
 		expect(keys.length).toBeGreaterThan(10);
 		const missing = [...new Set(keys)].filter((k) => !zh[k]);
 		expect(missing, `缺翻译: ${missing.join(" / ")}`).toEqual([]);

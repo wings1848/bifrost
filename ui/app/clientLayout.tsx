@@ -120,38 +120,38 @@ function AppContent({ children }: { children: React.ReactNode }) {
 			<CookiesProvider>
 				<StoreSyncInitializer />
 				<LocaleContext.Provider value={{ locale, switchLocale, t }}>
-				<TopbarProvider>
-					<SidebarProvider>
-						<Sidebar />
-						{/* Content column: a fixed-height flex stack so the topbar takes its
+					<TopbarProvider>
+						<SidebarProvider>
+							<Sidebar />
+							{/* Content column: a fixed-height flex stack so the topbar takes its
 					    48px and the content card absorbs the remainder. The topbar has no
 					    background of its own, so it reads as the same surface as the
 					    sidebar (both show the page body background). */}
-						<div className="flex h-dvh w-full min-w-0 flex-col">
-							<Topbar />
-							{/* No w-full: in a column flex container the cross axis is width, and
+							<div className="flex h-dvh w-full min-w-0 flex-col">
+								<Topbar />
+								{/* No w-full: in a column flex container the cross axis is width, and
 							    an explicit 100% would sit *outside* the right margin, pushing it
 							    off-screen. Default align-items:stretch already fills the column
 							    minus margins. No top margin either: the card butts against the
 							    60px topbar so its top edge lands on the same line as the sidebar's
 							    search input, and --app-content-viewport compensates so full-height
 							    pages still measure to the card's inner height. */}
-							<div className="dark:bg-card custom-scrollbar content-container mx-0 min-h-0 min-w-0 flex-1 overflow-auto border border-gray-200 bg-white md:mr-3 md:mb-3 md:rounded-md md:px-10 dark:border-zinc-800">
-								<TrialExpiryBanner />
-								<main className="custom-scrollbar content-container-inner relative mx-auto flex h-full min-h-0 flex-col overflow-y-hidden md:p-4">
-									{isLoading ? (
-										<FullPageLoader />
-									) : (
-										<FullPage config={bifrostConfig} hasError={!!error} isRetrying={isFetching} onRetry={refetch}>
-											{children}
-										</FullPage>
-									)}
-								</main>
-								{bifrostConfig?.is_db_connected && <OnboardingWidget />}
+								<div className="dark:bg-card custom-scrollbar content-container mx-0 min-h-0 min-w-0 flex-1 overflow-auto border border-gray-200 bg-white md:mr-3 md:mb-3 md:rounded-md md:px-10 dark:border-zinc-800">
+									<TrialExpiryBanner />
+									<main className="custom-scrollbar content-container-inner relative mx-auto flex h-full min-h-0 flex-col overflow-y-hidden md:p-4">
+										{isLoading ? (
+											<FullPageLoader />
+										) : (
+											<FullPage config={bifrostConfig} hasError={!!error} isRetrying={isFetching} onRetry={refetch}>
+												{children}
+											</FullPage>
+										)}
+									</main>
+									{bifrostConfig?.is_db_connected && <OnboardingWidget />}
+								</div>
 							</div>
-						</div>
-					</SidebarProvider>
-				</TopbarProvider>
+						</SidebarProvider>
+					</TopbarProvider>
 				</LocaleContext.Provider>
 			</CookiesProvider>
 		</WebSocketProvider>
