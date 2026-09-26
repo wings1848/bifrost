@@ -22,3 +22,14 @@ describe("sidebar 不再渲染版本更新提示卡", () => {
 		expect(src).not.toContain("latest-release");
 	});
 });
+
+describe("sidebar 不再渲染生产环境搭建推广卡", () => {
+	it("sidebar.tsx 不包含 production-setup 营销卡与其 cookie", () => {
+		const src = read("./sidebar.tsx");
+		expect(src).not.toContain("productionSetupHelpCard");
+		expect(src).not.toContain('id: "production-setup"');
+		expect(src).not.toContain("Need help with production setup?");
+		expect(src).not.toContain("calendly.com");
+		expect(src).not.toContain("bifrost_production_setup_dismissed");
+	});
+});

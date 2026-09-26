@@ -86,8 +86,6 @@ import { useCookies } from "react-cookie";
 import { Badge } from "./ui/badge";
 import { PromoCardStack } from "./ui/promoCardStack";
 
-// Cookie name for dismissing production setup card
-const PRODUCTION_SETUP_DISMISSED_COOKIE = "bifrost_production_setup_dismissed";
 // Closing the "setup checklist incomplete" promo card only snoozes that card
 // for a day — separate from the widget's own hidden/snoozed cookies, so it
 // doesn't affect whether the floating widget itself reappears on next nav.
@@ -114,29 +112,6 @@ const MCPIcon = ({ className }: { className?: string }) => (
 
 // Main navigation items
 
-// Base promotional card (memoized outside component to prevent recreation)
-const productionSetupHelpCard = {
-	id: "production-setup",
-	title: "Need help with production setup?",
-	description: (
-		<>
-			We offer help with production setup including custom integrations and dedicated support.
-			<br />
-			<br />
-			Book a demo with our team{" "}
-			<a
-				href="https://calendly.com/maximai/bifrost-demo?utm_source=bfd_sdbr"
-				target="_blank"
-				className="text-primary font-medium underline"
-				rel="noopener noreferrer"
-			>
-				here
-			</a>
-			.
-		</>
-	),
-	dismissible: true,
-};
 
 // Sidebar item interface
 interface SidebarItem {
@@ -489,12 +464,10 @@ export default function AppSidebar() {
 	const [focusedIndex, setFocusedIndex] = useState(-1);
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const [cookies, setCookie, removeCookie] = useCookies([
-		PRODUCTION_SETUP_DISMISSED_COOKIE,
 		HIDDEN_UNTIL_NAV_COOKIE,
 		REMIND_LATER_COOKIE,
 		ONBOARDING_CARD_DISMISSED_COOKIE,
 	]);
-	const isProductionSetupDismissed = !!cookies[PRODUCTION_SETUP_DISMISSED_COOKIE];
 	const isOnboardingCardDismissed = !!cookies[ONBOARDING_CARD_DISMISSED_COOKIE];
 	// 本地偏好（设置页可切换，存 localStorage）：隐藏 OSS 下点进去只有企业版提示的入口。
 	const [hideEnterpriseNav] = useHideEnterpriseNav();
@@ -1347,15 +1320,9 @@ export default function AppSidebar() {
 				variant: "warning" as const,
 			});
 		}
-		// Only show after mounted to ensure cookie is properly hydrated and avoid flash
-		if (!IS_ENTERPRISE && mounted && !isProductionSetupDismissed) {
-			cards.push(productionSetupHelpCard);
-		}
 		return cards;
 	}, [
 		coreConfig?.restart_required,
-		isProductionSetupDismissed,
-		mounted,
 		showOnboardingResumeCard,
 		onboardingSteps.length,
 		onboardingDoneCount,
@@ -1364,14 +1331,6 @@ export default function AppSidebar() {
 
 	const handlePromoDismiss = useCallback(
 		(cardId: string) => {
-			if (cardId === "production-setup") {
-				const expiryDate = new Date();
-				expiryDate.setDate(expiryDate.getDate() + 7);
-				setCookie(PRODUCTION_SETUP_DISMISSED_COOKIE, "true", {
-					path: "/",
-					expires: expiryDate,
-				});
-			}
 			if (cardId === "onboarding-incomplete") {
 				// If the widget itself is snoozed via "Remind me later", align the
 				// card's dismissal to that same date — otherwise the card would
