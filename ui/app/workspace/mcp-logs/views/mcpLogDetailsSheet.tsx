@@ -337,7 +337,9 @@ export function MCPLogDetailSheet({
 						<AlertDialogContent>
 							<AlertDialogHeader>
 								<AlertDialogTitle>{t("Are you sure you want to delete this log?")}</AlertDialogTitle>
-								<AlertDialogDescription>{t("This action cannot be undone. This will permanently delete the log entry.")}</AlertDialogDescription>
+								<AlertDialogDescription>
+									{t("This action cannot be undone. This will permanently delete the log entry.")}
+								</AlertDialogDescription>
 							</AlertDialogHeader>
 							<AlertDialogFooter>
 								<AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
@@ -390,7 +392,9 @@ export function MCPLogDetailSheet({
 								<CopyInlineButton text={displayLog.tool_name} testId="mcplogdetails-copy-tool-name-button" />
 							</div>
 							<div className="mt-1 flex items-center gap-2">
-								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">{t("Request")}</div>
+								<div className="text-muted-foreground w-24 shrink-0 text-[10.5px] font-semibold tracking-wider uppercase">
+									{t("Request")}
+								</div>
 								<code className="text-foreground truncate font-mono text-[13px]">{requestId || "—"}</code>
 								{requestId ? <CopyInlineButton text={requestId} testId="mcplogdetails-copy-request-id-button" /> : null}
 							</div>
@@ -662,7 +666,9 @@ export function MCPLogDetailSheet({
 						{/* Error Details */}
 						{displayedErrorDetails && (
 							<div className="border-destructive/50 w-full rounded-sm border">
-								<div className="border-destructive/50 text-destructive border-b px-4 py-2 text-sm font-medium md:px-6">{t("Error Details")}</div>
+								<div className="border-destructive/50 text-destructive border-b px-4 py-2 text-sm font-medium md:px-6">
+									{t("Error Details")}
+								</div>
 								<CodeEditor
 									className="z-0 w-full"
 									shouldAdjustInitialHeight={true}

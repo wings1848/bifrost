@@ -123,10 +123,8 @@ export function MCPLibrarySettingsSheet({ open, onClose }: MCPLibrarySettingsShe
 							<div className="space-y-0.5">
 								<Label htmlFor="mcp-library-url">{t("Library Sync URL")}</Label>
 								<p className="text-muted-foreground text-sm">
-									{t(
-										"URL to a custom MCP server catalog. Leave empty to use the default Bifrost catalog. Use a {fileScheme} URL to load the catalog from local disk in air-gapped deployments.",
-										{ fileScheme: "file://" },
-									)}
+									{t("URL to a custom MCP server catalog. Leave empty to use the default Bifrost catalog. Use a")} <code>file://</code>{" "}
+									{t("URL to load the catalog from local disk in air-gapped deployments.")}
 								</p>
 							</div>
 							<Input
