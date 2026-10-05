@@ -31,7 +31,11 @@ export class ConfigSettingsPage extends BasePage {
   readonly rateLimitingSection: Locator
   readonly enforceAuthOnInferenceSwitch: Locator
   readonly requiredHeadersTextarea: Locator
-  readonly vkRotationCooldownInput: Locator
+  readonly dashboardAuthSwitch: Locator
+  readonly currentPasswordInput: Locator
+  readonly currentPasswordError: Locator
+  readonly setupTokenToggle: Locator
+  readonly setupTokenInput: Locator
 
   // Performance Tuning Settings
   readonly workerPoolSizeInput: Locator
@@ -69,7 +73,11 @@ export class ConfigSettingsPage extends BasePage {
     this.rateLimitingSection = page.locator('text=Rate Limiting').locator('..')
     this.enforceAuthOnInferenceSwitch = page.getByTestId('enforce-auth-on-inference-switch')
     this.requiredHeadersTextarea = page.getByTestId('required-headers-textarea')
-    this.vkRotationCooldownInput = page.getByTestId('security-vk-rotation-cooldown-input')
+    this.dashboardAuthSwitch = page.locator('#auth-enabled')
+    this.currentPasswordInput = page.getByTestId('security-current-password-input')
+    this.currentPasswordError = page.getByTestId('security-current-password-error')
+    this.setupTokenToggle = page.getByTestId('security-setup-token-toggle')
+    this.setupTokenInput = page.getByTestId('security-setup-token-input')
 
     // Performance Tuning locators
     this.workerPoolSizeInput = page.getByLabel(/Worker Pool Size/i)
@@ -157,26 +165,6 @@ export class ConfigSettingsPage extends BasePage {
     await this.page.reload()
     await waitForNetworkIdle(this.page)
     await expect(this.page.getByTestId('onboarding-later')).not.toBeVisible({ timeout: 5000 })
-  }
-
-  /**
-   * Set the virtual key rotation cooldown. An empty string is a meaningful
-   * value here: it disables the grace period, so the previous key value stops
-   * authenticating as soon as the key is rotated.
-   */
-  async setVkRotationCooldown(value: string): Promise<void> {
-    await this.vkRotationCooldownInput.clear()
-    if (value !== '') {
-      await this.vkRotationCooldownInput.fill(value)
-    }
-  }
-
-  /**
-   * Read the rotation cooldown as displayed. The API stores nanoseconds, so
-   * this is the duration string the UI formats back for the operator.
-   */
-  async getVkRotationCooldown(): Promise<string> {
-    return await this.vkRotationCooldownInput.inputValue()
   }
 
   /**
@@ -334,6 +322,24 @@ export class ConfigSettingsPage extends BasePage {
 
   async toggleEnforceAuthOnInference(): Promise<void> {
     await this.enforceAuthOnInferenceSwitch.click()
+  }
+
+  /**
+   * Flip the "Password protect the dashboard" switch without saving.
+   */
+  async toggleDashboardAuth(): Promise<void> {
+    await this.dashboardAuthSwitch.click()
+  }
+
+  /**
+   * Fill the confirmation field that appears when auth is being turned back on
+   * while it is off: the admin password currently stored on the server.
+   */
+  async setCurrentPassword(value: string): Promise<void> {
+    await this.currentPasswordInput.clear()
+    if (value !== '') {
+      await this.currentPasswordInput.fill(value)
+    }
   }
 
   async setRequiredHeaders(value: string): Promise<void> {

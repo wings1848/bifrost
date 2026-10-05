@@ -74,14 +74,7 @@ func (plugin *Plugin) performSemanticSearch(ctx *schemas.BifrostContext, state *
 		plugin.logger.Warn("Failed to store semantic cache metadata on request context")
 	}
 
-	cacheThreshold := plugin.config.Threshold
-	if v := ctx.Value(CacheThresholdKey); v != nil {
-		if threshold, ok := v.(float64); ok {
-			cacheThreshold = threshold
-		} else {
-			plugin.logger.Warn("Threshold is not a float64, using default threshold")
-		}
-	}
+	cacheThreshold := plugin.resolveCacheThreshold(ctx)
 
 	provider, model, _ := req.GetRequestFields()
 	strictFilters := []vectorstore.Query{
@@ -281,6 +274,12 @@ func (plugin *Plugin) buildResponseFromResult(ctx *schemas.BifrostContext, state
 		if ok && streamResponses != nil {
 			streamChunks, err := plugin.parseStreamChunks(streamResponses)
 			if err == nil && len(streamChunks) > 0 {
+				// Same rule as the non-streaming hit: a stored stream whose chunks carry
+				// tool calls is not replayed while the option is off.
+				if !plugin.config.CacheToolCallResponses && cachedStreamHasToolCalls(streamChunks) {
+					plugin.logger.Debug("Treating cache entry %s as a miss: stream carries tool calls and cache_tool_call_responses is disabled", result.ID)
+					return nil, nil
+				}
 				return plugin.buildStreamingResponseFromResult(ctx, state, req, result, streamChunks, cacheType, threshold, &similarity, inputTokens)
 			}
 		}
@@ -335,6 +334,14 @@ func (plugin *Plugin) buildNonStreamingResponseFromResult(ctx *schemas.BifrostCo
 	var cachedResponse schemas.BifrostResponse
 	if err := json.Unmarshal([]byte(responseStr), &cachedResponse); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal cached response: %w", err)
+	}
+	// The write path never stores tool-call responses while the option is off, but an
+	// entry may predate the option or have been written while it was on. Replaying it
+	// would run another prompt's tool arguments in this caller's agent loop, so it reads
+	// as a miss.
+	if !plugin.config.CacheToolCallResponses && responseHasToolCalls(&cachedResponse) {
+		plugin.logger.Debug("Treating cache entry %s as a miss: response carries tool calls and cache_tool_call_responses is disabled", result.ID)
+		return nil, nil
 	}
 
 	plugin.stampCacheMetadataForHit(state, cachedResponse.GetExtraFields(), result.ID, requestedProvider, requestedModel, cacheType, threshold, similarity, inputTokens)

@@ -39131,7 +39131,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `Settings:Update` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Update configuration",
-        "description": "Updates the Bifrost configuration. Supports hot-reloading of certain settings\nlike drop_excess_requests. Some settings may require a restart to take effect.\n",
+        "description": "Updates the Bifrost configuration. Supports hot-reloading of certain settings\nlike drop_excess_requests. Some settings may require a restart to take effect.\nCreating the very first admin account requires auth_config.setup_token. When an\nadmin account already exists but dashboard authentication is disabled, a request\nthat re-enables it or changes admin_username / admin_password must carry either\nauth_config.current_password (the stored admin password) or a valid\nauth_config.setup_token; otherwise it is refused with 403. A genuinely\nauthenticated session needs neither.\n",
         "tags": [
           "Configuration"
         ],
@@ -39173,6 +39173,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "auth_config was changed without the required proof: the first admin account needs a valid setup_token, and re-enabling authentication or changing the admin credentials while dashboard authentication is disabled needs current_password or a valid setup_token"
           },
           "500": {
             "description": "Internal server error",
@@ -39253,7 +39256,8 @@
                       ]
                     },
                     "url": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Proxy URL (http or https). Private and loopback hosts are accepted; link-local and unspecified addresses are rejected."
                     },
                     "username": {
                       "type": "string"
@@ -39313,7 +39317,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `Settings:Update` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Update proxy configuration",
-        "description": "Updates the global proxy configuration.\n",
+        "description": "Updates the global proxy configuration.\nSetting a new proxy url or turning on skip_tls_verify requires a genuinely\nauthenticated admin session - it is refused with 403 if dashboard authentication is\ndisabled or unconfigured, even though other management endpoints remain reachable in\nthat state. Saving other fields with the stored url, disabling the proxy, or turning\nskip_tls_verify off is allowed.\nThe url follows the same destination rule as a provider base_url: it must be an http\nor https URL whose host resolves to a routable address. Private and loopback hosts are\naccepted (a self-hosted egress proxy is the normal setup); link-local (for example the\ncloud metadata endpoint) and unspecified addresses are refused with 400.\n",
         "tags": [
           "Configuration"
         ],
@@ -39337,7 +39341,8 @@
                     ]
                   },
                   "url": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Proxy URL (http or https). Private and loopback hosts are accepted; link-local and unspecified addresses are rejected."
                   },
                   "username": {
                     "type": "string"
@@ -39397,6 +39402,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "A new proxy url was supplied or skip_tls_verify was turned on, and dashboard authentication is disabled or unconfigured (the request was not genuinely authenticated)"
           },
           "500": {
             "description": "Internal server error",
@@ -40391,7 +40399,7 @@
           "content": "<Note>\n  This endpoint is available in [Bifrost Enterprise](https://www.getmaxim.ai/bifrost/enterprise) only.\n</Note>\n\n**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `VirtualKeys:View` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Get the calling user's virtual-key creation policy",
-        "description": "Resolves the access profile that would govern a virtual key the **calling** user creates,\nreturning its name or none. Whether governance applies at all is decided separately from the\n`VirtualKeys:CreateStandalone` permission (see `/api/governance/users/me/permissions`); this\nendpoint only resolves the profile, and the create form combines the two.\n\nSelf-scoped: it always describes the caller and takes no user ID. Returns\n`{\"has_access_profile\": false}` when the caller has no per-user identity (local admin) or holds\nno active access profile. When several of their profiles qualify, the highest-ranked one governs.\n",
+        "description": "Resolves the access profile that would govern a virtual key the **calling** user creates,\nreturning its name or none. Whether governance applies at all is decided separately from the\n`VirtualKeys:CreateStandalone` permission (see `/api/governance/users/me/permissions`); this\nendpoint only resolves the profile, and the create form combines the two.\n\nSelf-scoped: it always describes the caller and takes no user ID. Returns\n`{\"has_access_profile\": false}` when the caller has no per-user identity (local admin) or holds\nno active access profile. When several of their profiles qualify, the highest-ranked one governs.\nHolding no profile does not by itself block a caller from creating a key: given\n`VirtualKeys:Create`, the key is created ungoverned.\n",
         "tags": [
           "Users",
           "Virtual Keys"
@@ -42399,7 +42407,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `ModelProvider:Create` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Add a new provider",
-        "description": "Adds a new provider with the specified configuration.\n",
+        "description": "Adds a new provider with the specified configuration.\nSetting network_config.base_url or network_config.allow_private_network requires a\ngenuinely authenticated admin session - it is refused with 403 if dashboard\nauthentication is disabled or unconfigured, even though other management endpoints\nremain reachable in that state. allow_private_network is guarded even without a base\nURL, because it also governs which addresses key-level URLs (Ollama/SGL/VLLM) may reach.\nThe same applies to settings that let a third party read credentials in flight:\nproxy_config.url, proxy_config.ca_cert_pem, network_config.ca_cert_pem,\nnetwork_config.insecure_skip_verify, and any absolute (scheme and host)\ncustom_provider_config.request_path_overrides value.\n",
         "tags": [
           "Providers"
         ],
@@ -42441,6 +42449,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "network_config.base_url, allow_private_network, a proxy URL, a CA certificate, insecure_skip_verify, or an absolute request path override was supplied and dashboard authentication is disabled or unconfigured (the request was not genuinely authenticated)"
           },
           "409": {
             "description": "Provider already exists",
@@ -42544,7 +42555,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `ModelProvider:Update` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Update a provider",
-        "description": "Updates a provider's configuration. Expects ALL fields to be provided,\nincluding both edited and non-edited fields. Partial updates are not supported.\n",
+        "description": "Updates a provider's configuration. Expects ALL fields to be provided,\nincluding both edited and non-edited fields. Partial updates are not supported.\nChanging network_config.base_url, or turning on network_config.allow_private_network\n(with or without a base URL), requires a genuinely authenticated admin session - it is\nrefused with 403 if dashboard authentication is disabled or unconfigured, even though\nother management endpoints remain reachable in that state. The same applies to setting\nor changing proxy_config.url, proxy_config.ca_cert_pem, network_config.ca_cert_pem, or\nan absolute (scheme and host) custom_provider_config.request_path_overrides value, and\nto turning on network_config.insecure_skip_verify. Sending the stored values back\nunchanged (including redacted placeholders), clearing the base URL, proxy or an\noverride, path-only overrides, or turning allow_private_network or\ninsecure_skip_verify off is allowed.\n",
         "tags": [
           "Providers"
         ],
@@ -42597,6 +42608,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "network_config.base_url, a proxy URL, a CA certificate, or an absolute request path override was changed, or allow_private_network or insecure_skip_verify was turned on, and dashboard authentication is disabled or unconfigured (the request was not genuinely authenticated)"
           },
           "500": {
             "description": "Internal server error",
@@ -42762,7 +42776,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `ModelProvider:Create` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Create a key for a provider",
-        "description": "Creates a new API key for the specified provider. The key `id` is auto-generated\nif omitted. `enabled` defaults to `true` if omitted. `value` is required and must\nnot be empty. Keys cannot be created on keyless providers.\n",
+        "description": "Creates a new API key for the specified provider. The key `id` is auto-generated\nif omitted. `enabled` defaults to `true` if omitted. `value` is required and must\nnot be empty. Keys cannot be created on keyless providers.\nSetting any field that chooses the host Bifrost sends this key's credentials to\nrequires a genuinely authenticated admin session - it is refused with 403 if dashboard\nauthentication is disabled or unconfigured, even though other management endpoints\nremain reachable in that state. ollama_key_config.url, sgl_key_config.url and\nvllm_key_config.url also follow the provider base_url destination rule: private and\nloopback hosts are accepted, link-local and unspecified addresses are refused with 400.\nKey-level and per-alias regions must be vendor region identifiers (lowercase letters,\ndigits and hyphens, e.g. us-east-1); any other value is refused with 400.\nGuarded fields: ollama_key_config.url, sgl_key_config.url, vllm_key_config.url,\nazure_key_config.endpoint, databricks_key_config.workspace_url,\ngithub_copilot_key_config.github_domain,\nbedrock_key_config.endpoints.*, bedrock_mantle_key_config.endpoints.*, and\naliases.<name>.endpoint.\n",
         "tags": [
           "Providers"
         ],
@@ -42815,6 +42829,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "A key endpoint field was set, changed, or removed and dashboard authentication is disabled or unconfigured (the request was not genuinely authenticated)"
           },
           "404": {
             "description": "Provider not found",
@@ -42937,7 +42954,7 @@
           "content": "**Required Permissions**\n\n| Permission | Granted via |\n| --- | --- |\n| `ModelProvider:Update` | RBAC role or API key scope |\n\n[How permissions work](/api/procuring-api-keys#required-permissions)\n"
         },
         "summary": "Update a key for a provider",
-        "description": "Updates an existing key. Send the full key object. Redacted values sent back\nunchanged are automatically preserved (the server merges them with the stored\nraw values).\n",
+        "description": "Updates an existing key. Send the full key object. Redacted values sent back\nunchanged are automatically preserved (the server merges them with the stored\nraw values).\nSetting, changing, or removing any field that chooses the host Bifrost sends this\nkey's credentials to requires a genuinely authenticated admin session - it is refused\nwith 403 if dashboard authentication is disabled or unconfigured, even though other\nmanagement endpoints remain reachable in that state. Sending the stored values back\nunchanged is allowed. ollama_key_config.url, sgl_key_config.url and\nvllm_key_config.url also follow the provider base_url destination rule: private and\nloopback hosts are accepted, link-local and unspecified addresses are refused with 400.\nKey-level and per-alias regions must be vendor region identifiers (lowercase letters,\ndigits and hyphens, e.g. us-east-1); any other value is refused with 400.\nGuarded fields: ollama_key_config.url, sgl_key_config.url, vllm_key_config.url,\nazure_key_config.endpoint, databricks_key_config.workspace_url,\ngithub_copilot_key_config.github_domain,\nbedrock_key_config.endpoints.*, bedrock_mantle_key_config.endpoints.*, and\naliases.<name>.endpoint.\n",
         "tags": [
           "Providers"
         ],
@@ -42999,6 +43016,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "A key endpoint field was set, changed, or removed and dashboard authentication is disabled or unconfigured (the request was not genuinely authenticated)"
           },
           "404": {
             "description": "Provider or key not found",
@@ -97578,6 +97598,16 @@
               }
             }
           },
+          "403": {
+            "description": "The endpoint allows private-network delivery and the caller is not authenticated (dashboard auth unconfigured)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BifrostError"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Resource not found",
             "content": {
@@ -110410,7 +110440,7 @@
                         "additionalProperties": false
                       }
                     ],
-                    "description": "Stable public URL advertised as the OAuth2 AS issuer in discovery documents and the JWT iss claim. Required for multi-host deployments; single-host can omit it (falls back to the request Host header). Supports env var syntax (\"env.MY_VAR\").\n"
+                    "description": "Stable public URL advertised as the OAuth2 AS issuer in discovery documents and the JWT iss claim. Required whenever mcp_server_auth_mode is 'both' or 'oauth'. A config.json that enables one of those modes without it fails validation at startup; a PUT /api/config that does the same is refused with HTTP 400. The issuer is never derived from the request Host header while OAuth is enabled. Supports env var syntax (\"env.MY_VAR\").\n"
                   },
                   "auth_code_ttl": {
                     "type": "integer",
@@ -110500,7 +110530,8 @@
                 ]
               },
               "url": {
-                "type": "string"
+                "type": "string",
+                "description": "Proxy URL (http or https). Private and loopback hosts are accepted; link-local and unspecified addresses are rejected."
               },
               "username": {
                 "type": "string"
@@ -110756,7 +110787,7 @@
                         "additionalProperties": false
                       }
                     ],
-                    "description": "Stable public URL advertised as the OAuth2 AS issuer in discovery documents and the JWT iss claim. Required for multi-host deployments; single-host can omit it (falls back to the request Host header). Supports env var syntax (\"env.MY_VAR\").\n"
+                    "description": "Stable public URL advertised as the OAuth2 AS issuer in discovery documents and the JWT iss claim. Required whenever mcp_server_auth_mode is 'both' or 'oauth'. A config.json that enables one of those modes without it fails validation at startup; a PUT /api/config that does the same is refused with HTTP 400. The issuer is never derived from the request Host header while OAuth is enabled. Supports env var syntax (\"env.MY_VAR\").\n"
                   },
                   "auth_code_ttl": {
                     "type": "integer",
@@ -110828,7 +110859,11 @@
                 "properties": {
                   "setup_token": {
                     "type": "string",
-                    "description": "Available starting in Bifrost 2.0.0-prerelease3. Bootstrap token, required only when this request creates the very first admin account (i.e. no admin account exists yet). Must match the setup token configured by the operator via setup_token in config.json (or the BIFROST_SETUP_TOKEN environment variable); never persisted or returned by GET /api/config. If the operator hasn't configured a setup token, requests that would create the first admin account are rejected until they do. Once an admin account exists, this field is ignored."
+                    "description": "Available starting in Bifrost 2.0.0-prerelease3. Bootstrap token, required only when this request creates the very first admin account (i.e. no admin account exists yet). Must match the setup token configured by the operator via setup_token in config.json (or the BIFROST_SETUP_TOKEN environment variable); never persisted or returned by GET /api/config. If the operator hasn't configured a setup token, requests that would create the first admin account are rejected until they do. Once an admin account exists it is also accepted, as an alternative to current_password, when auth_config is changed while dashboard authentication is disabled (see current_password)."
+                  },
+                  "current_password": {
+                    "type": "string",
+                    "description": "The currently stored admin password. Required (unless a valid setup_token is supplied) when an admin account exists, dashboard authentication is disabled, and this request re-enables it or changes admin_username / admin_password. Such requests reach the API without any credential check, so one of the two proofs must be presented or the request is refused with 403. Ignored when the request is genuinely authenticated or when no admin account exists yet. Never persisted or returned by GET /api/config."
                   }
                 }
               }
@@ -110884,10 +110919,23 @@
         "description": "Auth enabled status response",
         "properties": {
           "is_auth_enabled": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether dashboard/admin session authentication is enabled."
           },
           "has_valid_token": {
             "type": "boolean"
+          },
+          "auth_type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "password"
+            ],
+            "description": "Dashboard session auth mode."
+          },
+          "inference_auth_enforced": {
+            "type": "boolean",
+            "description": "Whether enforce_auth_on_inference is on. This is a separate control from is_auth_enabled. It requires a valid inference credential (virtual key, API key, or user token) on every inference route, including the /v1/* routes and the provider SDK integration routes. A locked dashboard (is_auth_enabled: true) does not by itself protect inference. Check this field too."
           }
         }
       },
@@ -112605,6 +112653,12 @@
             "type": "boolean",
             "default": false,
             "description": "Whether the client is intentionally disabled.\nWhen true, the client has no active connection or workers and its tools are not available for inference.\n"
+          },
+          "require_public_target": {
+            "type": "boolean",
+            "readOnly": true,
+            "default": false,
+            "description": "Server-set. True when the client was registered over the management API\nwith no admin credential check (dashboard auth unconfigured). Every\nconnection to the MCP server (initial, reconnect, per-call) must then\nresolve to a public address. Ignored in create/update request bodies\nand never cleared once set.\n"
           }
         }
       },
@@ -116031,6 +116085,14 @@
             "type": "number",
             "minimum": 0
           },
+          "input_cost_per_token_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
+          "output_cost_per_token_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
           "input_cost_per_token_flex": {
             "type": "number",
             "minimum": 0
@@ -116113,6 +116175,14 @@
             "type": "number",
             "minimum": 0
           },
+          "input_cost_per_token_above_272k_tokens_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
+          "output_cost_per_token_above_272k_tokens_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
           "cache_creation_input_token_cost": {
             "type": "number",
             "minimum": 0
@@ -116149,6 +116219,10 @@
             "type": "number",
             "minimum": 0
           },
+          "cache_read_input_token_cost_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
           "cache_read_input_token_cost_flex": {
             "type": "number",
             "minimum": 0
@@ -116169,6 +116243,10 @@
             "type": "number",
             "minimum": 0
           },
+          "cache_read_input_token_cost_above_272k_tokens_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
           "cache_creation_input_token_cost_above_272k_tokens": {
             "type": "number",
             "minimum": 0
@@ -116182,6 +116260,19 @@
             "minimum": 0
           },
           "cache_creation_input_token_cost_priority": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cache_creation_input_token_cost_above_272k_tokens_priority": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Cache creation above 272k context for priority (OpenAI Fast mode) requests."
+          },
+          "cache_creation_input_token_cost_ultrafast": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cache_creation_input_token_cost_above_272k_tokens_ultrafast": {
             "type": "number",
             "minimum": 0
           },
