@@ -112,7 +112,6 @@ const MCPIcon = ({ className }: { className?: string }) => (
 
 // Main navigation items
 
-
 // Sidebar item interface
 interface SidebarItem {
 	title: string;
@@ -463,11 +462,7 @@ export default function AppSidebar() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [focusedIndex, setFocusedIndex] = useState(-1);
 	const searchInputRef = useRef<HTMLInputElement>(null);
-	const [cookies, setCookie, removeCookie] = useCookies([
-		HIDDEN_UNTIL_NAV_COOKIE,
-		REMIND_LATER_COOKIE,
-		ONBOARDING_CARD_DISMISSED_COOKIE,
-	]);
+	const [cookies, setCookie, removeCookie] = useCookies([HIDDEN_UNTIL_NAV_COOKIE, REMIND_LATER_COOKIE, ONBOARDING_CARD_DISMISSED_COOKIE]);
 	const isOnboardingCardDismissed = !!cookies[ONBOARDING_CARD_DISMISSED_COOKIE];
 	// 本地偏好（设置页可切换，存 localStorage）：隐藏 OSS 下点进去只有企业版提示的入口。
 	const [hideEnterpriseNav] = useHideEnterpriseNav();
@@ -1321,13 +1316,7 @@ export default function AppSidebar() {
 			});
 		}
 		return cards;
-	}, [
-		coreConfig?.restart_required,
-		showOnboardingResumeCard,
-		onboardingSteps.length,
-		onboardingDoneCount,
-		handleResumeOnboarding,
-	]);
+	}, [coreConfig?.restart_required, showOnboardingResumeCard, onboardingSteps.length, onboardingDoneCount, handleResumeOnboarding]);
 
 	const handlePromoDismiss = useCallback(
 		(cardId: string) => {
